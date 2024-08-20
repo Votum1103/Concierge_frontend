@@ -14,7 +14,7 @@
         <section class="main-window">
         <h1>Zeskanuj kartę portiera</h1>
         <span class="loader"></span>
-        <div class="button-group"><LogInButton/></div>
+        <div class="button-group"><LogInButton routeName="MainWindow" /></div>
     </section>
     </main>
 </body>
@@ -37,7 +37,7 @@ export default {
 </script>
 
 
-<style lang="scss">
+<style lang="scss" scoped>
 body {
     background: rgb(41, 38, 38);
     color: white;

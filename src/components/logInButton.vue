@@ -1,22 +1,23 @@
-!<template>
-<button class="primary-button">Zaloguj się</button>
-</template>
-<script>
-export default {
+<template>
+    <button @click="redirectToRoute" class="primary-button">Zaloguj się</button>
+  </template>
+  
+  <script>
+  export default {
     name: 'LogInButton',
-  props: {
-    url: {
-      type: String,
-      required: true
-    }
-  },
-  methods: {
-    redirectToUrl() {
-      window.location.href = this.url;
+    props: {
+      routeName: {
+        type: String,
+        required: true
+      }
+    },
+    methods: {
+      redirectToRoute() {
+        this.$router.push({ name: this.routeName });
+      }
     }
   }
-}
-</script>
-<style lang="scss">
-    
-</style>
+  </script>
+  
+  <style lang="scss">
+  </style>
