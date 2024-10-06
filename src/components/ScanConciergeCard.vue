@@ -13,8 +13,8 @@
     </nav>
 
     <main>
-      <section class="main-window">
-        <h1>Zeskanuj kartę portiera</h1>
+      <section class="container">
+        <h1>Zeskanuj kartę pracownika</h1>
         <span class="loader"></span>
         <div class="button-group">
           <RouteButton routeName="ConciergeLogin" buttonText="Zaloguj się" />
@@ -30,7 +30,7 @@ import RouteButton from './RouteButton.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
 
 export default {
-  name: 'eConcierge',
+  name: 'ScanConciergeCard',
   components: {
     WUoT_Logo,
     GoogleFonts,
@@ -41,6 +41,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$background-color: rgb(41, 38, 38);
+$text-color: #ffffff;
+$primary-color: #0083BB;
+$font-main: 'Open Sans', sans-serif;
+$font-heading: 'Ubuntu', sans-serif;
+
 html,
 body {
   height: 100%;
@@ -49,10 +55,10 @@ body {
 }
 
 body {
-  background: rgb(41, 38, 38);
-  color: white;
+  background-color: $background-color;
+  color: $text-color;
   text-align: center;
-  font-family: 'Open Sans', sans-serif;
+  font-family: $font-main;
   background-image: url('../assets/back.jpg');
   background-size: cover;
   background-repeat: no-repeat;
@@ -64,14 +70,14 @@ body {
 
 h1,
 h2 {
-  font-family: 'Ubuntu';
+  font-family: $font-heading;
 }
 
 button,
 a,
 p,
 label {
-  font-family: 'Open Sans', sans-serif;
+  font-family: $font-main;
 }
 
 nav {
@@ -82,7 +88,7 @@ nav {
   position: absolute;
   top: 0;
   right: 0;
-  margin: 10px;
+  margin: 1rem;
 }
 
 main {
@@ -94,31 +100,30 @@ main {
   justify-content: center;
 }
 
-.main-window {
+.container {
   border-radius: 2em;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 45%;
-  min-width: 300px;
-  max-width: 600px;
-  background: rgb(0, 0, 0);
-  padding: 50px 20px;
-  height: auto;
-  max-height: calc(100vh - 100px);
-  gap: 100px;
+  min-width: 18.75rem;
+  max-width: 37.5rem;
+  background-color: rgb(0, 0, 0);
+  padding: 3.125rem 1.25rem;
+  height: 40%;
+  max-height: calc(100vh - 6.25rem);
+  gap: 3.125rem;
   overflow: auto;
 }
 
 h1 {
-  font-family: 'Ubuntu';
-  font-size: xx-large;
+  font-size: 2rem;
 }
 
 .loader {
-  color: #ffffff;
-  font-size: 35px;
+  color: $text-color;
+  font-size: 2.1875rem;
   overflow: hidden;
   width: 1em;
   height: 1em;
@@ -128,14 +133,11 @@ h1 {
 }
 
 @keyframes mltShdSpin {
-  0% {
-    box-shadow: 0 -0.83em 0 -0.4em,
-      0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em,
-      0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
-  }
 
+  0%,
   5%,
-  95% {
+  95%,
+  100% {
     box-shadow: 0 -0.83em 0 -0.4em,
       0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em,
       0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
@@ -148,21 +150,11 @@ h1 {
       -0.256em -0.789em 0 -0.46em, -0.297em -0.775em 0 -0.477em;
   }
 
-  20% {
-    box-shadow: 0 -0.83em 0 -0.4em, -0.338em -0.758em 0 -0.42em,
-      -0.555em -0.617em 0 -0.44em, -0.671em -0.488em 0 -0.46em,
-      -0.749em -0.34em 0 -0.477em;
-  }
-
+  20%,
   38% {
-    box-shadow: 0 -0.83em 0 -0.4em, -0.377em -0.74em 0 -0.42em,
-      -0.645em -0.522em 0 -0.44em, -0.775em -0.297em 0 -0.46em,
-      -0.82em -0.09em 0 -0.477em;
-  }
-
-  100% {
-    box-shadow: 0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em,
-      0 -0.83em 0 -0.44em, 0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
+    box-shadow: 0 -0.83em 0 -0.4em,
+      -0.338em -0.758em 0 -0.42em, -0.555em -0.617em 0 -0.44em,
+      -0.671em -0.488em 0 -0.46em, -0.749em -0.34em 0 -0.477em;
   }
 }
 
@@ -179,18 +171,19 @@ h1 {
 .button-group {
   display: flex;
   justify-content: space-around;
+  width: 100%;
 }
 
 .primary-button {
-  color: #FFFFFF;
-  font-size: 1.2em;
+  color: $text-color;
+  font-size: 1.2rem;
   width: 25%;
   border: none;
-  background-color: #0083BB;
-  min-width: 200px;
-  height: 50px;
-  border-radius: 25px;
-  transition: all 0.3s;
+  background-color: $primary-color;
+  min-width: 12.5rem;
+  height: 3.125rem;
+  border-radius: 1.5625rem;
+  transition: transform 0.3s;
 }
 
 button:hover {
@@ -199,23 +192,23 @@ button:hover {
 }
 
 @media (max-width: 1040px) {
-  .button-group button {
-    height: 45px;
-    font-size: 0.9em;
+  .primary-button {
+    height: 2.8125rem;
+    font-size: 0.9rem;
   }
 }
 
 @media (max-width: 768px) {
   h1 {
-    font-size: x-large;
+    font-size: 1.5rem;
   }
 
-  .button-group button {
-    height: 40px;
+  .primary-button {
+    height: 2.5rem;
   }
 
   .loader {
-    font-size: 25px;
+    font-size: 1.5625rem;
   }
 }
 
