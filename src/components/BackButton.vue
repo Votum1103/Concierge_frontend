@@ -1,5 +1,5 @@
 <template>
-    <button @click="redirectToRoute" class="primary-button">
+    <button @click="redirectToRoute" class="back-button-component">
         <div class="button-content">
             <div class="icon">
                 <slot name="icon"></slot>
@@ -35,16 +35,16 @@ button {
     font-family: 'Open Sans', sans-serif;
 }
 
-.primary-button {
+.back-button-component {
     color: #FFFFFF;
     font-size: 1.2em;
-    width: 250px;
+    width: 150px;
     height: 50px;
     border-radius: 25px;
     transition: all 0.3s;
     white-space: nowrap;
     border: none;
-    background-color: #0083BB;
+    background-color: transparent;
 
 }
 
@@ -55,17 +55,16 @@ button:hover {
 
 .button-content {
     display: flex;
-    /* Ustawia Flexbox dla zawartości przycisku */
     align-items: center;
-    /* Wyrównuje ikonę i tekst w pionie */
+
 }
 
 .icon {
     margin-right: 8px;
-    /* Odstęp między ikoną a tekstem */
+
 }
 
 .text {
-    font-size: 15px;
+    font-size: 16px;
 }
 </style>

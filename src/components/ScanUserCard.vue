@@ -9,6 +9,15 @@
 
   <body>
     <nav>
+      <BackButton class="back-button" routeName="MainWindow" buttonText="Wróć">
+                <template #icon>
+                    <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-chevron-left" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
+                    </svg>
+                </template>
+            </BackButton>
       <WUoT_Logo />
     </nav>
 
@@ -28,13 +37,15 @@
 import GoogleFonts from './googleFonts.vue';
 import RouteButton from './RouteButton.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
+import BackButton from './BackButton.vue';
 
 export default {
   name: 'ScanConciergeCard',
   components: {
     WUoT_Logo,
     GoogleFonts,
-    RouteButton
+    RouteButton,
+    BackButton
   }
 }
 
@@ -64,8 +75,7 @@ body {
   background-repeat: no-repeat;
   background-position: center;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
 }
 
 h1,
@@ -81,7 +91,11 @@ label {
 }
 
 nav {
+  display: flex;
+  align-items: start;
+  justify-content: flex-start;
   height: 50px;
+
 }
 
 .logo {
@@ -189,6 +203,15 @@ h1 {
 button:hover {
   transform: scale(1.07);
   cursor: pointer;
+}
+
+.back-button {
+    text-decoration: none;
+    margin: 15px;
+    display: inline-flex;
+    align-items: center;
+    color: #FFFFFF;
+    background-color: transparent;
 }
 
 @media (max-width: 1040px) {

@@ -172,7 +172,7 @@ $font-heading: 'Ubuntu', sans-serif;
 
 body {
     background: $background-color url('../assets/back.jpg') top no-repeat;
-    background-size: 1920px 1080px;
+    background-size: cover;
     color: $text-color;
     text-align: center;
     margin: 0;

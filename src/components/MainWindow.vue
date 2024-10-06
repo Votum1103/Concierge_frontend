@@ -26,7 +26,7 @@
       <div class="left-action-buttons">
         <ul class="sidebar">
           <li class="option">
-            <RouteButton routeName="ScanConciergeCard" class="giveItem" buttonText="Wydaj/Odbierz">
+            <RouteButton routeName="ScanUserCard" class="giveItem" buttonText="Wydaj/Odbierz">
               <template #icon>
                 <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"
                   xmlns:xlink="http://www.w3.org/1999/xlink">

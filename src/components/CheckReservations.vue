@@ -1,6 +1,6 @@
 <template>
     <div>
-        <GoogleFonts /> <!-- Dodaj komponent GoogleFonts tutaj -->
+        <GoogleFonts />
         <nav>
             <BackButton class="back-button" routeName="MainWindow" buttonText="Wróć">
                 <template #icon>
@@ -137,13 +137,9 @@ nav {
     display: inline-flex;
     align-items: center;
     color: #FFFFFF;
-    font-size: 15px;
     background-color: transparent !important;
 }
 
-#left-arrow {
-    margin-right: 5px;
-}
 
 .back-button:hover,
 button:hover {
@@ -289,6 +285,7 @@ table {
     transform: scale(1.07);
     cursor: pointer;
 }
+
 
 /* Custom scrollbar styles */
 ::-webkit-scrollbar {
