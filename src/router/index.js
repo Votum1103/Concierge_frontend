@@ -11,22 +11,23 @@ import UnauthorizedUserGiveItem from '@/components/UnauthorizedUserGiveItem.vue'
 import AddNote from '@/components/AddNote.vue';
 import CheckReservations from '@/components/CheckReservations.vue';
 import EditNote from '@/components/EditNote.vue';
-import ScanConciergeCard from '@/components/ScanConciergeCard.vue';
+import ScanConciergeCard from '@/components/ScanUserCard.vue';
 import MainProcess from '@/components/MainProcess.vue';
+import DeviceNote from '@/components/DeviceNote.vue';
 
 
 
 const routes = [
   {
-    path: '/',
+    path: '/mainwindow',
     name: 'MainWindow',
-    component : MainWindow
+    component: MainWindow
   },
-  
+
   {
-    path: '/scan',
+    path: '/',
     name: 'eConcierge',
-    component : eConcierge
+    component: eConcierge
   },
   {
     path: '/concierge-login',
@@ -79,8 +80,8 @@ const routes = [
     component: EditNote
   },
   {
-    path: '/scanconciergecard',
-    name: 'ScanConciergeCard',
+    path: '/scanusercard',
+    name: 'ScanUserCard',
     component: ScanConciergeCard
   },
   {
@@ -88,8 +89,13 @@ const routes = [
     name: 'MainProcess',
     component: MainProcess
   },
+  {
+    path: '/devicenote/:room_number',
+    name: 'DeviceNote',
+    component: DeviceNote
+  },
 
-  
+
 ]
 
 const router = createRouter({

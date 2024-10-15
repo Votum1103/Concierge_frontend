@@ -65,6 +65,8 @@ export default {
     methods: {
         async login() {
             try {
+                console.log("Zaloga dane:", this.username, this.password);
+
                 const response = await axios.post('http://127.0.0.1:8000/login', new URLSearchParams({
                     username: this.username,
                     password: this.password
@@ -76,7 +78,7 @@ export default {
 
                 console.log('Zalogowano pomyślnie:', accessToken);
 
-                this.$router.push({ name: 'MainProcess' });
+                this.$router.push({ name: 'MainWindow' });
             } catch (error) {
                 console.error('Błąd logowania:', error);
             }

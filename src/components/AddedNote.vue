@@ -9,13 +9,15 @@
 
     <body>
         <nav>
-            <a class="back-button" href="#" aria-label="Wróć">
-                <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                    class="bi bi-chevron-left" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd"
-                        d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
-                </svg>Wróć
-            </a>
+            <BackButton class="back-button" routeName="MainProcess" buttonText="Wróć">
+                <template #icon>
+                    <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-chevron-left" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
+                    </svg>
+                </template>
+            </BackButton>
             <WUoT_Logo />
         </nav>
 
@@ -57,6 +59,7 @@
 </template>
 
 <script>
+import BackButton from './BackButton.vue';
 import GoogleFonts from './googleFonts.vue';
 import RouteButton from './RouteButton.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
@@ -66,7 +69,8 @@ export default {
     components: {
         GoogleFonts,
         WUoT_Logo,
-        RouteButton
+        RouteButton,
+        BackButton
     }
 }
 </script>
@@ -74,7 +78,7 @@ export default {
 <style lang="scss" scoped>
 body {
     background: black url('../assets/back.jpg') top no-repeat;
-    background-size: 1920px 1080px;
+    background-size: cover;
     color: white;
     text-align: center;
     margin: 0;
@@ -97,23 +101,21 @@ nav {
     height: 50px;
 }
 
+
+.back-button:hover {
+    transform: scale(1.07);
+    cursor: pointer;
+}
+
 .back-button {
     text-decoration: none;
     margin: 15px;
     display: inline-flex;
     align-items: center;
     color: #FFFFFF;
-    font-size: 15px;
+    background-color: transparent;
 }
 
-#left-arrow {
-    margin-right: 5px;
-}
-
-.back-button:hover {
-    transform: scale(1.07);
-    cursor: pointer;
-}
 
 .logo {
     position: absolute;
@@ -231,10 +233,6 @@ button:hover {
     p {
         font-size: 18px;
     }
-
-    .bi {
-        width: 40px;
-    }
 }
 
 @media (max-width: 768px) {
@@ -253,19 +251,11 @@ button:hover {
     .button-group button {
         height: 40px;
     }
-
-    .bi {
-        width: 30px;
-    }
 }
 
 @media (max-width: 560px) {
     p {
         font-size: 14px;
-    }
-
-    .bi {
-        width: 25px;
     }
 
     img,

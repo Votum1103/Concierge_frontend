@@ -9,6 +9,15 @@
 
     <body>
         <nav>
+            <BackButton class="back-button" routeName="MainProcess" buttonText="Wróć">
+                <template #icon>
+                    <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-chevron-left" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
+                    </svg>
+                </template>
+            </BackButton>
             <WUoT_Logo />
         </nav>
 
@@ -30,23 +39,24 @@
 <script>
 import GoogleFonts from './googleFonts.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
+import BackButton from './BackButton.vue';
 
 export default {
     name: 'GiveManuallyItemCode',
     components: {
         GoogleFonts,
-        WUoT_Logo
+        WUoT_Logo,
+        BackButton
     },
     data() {
         return {
-            itemCode: ''  // Pole do przechowywania kodu przedmiotu
+            itemCode: ''  
         };
     },
     methods: {
         submitForm() {
-            // Emitowanie zdarzenia, aby przekazać dane do komponentu nadrzędnego
             this.$emit('submit-item-code', this.itemCode);
-            this.itemCode = ''; // Czyszczenie pola po wysłaniu
+            this.itemCode = '';
         }
     }
 };
@@ -85,18 +95,14 @@ nav {
 }
 
 .back-button {
-    border: none;
+    text-decoration: none;
     margin: 15px;
     display: inline-flex;
     align-items: center;
     color: #FFFFFF;
-    font-size: 15px;
-    background-color: transparent;
+    background-color: transparent !important;
 }
 
-#left-arrow {
-    margin-right: 5px;
-}
 
 .logo {
     position: absolute;
