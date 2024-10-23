@@ -128,11 +128,17 @@
             </table>
           </div>
           <div class="itemsStatus">
-            <div>
-              Dostępne: 150
+            <div class="keysStatus" v-if="currentView === 'keys'">
+              <p>Dostępne: {{ availableDevicesCount.keys }}</p>
+              <p>Pobrane: {{ takenDevicesCount.keys }}</p>
             </div>
-            <div>
-              Pobrane: 130
+            <div class="microphonesStatus" v-if="currentView === 'microphones'">
+              <p>Dostępne: {{ availableDevicesCount.microphones }}</p>
+              <p>Pobrane: {{ takenDevicesCount.microphones }}</p>
+            </div>
+            <div class="remoteControllersStatus" v-if="currentView === 'remoteControllers'">
+              <p>Dostępne: {{ availableDevicesCount.remoteControllers }}</p>
+              <p> Pobrane: {{ takenDevicesCount.remoteControllers }}</p>
             </div>
           </div>
         </div>
@@ -189,9 +195,31 @@ export default {
         result.push(items.slice(i, i + chunkSize));
       }
       return result;
+    },
+    takenDevicesCount() {
+      let takenDevices = { 'keys': 0, 'microphones': 0, 'remoteControllers': 0 };
+
+
+      // Sprawdź liczbę pobranych urządzeń dla każdej kategorii
+      takenDevices.keys = this.keys.filter(device => device.is_taken).length;
+      takenDevices.microphones = this.microphones.filter(device => device.is_taken).length;
+      takenDevices.remoteControllers = this.remoteControllers.filter(device => device.is_taken).length;
+
+      return takenDevices;
+    },
+
+    availableDevicesCount() {
+      let availableDevices = { 'keys': 0, 'microphones': 0, 'remoteControllers': 0 };
+
+      // Sprawdź liczbę dostępnych urządzeń dla każdej kategorii
+      availableDevices.keys = this.keys.filter(device => !device.is_taken).length;
+      availableDevices.microphones = this.microphones.filter(device => !device.is_taken).length;
+      availableDevices.remoteControllers = this.remoteControllers.filter(device => !device.is_taken).length;
+
+      return availableDevices;
     }
   },
-  created() {
+  mounted() {
     this.fetchKeys();
     this.fetchMicrophones();
     this.fetchRemoteControllers();
@@ -200,15 +228,20 @@ export default {
     handleClick(item) {
       console.log('Clicked on item:', item); // Sprawdź, czy item zawiera room_number
 
-      // Zapisz dane urządzenia do localStorage, aby były dostępne w notatkach
+      if (!item || !item.room_number || !item.id || !item.dev_type) {
+        console.error('Błąd: Brak jednej z właściwości w item:', item);
+        return;
+      }
+
+      // Zapisz dane urządzenia do sessionStorage, aby były dostępne w notatkach
       const selectedDevice = {
         room_number: item.room_number,
         device_id: item.id, // Zakładam, że item ma pole "id", które jest device_id
         dev_type: item.dev_type
       };
 
-      // Zapisz szczegóły urządzenia w localStorage
-      localStorage.setItem('selectedDevice', JSON.stringify(selectedDevice));
+      // Zapisz szczegóły urządzenia w sessionStorage
+      sessionStorage.setItem('selectedDevice', JSON.stringify(selectedDevice));
 
       // Przejdź do widoku notatek dla tego urządzenia
       this.$router.push(`/DeviceNote/${item.room_number}`); // Użyj backticks do interpolacji
@@ -216,7 +249,7 @@ export default {
 
     async fetchKeys() {
       try {
-        const token = localStorage.getItem('access_token');
+        const token = sessionStorage.getItem('access_token');
         const headers = {
           Authorization: `Bearer ${token}`
         };
@@ -230,7 +263,7 @@ export default {
     },
     async fetchMicrophones() {
       try {
-        const token = localStorage.getItem('access_token');
+        const token = sessionStorage.getItem('access_token');
         const headers = {
           Authorization: `Bearer ${token}`
         };
@@ -244,7 +277,7 @@ export default {
     },
     async fetchRemoteControllers() {
       try {
-        const token = localStorage.getItem('access_token');
+        const token = sessionStorage.getItem('access_token');
         const headers = {
           Authorization: `Bearer ${token}`
         };
@@ -261,7 +294,7 @@ export default {
           console.error('Error fetching remote controllers:', error.message);
         }
       }
-    }
+    },
   }
 };
 </script>
@@ -448,18 +481,19 @@ button.reserve-version {
 
 .itemsTable {
   display: grid;
-  grid-template-rows: repeat(10, 1fr);
+  grid-template-rows: repeat(4, 1fr);
   align-items: center;
   background-color: $secondary-bg;
   height: 700px;
   width: 100%;
   border-radius: $border-radius-large;
   margin: 20px 10% 0 0;
+  overflow-y: auto; 
 }
 
 .itemsNumber {
   display: grid;
-  grid-template-rows: repeat(10, 1fr);
+  height: 600px;
   width: 100%;
 }
 
@@ -499,15 +533,25 @@ button.reserve-version {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  width: 90%;
-  height: 10%;
+  width: 100%;
+  height: 100%;
   border-radius: 15px;
+  font-size: 1.3em;
 }
 
 td svg {
   background-color: #397031;
   border-radius: 50%;
   margin-left: 10px;
+}
+
+.keysStatus,
+.microphonesStatus,
+.remoteControllersStatus {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-evenly;
 }
 
 @media (max-width: 768px) {

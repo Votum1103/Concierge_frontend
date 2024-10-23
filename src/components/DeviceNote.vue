@@ -24,21 +24,25 @@
                     <div class="note-box" v-for="(note, index) in notes" :key="index"
                         :class="{ 'selected-note': selectedNote === index }" @click="toggleNoteSelection(index)">
                         <textarea v-if="editingIndex === index" v-model="editedNote"></textarea>
-                        <span v-else>{{ note }}</span>
+                        <span v-else>{{ note.note }}</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Przycisk "Dodaj notatkę" -->
-            <div>
-                <button class="add-button" @click="addNote">Dodaj notatkę</button>
-            </div>
+            <!-- Kontener na przyciski -->
+            <div class="button-container">
+                <button class="add-button" v-if="!isAdding" @click="addNote">Dodaj notatkę</button>
 
-            <!-- Dynamiczne przyciski: Edytuj/Zapisz oraz Usuń -->
-            <div v-if="selectedNote !== null">
-                <button class="edit-button" v-if="editingIndex === null" @click="editNotes">Edytuj</button>
-                <button class="save-button" v-else @click="saveNotes">Zapisz</button>
-                <button class="delete-button" @click="deleteNote">Usuń</button>
+                <button class="save-button" v-if="isAdding" @click="saveNewNote()">Zapisz</button>
+                <button class="cancel-button" v-if="isAdding" @click="cancelAdding">Anuluj</button>
+
+                <button class="edit-button" v-if="selectedNote !== null && editingIndex === null && !isAdding"
+                    @click="editNote">Edytuj</button>
+                <button class="save-button" v-if="selectedNote !== null && editingIndex !== null && !isAdding"
+                    @click="saveEditedNote">Zapisz</button>
+
+                <button class="delete-button" v-if="selectedNote !== null && !isAdding"
+                    @click="deleteNote">Usuń</button>
             </div>
         </div>
     </body>
@@ -56,110 +60,142 @@ export default {
     },
     data() {
         return {
-            roomNumber: 95, // Numer sali
-            deviceType: 'mikrofon', // Typ urządzenia
-            notes: [], // Pusta tablica notatek, która zostanie zapełniona
-            selectedNote: null, // Index klikniętej notatki, null oznacza brak zaznaczenia
-            editingIndex: null, // Index aktualnie edytowanej notatki
-            editedNote: '' // Zmienna przechowująca notatkę podczas edycji
+            notes: [],
+            devType: null,
+            devVersion: null,
+            newNote: '',
+            editingIndex: null,
+            selectedNote: null,
+            isAdding: false,
+            editedNote: "",
         };
     },
     mounted() {
-        this.roomNumber = this.$route.params.room_number;
-        const selectedDevice = JSON.parse(localStorage.getItem('selectedDevice'));
-        if (selectedDevice) {
-            this.deviceType = selectedDevice.dev_type;
-            this.fetchNotes(selectedDevice.device_id);
-            console.log(selectedDevice.device_id)
-        }
+        const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
+        this.devType = selectedDevice.dev_type;
+        this.devVersion = selectedDevice.dev_version;
+        this.notes = this.fetchNotes(selectedDevice.device_id);
+        console.log(this.notes);
+
+
+
     },
     methods: {
+        async fetchNotes(device_id) {
+            try {
+                const accesToken = sessionStorage.getItem('access_token');
+
+                const headers = { Authorization: `Bearer ${accesToken}` };
+                const response = await axios.get(`http://127.0.0.1:8000/notes/devices/${device_id}`, { headers });
+                console.log("fefwfew")
+                this.notes = response.data.map(noteObj => ({ "id": noteObj.id, "device": device_id, "note": noteObj.note }));
+            } catch (error) {
+                if (error.status == "404") {
+                    this.notes = [];
+                }
+            }
+
+        },
+        addNote() {
+            this.notes.push({ text: '', isEditing: true });
+            this.editingIndex = this.notes.length - 1;
+            this.isAdding = true;
+            this.editedNote = this.notes[this.editingIndex].note
+            console.log(this.notes[this.editingIndex].note)
+
+        },
         toggleNoteSelection(index) {
             if (this.editingIndex === null) {
                 this.selectedNote = this.selectedNote === index ? null : index;
             }
+            console.log(this.notes[this.selectedNote]);
         },
-        editNotes() {
-            this.editingIndex = this.selectedNote;
-            this.editedNote = this.notes[this.selectedNote];
-        },
-        cancelEdit() {
-            this.editingIndex = null;
-            this.editedNote = '';
+        cancelAdding() {
             this.selectedNote = null;
+            this.isAdding = false;
+            this.notes.pop();
+            this.editedNote = '';
+            this.editingIndex = null;
         },
-        async fetchNotes(device_id) {
+        async saveNewNote() {
+            const accesToken = sessionStorage.getItem('access_token');
+            const headers = { Authorization: `Bearer ${accesToken}` };
+            const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
+
+            const device_id = selectedDevice.device_id;
+            console.log("device_id: ", device_id);
+
             try {
-                const token = localStorage.getItem('access_token');
-                const headers = { Authorization: `Bearer ${token}` };
-                const response = await axios.get(`http://127.0.0.1:8000/notes/devices/${device_id}`, { headers });
-                if (response.data && Array.isArray(response.data)) {
-                    this.notes = response.data.map(noteObj => noteObj.note);
-                } else {
-                    this.notes = [];
-                }
+                const response = await axios.post('http://127.0.0.1:8000/notes/devices/', { device_id: device_id, note: this.editedNote }, { headers });
+
+                this.notes[this.editingIndex].note = this.editedNote;
+
+                this.editingIndex = null;
+                this.isAdding = false;
+                this.editedNote = '';
+                this.fetchNotes(selectedDevice.device_id);
+
+                console.log("Dodano następującą notatkę: ", response.data);
             } catch (error) {
-                console.error('Błąd podczas pobierania notatek:', error);
-                this.notes = [];
+                console.error("Błąd podczas dodawania notatki: ", error);
             }
         },
-        async saveNotes() {
+
+        editNote() {
+            this.editingIndex = this.selectedNote;
+            console.log(this.editingIndex);
+            this.editedNote = this.notes[this.selectedNote].note;
+            console.log(this.notes[this.selectedNote].note);
+            this.isAdding = false;
+        },
+
+        async saveEditedNote() {
+            const accessToken = sessionStorage.getItem('access_token')
+            const headers = { Authorization: `Bearer ${accessToken}` }
+            const noteId = this.notes[this.editingIndex].id
+
             try {
-                const selectedDevice = JSON.parse(localStorage.getItem('selectedDevice'));
-                const device_id = selectedDevice.device_id;
-                const token = localStorage.getItem('access_token');
-                const headers = { Authorization: `Bearer ${token}` };
+                const response = await axios.put(`http://127.0.0.1:8000/notes/devices/${noteId}`, { note: this.editedNote },
+                    { headers });
 
-                if (this.editingIndex >= this.notes.length - 1) {
-                    // Nowa notatka
-                    const response = await axios.post(
-                        `http://127.0.0.1:8000/notes/devices/`,
-                        { note: this.editedNote, device_id: device_id },
-                        { headers }
-                    );
-                    this.notes[this.editingIndex] = this.editedNote;
-                    console.log('Nowa notatka dodana', response.data);
-                } else {
-                    // Edycja istniejącej notatki
-                    const response = await axios.put(
-                        `http://127.0.0.1:8000/notes/devices/${device_id}`,
-                        { note: this.editedNote },
-                        { headers }
-                    );
-                    this.notes[this.editingIndex] = this.editedNote;
-                    console.log('Notatka zaktualizowana', response.data);
-                }
+                console.log(response.data)
 
-                // Resetuj stany po zapisaniu
+                this.notes[this.editingIndex].note = this.editedNote;
+
                 this.editingIndex = null;
                 this.editedNote = '';
+
+
             } catch (error) {
                 console.error('Błąd podczas zapisywania notatki:', error);
             }
+
+
         },
+
         async deleteNote() {
+            const accesToken = sessionStorage.getItem('access_token');
+            const headers = { Authorization: `Bearer ${accesToken}` };
+            console.log(this.notes[this.selectedNote].id);
+            const noteId = this.notes[this.selectedNote].id;
+            const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
+
             try {
-                const selectedDevice = JSON.parse(localStorage.getItem('selectedDevice'));
-                const device_id = selectedDevice.device_id;
-                const token = localStorage.getItem('access_token');
-                const headers = { Authorization: `Bearer ${token}` };
-                const response = await axios.delete(`http://127.0.0.1:8000/notes/devices/${device_id}/${this.selectedNote}`, { headers });
-                this.notes.splice(this.selectedNote, 1);
+                const response = await axios.delete(`http://127.0.0.1:8000/notes/devices/${noteId}`, { headers })
+
+                this.notes.pop();
                 this.editingIndex = null;
                 this.editedNote = '';
                 this.selectedNote = null;
+
                 console.log('Notatka usunięta', response.data);
             } catch (error) {
                 console.error('Błąd podczas usuwania notatki:', error);
             }
-        },
-        addNote() {
-            this.notes.push('Nowa notatka');
-            this.selectedNote = this.notes.length - 1;
-            this.editingIndex = this.selectedNote;
-            this.editedNote = this.notes[this.selectedNote];
+            this.fetchNotes(selectedDevice.device_id);
         }
-    }
+    },
+
 };
 </script>
 
@@ -251,47 +287,59 @@ nav {
     margin-bottom: 0.5em;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    white-space: normal;
+    word-wrap: break-word;
+    max-height: 150px;
+    overflow-y: auto; 
 }
 
 .selected-note {
     background-color: #0083BB;
-    color: white;
 }
 
 textarea {
+    font-family: $font-main;
+    width: 100%;
+    height: 100%;
     background-color: transparent;
-    border: none;
     color: white;
     font-size: 18px;
-    width: 100%;
-    padding: 10px;
-    resize: none;
+    border: none;
+    outline: none;
+    resize: vertical; 
+    min-height: 50px; 
+    max-height: 300px; 
+    overflow-y: auto; 
 }
 
-.save-button,
-.cancel-button,
-.delete-button,
+/* Stylizacja przycisków */
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
 .add-button,
-.edit-button {
+.edit-button,
+.save-button,
+.delete-button,
+.cancel-button {
     background-color: #0083BB;
     color: white;
     border: none;
     border-radius: 25px;
-    padding: 10px 30px;
-    font-size: 18px;
+    padding: 10px 20px;
+    font-size: 16px;
     cursor: pointer;
-    margin: 10px;
 }
 
-.save-button:hover,
-.cancel-button:hover,
-.delete-button:hover,
 .add-button:hover,
-.edit-button:hover {
+.edit-button:hover,
+.save-button:hover,
+.delete-button:hover,
+.cancel-button:hover {
     background-color: #007ecc;
-}
-
-h1 {
-    font-family: $font-heading;
 }
 </style>

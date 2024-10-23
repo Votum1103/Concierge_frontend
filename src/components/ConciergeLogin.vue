@@ -74,7 +74,7 @@ export default {
 
                 const accessToken = response.data.access_token;
 
-                localStorage.setItem('access_token', accessToken);
+                sessionStorage.setItem('access_token', accessToken);
 
                 console.log('Zalogowano pomyślnie:', accessToken);
 
