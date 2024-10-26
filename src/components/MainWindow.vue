@@ -81,35 +81,53 @@
           </RouteButton>
 
           <div class="itemTypesButtons">
-            <button @click="currentView = 'microphones'" class="microphones"><svg xmlns="http://www.w3.org/2000/svg"
-                width="20" height="20" fill="white" class="bi bi-mic-fill" viewBox="0 0 16 16">
+            <button @click="selectItemType('microphone')" :class="{ selected: selectedItemType === 'microphone' }"
+              class="microphones">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-mic-fill"
+                viewBox="0 0 16 16">
                 <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0z" />
                 <path
                   d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5" />
-              </svg>></button>
-            <button @click="currentView = 'remoteControllers'" class="remote-controllers"><svg
-                xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-file-spreadsheet"
+              </svg>
+            </button>
+
+            <button @click="selectItemType('remote_controler')"
+              :class="{ selected: selectedItemType === 'remote_controler' }" class="remote-controllers">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-file-spreadsheet"
                 viewBox="0 0 16 16">
                 <path
                   d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v4h10V2a1 1 0 0 0-1-1zm9 6h-3v2h3zm0 3h-3v2h3zm0 3h-3v2h2a1 1 0 0 0 1-1zm-4 2v-2H6v2zm-4 0v-2H3v1a1 1 0 0 0 1 1zm-2-3h2v-2H3zm0-3h2V7H3zm3-2v2h3V7zm3 3H6v2h3z" />
-              </svg></button>
-            <button @click="currentView = 'keys'" class="keys"><svg xmlns="http://www.w3.org/2000/svg" width="20"
-                height="20" fill="white" class="bi bi-key-fill" viewBox="0 0 16 16">
+              </svg>
+            </button>
+
+            <button @click="selectItemType('key')" :class="{ selected: selectedItemType === 'key' }" class="keys">
+              <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-key-fill"
+                viewBox="0 0 16 16">
                 <path
                   d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2M2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2" />
-              </svg></button>
+              </svg>
+            </button>
           </div>
+
+          <!-- Przyciski wyboru wersji przedmiotów -->
           <div class="itemsVersionsButtons">
-            <button class="primary-version"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white"
-                class="bi bi-1-circle-fill" viewBox="0 0 16 16">
+            <button @click="selectItemVersion('primary')" :class="{ selected: selectedItemVersion === 'primary' }"
+              class="primary-version">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" class="bi bi-1-circle-fill"
+                viewBox="0 0 16 16">
                 <path
                   d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M9.283 4.002H7.971L6.072 5.385v1.271l1.834-1.318h.065V12h1.312z" />
-              </svg></button>
-            <button class="reserve-version"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white"
-                class="bi bi-2-circle-fill" viewBox="0 0 16 16">
+              </svg>
+            </button>
+
+            <button @click="selectItemVersion('emergency')" :class="{ selected: selectedItemVersion === 'emergency' }"
+              class="reserve-version">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" class="bi bi-2-circle-fill"
+                viewBox="0 0 16 16">
                 <path
                   d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M6.646 6.24c0-.691.493-1.306 1.336-1.306.756 0 1.313.492 1.313 1.236 0 .697-.469 1.23-.902 1.705l-2.971 3.293V12h5.344v-1.107H7.268v-.077l1.974-2.22.096-.107c.688-.763 1.287-1.428 1.287-2.43 0-1.266-1.031-2.215-2.613-2.215-1.758 0-2.637 1.19-2.637 2.402v.065h1.271v-.07Z" />
-              </svg></button>
+              </svg>
+            </button>
           </div>
         </div>
         <div class="itemsTable">
@@ -127,19 +145,19 @@
               </tbody>
             </table>
           </div>
-          <div class="itemsStatus">
-            <div class="keysStatus" v-if="currentView === 'keys'">
-              <p>Dostępne: {{ availableDevicesCount.keys }}</p>
-              <p>Pobrane: {{ takenDevicesCount.keys }}</p>
-            </div>
-            <div class="microphonesStatus" v-if="currentView === 'microphones'">
-              <p>Dostępne: {{ availableDevicesCount.microphones }}</p>
-              <p>Pobrane: {{ takenDevicesCount.microphones }}</p>
-            </div>
-            <div class="remoteControllersStatus" v-if="currentView === 'remoteControllers'">
-              <p>Dostępne: {{ availableDevicesCount.remoteControllers }}</p>
-              <p> Pobrane: {{ takenDevicesCount.remoteControllers }}</p>
-            </div>
+        </div>
+        <div class="itemsStatus">
+          <div class="keysStatus" v-if="selectedItemType === 'key'">
+            <p>Dostępne: {{ availableDevicesCount }}</p>
+            <p>Pobrane: {{ takenDevicesCount }}</p>
+          </div>
+          <div class="microphonesStatus" v-if="selectedItemType === 'microphone'">
+            <p>Dostępne: {{ availableDevicesCount }}</p>
+            <p>Pobrane: {{ takenDevicesCount }}</p>
+          </div>
+          <div class="remoteControllersStatus" v-if="selectedItemType === 'remote_controler'">
+            <p>Dostępne: {{ availableDevicesCount }}</p>
+            <p> Pobrane: {{ takenDevicesCount }}</p>
           </div>
         </div>
       </div>
@@ -170,63 +188,38 @@ export default {
   },
   data() {
     return {
-      keys: [],
-      microphones: [],
-      remoteControllers: [],
-      currentView: 'keys'
+      items: [], // Będziemy przechowywać wszystkie urządzenia w tej tablicy
+      currentView: 'keys', // Domyślnie widok to 'keys'
+      selectedItemType: 'key', // Domyślny typ to 'key'
+      selectedItemVersion: 'primary', // Domyślna wersja to 'primary'
     };
   },
   computed: {
     chunkedItems() {
       const chunkSize = 5;
-      let items = [];
-
-      if (this.currentView === 'keys') {
-        items = this.keys;
-      } else if (this.currentView === 'microphones') {
-        items = this.microphones;
-      } else if (this.currentView === 'remoteControllers') {
-        items = this.remoteControllers;
-      }
-
-      // Podzielenie na grupy
       const result = [];
-      for (let i = 0; i < items.length; i += chunkSize) {
-        result.push(items.slice(i, i + chunkSize));
+
+      // Podzielenie na grupy po 5 elementów
+      for (let i = 0; i < this.items.length; i += chunkSize) {
+        result.push(this.items.slice(i, i + chunkSize));
       }
       return result;
     },
     takenDevicesCount() {
-      let takenDevices = { 'keys': 0, 'microphones': 0, 'remoteControllers': 0 };
-
-
-      // Sprawdź liczbę pobranych urządzeń dla każdej kategorii
-      takenDevices.keys = this.keys.filter(device => device.is_taken).length;
-      takenDevices.microphones = this.microphones.filter(device => device.is_taken).length;
-      takenDevices.remoteControllers = this.remoteControllers.filter(device => device.is_taken).length;
-
-      return takenDevices;
+      return this.items.filter(device => device.is_taken).length;
     },
-
     availableDevicesCount() {
-      let availableDevices = { 'keys': 0, 'microphones': 0, 'remoteControllers': 0 };
-
-      // Sprawdź liczbę dostępnych urządzeń dla każdej kategorii
-      availableDevices.keys = this.keys.filter(device => !device.is_taken).length;
-      availableDevices.microphones = this.microphones.filter(device => !device.is_taken).length;
-      availableDevices.remoteControllers = this.remoteControllers.filter(device => !device.is_taken).length;
-
-      return availableDevices;
+      console.log(this.items.filter(device => !device.is_taken).length);
+      return this.items.filter(device => !device.is_taken).length;
     }
   },
   mounted() {
-    this.fetchKeys();
-    this.fetchMicrophones();
-    this.fetchRemoteControllers();
+    // Pobranie domyślnych urządzeń przy ładowaniu komponentu
+    this.fetchDevices(this.selectedItemType, this.selectedItemVersion);
   },
   methods: {
     handleClick(item) {
-      console.log('Clicked on item:', item); // Sprawdź, czy item zawiera room_number
+      console.log('Clicked on item:', item);
 
       if (!item || !item.room_number || !item.id || !item.dev_type) {
         console.error('Błąd: Brak jednej z właściwości w item:', item);
@@ -240,61 +233,47 @@ export default {
         dev_type: item.dev_type
       };
 
-      // Zapisz szczegóły urządzenia w sessionStorage
       sessionStorage.setItem('selectedDevice', JSON.stringify(selectedDevice));
-
-      // Przejdź do widoku notatek dla tego urządzenia
-      this.$router.push(`/DeviceNote/${item.room_number}`); // Użyj backticks do interpolacji
+      this.$router.push(`/DeviceNote/${item.room_number}`);
     },
 
-    async fetchKeys() {
+    selectItemType(type) {
+      this.selectedItemType = type;
+      this.currentView = type;
+      this.fetchDevices(this.selectedItemType, this.selectedItemVersion);
+    },
+
+    selectItemVersion(version) {
+      this.selectedItemVersion = version;
+      this.fetchDevices(this.selectedItemType, this.selectedItemVersion);
+    },
+
+    async fetchDevices(deviceType, version) {
       try {
         const token = sessionStorage.getItem('access_token');
         const headers = {
           Authorization: `Bearer ${token}`
         };
 
-        const devTypes = 'key';
-        const response = await axios.get(`http://127.0.0.1:8000/devices/?dev_type=${devTypes}`, { headers });
-        this.keys = response.data;
-      } catch (error) {
-        console.error('Error fetching keys:', error);
-      }
-    },
-    async fetchMicrophones() {
-      try {
-        const token = sessionStorage.getItem('access_token');
-        const headers = {
-          Authorization: `Bearer ${token}`
-        };
+        // Pobierz urządzenia z serwera
+        const response = await axios.get(
+          `http://127.0.0.1:8000/devices/?dev_type=${deviceType}&dev_version=${version}`,
+          { headers }
+        );
 
-        const devTypes = 'microphone';
-        const response = await axios.get(`http://127.0.0.1:8000/devices/?dev_type=${devTypes}`, { headers });
-        this.microphones = response.data;
-      } catch (error) {
-        console.error('Error fetching microphones:', error);
-      }
-    },
-    async fetchRemoteControllers() {
-      try {
-        const token = sessionStorage.getItem('access_token');
-        const headers = {
-          Authorization: `Bearer ${token}`
-        };
-
-        const devTypes = 'remote_controler';
-        const response = await axios.get(`http://127.0.0.1:8000/devices/?dev_type=${devTypes}`, { headers });
-        this.remoteControllers = response.data; // Tutaj powinniśmy mieć odpowiedź
+        // Przypisz dane do `items`
+        this.items = response.data;
+        console.log('Fetched devices:', response.data); // Log danych po pobraniu
       } catch (error) {
         if (error.response) {
-          console.error('Error fetching remote controllers:', error.response.data);
+          console.error(`Error fetching ${deviceType}:`, error.response.data);
         } else if (error.request) {
-          console.error('Error fetching remote controllers: No response received', error.request);
+          console.error(`Error fetching ${deviceType}: No response received`, error.request);
         } else {
-          console.error('Error fetching remote controllers:', error.message);
+          console.error(`Error fetching ${deviceType}:`, error.message);
         }
       }
-    },
+    }
   }
 };
 </script>
@@ -432,6 +411,11 @@ button.reserve-version {
   }
 }
 
+.selected {
+  transform: scale(1.7); // Powiększenie aktywnego przycisku
+  transition: transform 0.2s ease-in-out; // Płynna animacja powiększenia
+}
+
 .main-page {
   display: flex;
   margin-top: 40px;
@@ -488,7 +472,7 @@ button.reserve-version {
   width: 100%;
   border-radius: $border-radius-large;
   margin: 20px 10% 0 0;
-  overflow-y: auto; 
+  overflow-y: auto;
 }
 
 .itemsNumber {
