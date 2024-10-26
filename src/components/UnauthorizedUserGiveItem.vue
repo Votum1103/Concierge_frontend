@@ -1,12 +1,7 @@
 <template>
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <GoogleFonts />
-    </head>
-
     <body>
+        <GoogleFonts />
         <nav>
             <a class="back-button" href="#" aria-label="Wróć">
                 <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -21,31 +16,20 @@
 
         <main class="form-container">
             <header>
-                <h1>Wydaj klucz</h1>
-                <h2>Sala nr: 322A</h2>
+                <h1>Wydaj/odbierz bez autoryzacji</h1>
             </header>
-            <form action="#">
+            <form @submit.prevent="submitForm">
                 <div class="form-group">
                     <label for="name-input">Imię</label>
-                    <input type="text" id="name-input" name="name-input" placeholder="Imię" required>
+                    <input type="text" id="name-input" v-model="formData.name" placeholder="Imię" required>
                 </div>
                 <div class="form-group">
                     <label for="surname-input">Nazwisko</label>
-                    <input type="text" id="surname-input" name="surname-input" placeholder="Nazwisko" required>
+                    <input type="text" id="surname-input" v-model="formData.surname" placeholder="Nazwisko" required>
                 </div>
                 <div class="form-group">
-                    <label for="position-select">Stanowisko</label>
-                    <select name="position-select" id="position-select" required>
-                        <option id="disabled-option" value="" disabled selected>Stanowisko</option>
-                        <option value="pracownik PW">Pracownik PW</option>
-                        <option value="gość">Gość</option>
-                        <option value="inny">Inny</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="additional-info-textarea">Informacje dodatkowe</label>
-                    <textarea name="additional-info-textarea" id="additional-info-textarea" cols="40" rows="5"
-                        placeholder="Informacje dodatkowe"></textarea>
+                    <label for="email-input">Email</label>
+                    <input type="email" id="email-input" v-model="formData.email" placeholder="Email" required>
                 </div>
                 <div class="button-group">
                     <button class="primary-button" type="submit">Wydaj</button>
@@ -53,9 +37,10 @@
             </form>
         </main>
     </body>
-
 </template>
+
 <script>
+import axios from 'axios';
 import GoogleFonts from './googleFonts.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
 
@@ -64,9 +49,57 @@ export default {
     components: {
         GoogleFonts,
         WUoT_Logo
+    },
+    data() {
+        return {
+            formData: {
+                name: '',
+                surname: '',
+                email: '',
+                added_at: '', // Pole na czas dodania
+                position: '',
+                additionalInfo: ''
+            }
+        };
+    },
+    methods: {
+        async submitForm() {
+            try {
+                // Ustawienie aktualnej daty i czasu w formacie ISO
+                this.formData.added_at = new Date().toISOString();
+
+                const token = sessionStorage.getItem('access_token');
+                const headers = {
+                    Authorization: `Bearer ${token}`
+                };
+
+                // Wyślij dane do backendu przy użyciu axios
+                const response = await axios.post('http://127.0.0.1:8000/unauthorized-users', {
+                    name: this.formData.name,
+                    surname: this.formData.surname,
+                    email: this.formData.email,
+                    added_at: this.formData.added_at,
+                }, { headers });
+
+                console.log('Użytkownik został utworzony:', response.data);
+
+                // Ewentualnie zresetuj formularz po wysłaniu
+                this.formData = {
+                    name: '',
+                    surname: '',
+                    email: '',
+                    added_at: '',
+                    position: '',
+                    additionalInfo: ''
+                };
+            } catch (error) {
+                console.error('Błąd podczas tworzenia użytkownika:', error);
+            }
+        }
     }
-}
+};
 </script>
+
 <style lang="scss" scoped>
 $background-color: black;
 $text-color: white;
@@ -107,6 +140,17 @@ p {
 nav {
     text-align: left;
     height: 3.125em;
+}
+
+select:hover,
+select:focus,
+option:hover,
+option:focus,
+option:active {
+    font-family: $font-family-main;
+    font-size: 1.125em;
+    color: $text-color;
+    background-color: $background-color;
 }
 
 .back-button {
@@ -154,7 +198,7 @@ header h2 {
     display: flex;
     align-items: flex-start;
     gap: 3.125em;
-    margin-bottom: 2.5em;
+    margin-bottom: 3em;
 }
 
 label {
@@ -162,8 +206,7 @@ label {
 }
 
 .form-group input,
-.form-group select,
-.form-group textarea {
+.form-group select {
     color: inherit;
     font-family: inherit;
     font-size: 1.125em;
@@ -173,10 +216,13 @@ label {
     padding-bottom: 0.3125em;
     width: 25em;
     box-sizing: border-box;
+    text-align: center;
+    padding-top: 0.5em;
 
     &::placeholder {
         color: $placeholder-color;
         font-weight: 400;
+        text-align: left;
     }
 
     &:focus::placeholder {
@@ -223,12 +269,20 @@ textarea:-webkit-autofill,
 select:-webkit-autofill {
     border-bottom: 0.1875em solid $primary-color;
     -webkit-text-fill-color: $text-color;
-    -webkit-box-shadow: 0 0 0px 1000px $background-color inset;
+    -webkit-box-shadow: 0 0 0px 1000px transparent inset;
     transition: background-color 5000s ease-in-out 0s;
+
 }
 
 *:focus {
     outline: none;
+}
+
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0px 1000px transparent inset;
+    -webkit-text-fill-color: $text-color;
 }
 
 @media (max-width: 1040px) {

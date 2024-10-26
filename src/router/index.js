@@ -21,7 +21,8 @@ const routes = [
   {
     path: '/mainwindow',
     name: 'MainWindow',
-    component: MainWindow
+    component: MainWindow,
+    meta: { requiresAuth: true }
   },
 
   {
@@ -103,4 +104,16 @@ const router = createRouter({
   routes
 })
 
-export default router
+router.beforeEach((to, from, next) => {
+  console.log('Navigating to:', to.name); // Dodaj logowanie do debugowania
+  const isAuthenticated = !!sessionStorage.getItem('access_token');
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    console.log('User not authenticated, redirecting to Login');
+    next({ name: 'eConcierge' });
+  } else {
+    next();
+  }
+});
+
+export default router;

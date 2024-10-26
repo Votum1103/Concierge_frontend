@@ -5,7 +5,7 @@
     <nav>
       <div class="main-nav">
         <WUoT_Logo />
-        <button class="logOut">
+        <button @click="logOut" class="logOut">
           <span class="userbutton">
             <span class="avatars">
               <span class="userinitials">SH</span>
@@ -216,10 +216,30 @@ export default {
     }
   },
   mounted() {
-    // Pobranie domyślnych urządzeń przy ładowaniu komponentu
-    this.fetchDevices(this.selectedItemType, this.selectedItemVersion);
+    if (!sessionStorage.getItem('access_token')) {
+      this.$router.push({ name: 'eConcierge' });
+    } else {
+      this.fetchDevices(this.selectedItemType, this.selectedItemVersion);
+    }
   },
   methods: {
+
+    logOut() {
+
+      const token = sessionStorage.getItem('access_token');
+      const headers = {
+        Authorization: `Bearer ${token}`
+      };
+      try {
+        const response = axios.post('http://127.0.0.1:8000/logout/', {}, { headers });
+        console.log(response);
+        this.$router.push(`/`);
+      } catch (error) {
+        console.error(error);
+      }
+
+    },
+
     handleClick(item) {
       console.log('Clicked on item:', item);
 
@@ -239,7 +259,8 @@ export default {
       console.log(selectedDevice);
 
       sessionStorage.setItem('selectedDevice', JSON.stringify(selectedDevice));
-      this.$router.push(`/DeviceNote/${item.room_number}`);
+      const encodeRoomNumber = encodeURIComponent(item.room_number)
+      this.$router.push(`/DeviceNote/${encodeRoomNumber}`);
     },
 
     selectItemType(type) {
