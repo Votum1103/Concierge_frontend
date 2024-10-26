@@ -31,6 +31,12 @@
                     <label for="email-input">Email</label>
                     <input type="email" id="email-input" v-model="formData.email" placeholder="Email" required>
                 </div>
+                <div class="form-group">
+                    <label for="additional-info-textarea">Informacje dodatkowe</label>
+                    <textarea name="additional-info-textarea" id="additional-info-textarea"
+                        v-model="formData.note" cols="40" rows="5"
+                        placeholder="Informacje dodatkowe"></textarea>
+                </div>
                 <div class="button-group">
                     <button class="primary-button" type="submit">Wydaj</button>
                 </div>
@@ -56,9 +62,8 @@ export default {
                 name: '',
                 surname: '',
                 email: '',
-                added_at: '', // Pole na czas dodania
                 position: '',
-                additionalInfo: ''
+                note: ''
             }
         };
     },
@@ -66,7 +71,6 @@ export default {
         async submitForm() {
             try {
                 // Ustawienie aktualnej daty i czasu w formacie ISO
-                this.formData.added_at = new Date().toISOString();
 
                 const token = sessionStorage.getItem('access_token');
                 const headers = {
@@ -74,11 +78,14 @@ export default {
                 };
 
                 // Wyślij dane do backendu przy użyciu axios
+
+                console.log(this.formData.note);
+
                 const response = await axios.post('http://127.0.0.1:8000/unauthorized-users', {
                     name: this.formData.name,
                     surname: this.formData.surname,
                     email: this.formData.email,
-                    added_at: this.formData.added_at,
+                    note: this.formData.note
                 }, { headers });
 
                 console.log('Użytkownik został utworzony:', response.data);
@@ -88,9 +95,8 @@ export default {
                     name: '',
                     surname: '',
                     email: '',
-                    added_at: '',
                     position: '',
-                    additionalInfo: ''
+                    note: ''
                 };
             } catch (error) {
                 console.error('Błąd podczas tworzenia użytkownika:', error);
@@ -142,16 +148,6 @@ nav {
     height: 3.125em;
 }
 
-select:hover,
-select:focus,
-option:hover,
-option:focus,
-option:active {
-    font-family: $font-family-main;
-    font-size: 1.125em;
-    color: $text-color;
-    background-color: $background-color;
-}
 
 .back-button {
     text-decoration: none;
@@ -206,7 +202,8 @@ label {
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
     color: inherit;
     font-family: inherit;
     font-size: 1.125em;
