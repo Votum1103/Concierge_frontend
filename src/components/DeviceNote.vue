@@ -16,7 +16,7 @@
         <div class="note-editor">
             <div class="note-header">
                 <h1>Sala: {{ roomNumber }}</h1>
-                <p>{{ deviceType }}</p>
+                <p>{{ devType }} wersja {{ devVersion }}</p>
             </div>
             <div class="notes-section">
                 <h2 class="note-h2">Notatki</h2>
@@ -61,6 +61,7 @@ export default {
     data() {
         return {
             notes: [],
+            roomNumber: null,
             devType: null,
             devVersion: null,
             newNote: '',
@@ -72,13 +73,12 @@ export default {
     },
     mounted() {
         const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
+        this.roomNumber = selectedDevice.room_number;
         this.devType = selectedDevice.dev_type;
         this.devVersion = selectedDevice.dev_version;
-        this.notes = this.fetchNotes(selectedDevice.device_id);
-        console.log(this.notes);
-
-
-
+        console.log(this.devType, this.devVersion);
+        this.fetchNotes(selectedDevice.device_id);
+        
     },
     methods: {
         async fetchNotes(device_id) {
@@ -274,6 +274,44 @@ nav {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    max-height: 50vh;
+    /* Ograniczenie wysokości do połowy ekranu */
+    overflow-y: auto;
+    /* Przewijanie pionowe */
+    overflow-x: hidden;
+
+    /* Stylizacja przewijacza */
+    scrollbar-width: thin;
+    /* Cieńszy przewijacz dla Firefox */
+    scrollbar-color: grey $background-color;
+    /* Kolory przewijacza dla Firefox */
+}
+
+/* Stylizacja przewijacza dla Chrome, Safari i Edge */
+.notes-container::-webkit-scrollbar {
+    width: 8px;
+    /* Szerokość przewijacza */
+}
+
+.notes-container::-webkit-scrollbar-track {
+    background: $background-color;
+    /* Tło przewijacza */
+    border-radius: 10px;
+    /* Zaokrąglenie */
+}
+
+.notes-container::-webkit-scrollbar-thumb {
+    background-color: $primary-color;
+    /* Kolor suwaka */
+    border-radius: 10px;
+    /* Zaokrąglenie suwaka */
+    border: 2px solid $background-color;
+    /* Obramowanie dla lepszego kontrastu */
+}
+
+.notes-container::-webkit-scrollbar-thumb:hover {
+    background-color: lighten($primary-color, 10%);
+    /* Jaśniejszy kolor na hover */
 }
 
 .note-box {
@@ -290,7 +328,8 @@ nav {
     white-space: normal;
     word-wrap: break-word;
     max-height: 150px;
-    overflow-y: auto; 
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .selected-note {
@@ -306,10 +345,10 @@ textarea {
     font-size: 18px;
     border: none;
     outline: none;
-    resize: vertical; 
-    min-height: 50px; 
-    max-height: 300px; 
-    overflow-y: auto; 
+    resize: vertical;
+    min-height: 50px;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 /* Stylizacja przycisków */

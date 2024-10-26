@@ -81,6 +81,14 @@
           </RouteButton>
 
           <div class="itemTypesButtons">
+            <button @click="selectItemType('key')" :class="{ selected: selectedItemType === 'key' }" class="keys">
+              <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-key-fill"
+                viewBox="0 0 16 16">
+                <path
+                  d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2M2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2" />
+              </svg>
+            </button>
+
             <button @click="selectItemType('microphone')" :class="{ selected: selectedItemType === 'microphone' }"
               class="microphones">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-mic-fill"
@@ -100,15 +108,9 @@
               </svg>
             </button>
 
-            <button @click="selectItemType('key')" :class="{ selected: selectedItemType === 'key' }" class="keys">
-              <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-key-fill"
-                viewBox="0 0 16 16">
-                <path
-                  d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2M2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2" />
-              </svg>
-            </button>
-          </div>
 
+          </div>
+          <!-- #TODO jak mam przycisk 38/3 to jest ten / i to trzeba naprawić -->
           <!-- Przyciski wyboru wersji przedmiotów -->
           <div class="itemsVersionsButtons">
             <button @click="selectItemVersion('primary')" :class="{ selected: selectedItemVersion === 'primary' }"
@@ -120,7 +122,7 @@
               </svg>
             </button>
 
-            <button @click="selectItemVersion('emergency')" :class="{ selected: selectedItemVersion === 'emergency' }"
+            <button @click="selectItemVersion('backup')" :class="{ selected: selectedItemVersion === 'backup' }"
               class="reserve-version">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" class="bi bi-2-circle-fill"
                 viewBox="0 0 16 16">
@@ -230,8 +232,11 @@ export default {
       const selectedDevice = {
         room_number: item.room_number,
         device_id: item.id, // Zakładam, że item ma pole "id", które jest device_id
-        dev_type: item.dev_type
+        dev_type: item.dev_type,
+        dev_version: item.dev_version
       };
+
+      console.log(selectedDevice);
 
       sessionStorage.setItem('selectedDevice', JSON.stringify(selectedDevice));
       this.$router.push(`/DeviceNote/${item.room_number}`);
@@ -468,17 +473,52 @@ button.reserve-version {
   grid-template-rows: repeat(4, 1fr);
   align-items: center;
   background-color: $secondary-bg;
-  height: 700px;
+  height: calc(8 * 80px);
   width: 100%;
   border-radius: $border-radius-large;
   margin: 20px 10% 0 0;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .itemsNumber {
   display: grid;
-  height: 600px;
-  width: 100%;
+  height: calc(8 * 75px); // Wysokość jednego wiersza * 8
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Stylizacja przewijacza */
+  scrollbar-width: thin;
+  /* Cieńszy przewijacz dla Firefox */
+  scrollbar-color: grey $secondary-bg;
+  /* Kolory przewijacza dla Firefox */
+}
+
+/* Stylizacja przewijacza dla Chrome, Safari i Edge */
+.itemsNumber::-webkit-scrollbar {
+  width: 8px;
+  /* Szerokość przewijacza */
+}
+
+.itemsNumber::-webkit-scrollbar-track {
+  background: $secondary-bg;
+  /* Tło przewijacza */
+  border-radius: 10px;
+  /* Zaokrąglenie */
+}
+
+.itemsNumber::-webkit-scrollbar-thumb {
+  background-color: grey;
+  /* Kolor suwaka */
+  border-radius: 10px;
+  /* Zaokrąglenie suwaka */
+  border: 2px solid grey;
+  /* Obramowanie dla lepszego kontrastu */
+}
+
+.itemsNumber::-webkit-scrollbar-thumb:hover {
+  background-color: lighten($accent-color, 10%);
+  /* Jaśniejszy kolor na hover */
 }
 
 .table-row {
@@ -499,7 +539,7 @@ button.reserve-version {
 .cell-button {
   background: none;
   border: none;
-  width: 100%;
+  width: 120%;
   height: 100%;
   text-align: left;
   padding: 0;
