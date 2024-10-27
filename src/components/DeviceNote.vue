@@ -87,7 +87,7 @@ export default {
 
                 const headers = { Authorization: `Bearer ${accesToken}` };
                 const response = await axios.get(`http://127.0.0.1:8000/notes/devices/${device_id}`, { headers });
-                console.log("fefwfew")
+               
                 this.notes = response.data.map(noteObj => ({ "id": noteObj.id, "device": device_id, "note": noteObj.note }));
             } catch (error) {
                 if (error.status == "404") {
@@ -101,14 +101,12 @@ export default {
             this.editingIndex = this.notes.length - 1;
             this.isAdding = true;
             this.editedNote = this.notes[this.editingIndex].note
-            console.log(this.notes[this.editingIndex].note)
 
         },
         toggleNoteSelection(index) {
             if (this.editingIndex === null) {
                 this.selectedNote = this.selectedNote === index ? null : index;
             }
-            console.log(this.notes[this.selectedNote]);
         },
         cancelAdding() {
             this.selectedNote = null;
@@ -123,10 +121,10 @@ export default {
             const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
 
             const device_id = selectedDevice.device_id;
-            console.log("device_id: ", device_id);
 
             try {
-                const response = await axios.post('http://127.0.0.1:8000/notes/devices/', { device_id: device_id, note: this.editedNote }, { headers });
+
+                await axios.post('http://127.0.0.1:8000/notes/devices/', { device_id: device_id, note: this.editedNote }, { headers });
 
                 this.notes[this.editingIndex].note = this.editedNote;
 
@@ -135,7 +133,6 @@ export default {
                 this.editedNote = '';
                 this.fetchNotes(selectedDevice.device_id);
 
-                console.log("Dodano następującą notatkę: ", response.data);
             } catch (error) {
                 console.error("Błąd podczas dodawania notatki: ", error);
             }
@@ -143,9 +140,7 @@ export default {
 
         editNote() {
             this.editingIndex = this.selectedNote;
-            console.log(this.editingIndex);
             this.editedNote = this.notes[this.selectedNote].note;
-            console.log(this.notes[this.selectedNote].note);
             this.isAdding = false;
         },
 
@@ -155,10 +150,9 @@ export default {
             const noteId = this.notes[this.editingIndex].id
 
             try {
-                const response = await axios.put(`http://127.0.0.1:8000/notes/devices/${noteId}`, { note: this.editedNote },
+                await axios.put(`http://127.0.0.1:8000/notes/devices/${noteId}`, { note: this.editedNote },
                     { headers });
 
-                console.log(response.data)
 
                 this.notes[this.editingIndex].note = this.editedNote;
 
@@ -176,19 +170,16 @@ export default {
         async deleteNote() {
             const accesToken = sessionStorage.getItem('access_token');
             const headers = { Authorization: `Bearer ${accesToken}` };
-            console.log(this.notes[this.selectedNote].id);
             const noteId = this.notes[this.selectedNote].id;
             const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
 
             try {
-                const response = await axios.delete(`http://127.0.0.1:8000/notes/devices/${noteId}`, { headers })
+                await axios.delete(`http://127.0.0.1:8000/notes/devices/${noteId}`, { headers })
 
                 this.notes.pop();
                 this.editingIndex = null;
                 this.editedNote = '';
                 this.selectedNote = null;
-
-                console.log('Notatka usunięta', response.data);
             } catch (error) {
                 console.error('Błąd podczas usuwania notatki:', error);
             }

@@ -110,8 +110,6 @@
 
 
           </div>
-          <!-- #TODO jak mam przycisk 38/3 to jest ten / i to trzeba naprawić -->
-          <!-- Przyciski wyboru wersji przedmiotów -->
           <div class="itemsVersionsButtons">
             <button @click="selectItemVersion('primary')" :class="{ selected: selectedItemVersion === 'primary' }"
               class="primary-version">
@@ -211,7 +209,6 @@ export default {
       return this.items.filter(device => device.is_taken).length;
     },
     availableDevicesCount() {
-      console.log(this.items.filter(device => !device.is_taken).length);
       return this.items.filter(device => !device.is_taken).length;
     }
   },
@@ -231,8 +228,7 @@ export default {
         Authorization: `Bearer ${token}`
       };
       try {
-        const response = axios.post('http://127.0.0.1:8000/logout/', {}, { headers });
-        console.log(response);
+      axios.post('http://127.0.0.1:8000/logout/', {}, { headers });
         this.$router.push(`/`);
       } catch (error) {
         console.error(error);
@@ -241,7 +237,6 @@ export default {
     },
 
     handleClick(item) {
-      console.log('Clicked on item:', item);
 
       if (!item || !item.room_number || !item.id || !item.dev_type) {
         console.error('Błąd: Brak jednej z właściwości w item:', item);
@@ -255,8 +250,6 @@ export default {
         dev_type: item.dev_type,
         dev_version: item.dev_version
       };
-
-      console.log(selectedDevice);
 
       sessionStorage.setItem('selectedDevice', JSON.stringify(selectedDevice));
       const encodeRoomNumber = encodeURIComponent(item.room_number)
@@ -289,7 +282,7 @@ export default {
 
         // Przypisz dane do `items`
         this.items = response.data;
-        console.log('Fetched devices:', response.data); // Log danych po pobraniu
+
       } catch (error) {
         if (error.response) {
           console.error(`Error fetching ${deviceType}:`, error.response.data);

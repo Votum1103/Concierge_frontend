@@ -79,16 +79,12 @@ export default {
 
                 // Wyślij dane do backendu przy użyciu axios
 
-                console.log(this.formData.note);
-
-                const response = await axios.post('http://127.0.0.1:8000/unauthorized-users', {
+                await axios.post('http://127.0.0.1:8000/unauthorized-users', {
                     name: this.formData.name,
                     surname: this.formData.surname,
                     email: this.formData.email,
                     note: this.formData.note
                 }, { headers });
-
-                console.log('Użytkownik został utworzony:', response.data);
 
                 // Ewentualnie zresetuj formularz po wysłaniu
                 this.formData = {
