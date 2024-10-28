@@ -14,83 +14,63 @@
             <WUoT_Logo />
         </nav>
         <header>
-            <h1>Sprawdź rezerwacje sali</h1>
+            <h1>Rezerwacje sal</h1>
         </header>
         <main>
             <div class="form-container">
                 <form action="#">
                     <div class="form-group">
-                        <label for="room-number">Numer sali</label>
-                        <input type="text" id="room-number" name="room-number" placeholder="Podaj numer sali" required>
+                        <input type="text" id="room-number" v-model="roomNumber" placeholder="Podaj numer sali">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="start-date" v-model="startDate" placeholder="Podaj datę rezerwacji"
+                            onfocus="(this.type='date')" onblur="if(this.value==''){this.type='text'}">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="end-time" v-model="endTime" placeholder="Podaj godzinę rezerwacji"
+                            onfocus="(this.type='time')" onblur="if(this.value==''){this.type='text'}">
                     </div>
                 </form>
             </div>
             <div class="container">
                 <div class="header-items">
                     <div class="header-item">Sala</div>
+                    <div class="header-item">Data</div>
                     <div class="header-item">Godzina<br>rozpoczęcia</div>
                     <div class="header-item">Godzina<br>zakończenia</div>
                     <div class="header-item header-item-large">Rezerwujący</div>
                 </div>
                 <div class="items-table">
-                    <table>
+                    <div v-if="errorMessage" class="error-message">
+                        {{ errorMessage }}
+                    </div>
+                    <table v-else>
                         <tbody>
-                            <tr class="table-row">
-                                <td class="table-cell">402A</td>
-                                <td class="table-cell">12:00</td>
-                                <td class="table-cell">14:00</td>
-                                <td class="table-cell cell-large">Włodzimierz Konstantynopolny-Kwardyfinikowiak</td>
-                            </tr>
-                            <tr class="table-row">
-                                <td class="table-cell">12</td>
-                                <td class="table-cell">12:00</td>
-                                <td class="table-cell">14:00</td>
-                                <td class="table-cell cell-large">Jan Lak</td>
-                            </tr>
-                            <tr class="table-row">
-                                <td class="table-cell">402A</td>
-                                <td class="table-cell">12:00</td>
-                                <td class="table-cell">14:00</td>
-                                <td class="table-cell cell-large">Włodzimierz Konstantynopolny-Kwardyfinikowiak</td>
-                            </tr>
-                            <tr class="table-row">
-                                <td class="table-cell">12</td>
-                                <td class="table-cell">12:00</td>
-                                <td class="table-cell">14:00</td>
-                                <td class="table-cell cell-large">Jan Lak</td>
-                            </tr>
-                            <tr class="table-row">
-                                <td class="table-cell">402A</td>
-                                <td class="table-cell">12:00</td>
-                                <td class="table-cell">14:00</td>
-                                <td class="table-cell cell-large">Włodzimierz Konstantynopolny-Kwardyfinikowiak</td>
-                            </tr>
-                            <tr class="table-row">
-                                <td class="table-cell">12</td>
-                                <td class="table-cell">12:00</td>
-                                <td class="table-cell">14:00</td>
-                                <td class="table-cell cell-large">Jan Lak</td>
-                            </tr>
-                            <tr class="table-row">
-                                <td class="table-cell">12</td>
-                                <td class="table-cell">12:00</td>
-                                <td class="table-cell">14:00</td>
-                                <td class="table-cell cell-large">Jan Lak</td>
+                            <tr class="table-row" v-for="reservation in reservations" :key="reservation.id">
+                                <td class="table-cell">{{ reservation.room.number }}</td>
+                                <td class="table-cell">{{ reservation.date }}</td>
+                                <td class="table-cell">{{ reservation.start_time }}</td>
+                                <td class="table-cell">{{ reservation.end_time }}</td>
+                                <td class="table-cell cell-large">{{ `${reservation.user.name}
+                                    ${reservation.user.surname}` }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
             <div class="button-group">
-                <button class="primary-button" type="submit">Szukaj</button>
+                <button @click="searchReservations" class="primary-button" type="button">Szukaj</button>
             </div>
         </main>
     </div>
 </template>
+
+
 <script>
+import axios from 'axios';
 import BackButton from './BackButton.vue';
 import GoogleFonts from './googleFonts.vue';
-//         RouteButton,
 import WUoT_Logo from './WUoT_Logo.vue';
 
 export default {
@@ -98,11 +78,79 @@ export default {
     components: {
         GoogleFonts,
         WUoT_Logo,
-        // RouteButton,
         BackButton
+    },
+    data() {
+        return {
+            roomNumber: '',
+            startDate: '',
+            endTime: '',
+            reservations: [],
+            errorMessage: ''  // Dodana zmienna do przechowywania komunikatów o błędach
+        };
+    },
+    mounted() {
+        this.searchReservations()
+    },
+    methods: {
+        async searchReservations() {
+            const accesToken = sessionStorage.getItem('access_token');
+            if (!accesToken) {
+                console.error('Brak tokena dostępu. Upewnij się, że jesteś zalogowany.');
+                return;
+            }
+            const headers = { Authorization: `Bearer ${accesToken}` };
+
+            try {
+                // Resetowanie wiadomości o błędzie przed zapytaniem
+                this.errorMessage = '';
+
+                const queryParams = new URLSearchParams();
+
+                // Dodanie parametru `room_id` tylko jeśli numer sali został podany
+                if (this.roomNumber) {
+                    const roomResponse = await axios.get(`http://127.0.0.1:8000/rooms/?number=${this.roomNumber}`, { headers });
+                    const roomId = roomResponse.data[0]?.id;
+
+                    if (!roomId) {
+                        this.errorMessage = 'Brak rezerwacji o zadanych kryteriach.';
+                        this.reservations = [];
+                        return;
+                    }
+                    queryParams.append('room_id', roomId);
+                }
+
+                // Dodanie parametru `date` tylko jeśli data została podana
+                if (this.startDate) {
+                    queryParams.append('date', this.startDate);
+                }
+
+                // Dodanie parametru `start_time` tylko jeśli godzina zakończenia została podana
+                if (this.endTime) {
+                    queryParams.append('start_time', this.endTime);
+                }
+
+                const url = `http://127.0.0.1:8000/permissions/?${queryParams.toString()}`;
+                console.log('Wysłane zapytanie:', url);
+
+                const reservationsResponse = await axios.get(url, { headers });
+
+                // Aktualizacja danych rezerwacji
+                this.reservations = reservationsResponse.data.length > 0 ? reservationsResponse.data : [];
+
+                // Sprawdzenie czy nie znaleziono żadnych wyników
+                if (this.reservations.length === 0) {
+                    this.errorMessage = 'Brak rezerwacji o zadanych kryteriach.';
+                }
+            } catch (error) {
+                console.error('Błąd przy pobieraniu danych z API:', error);
+                this.errorMessage = 'Brak rezerwacji o zadanych kryteriach.';
+            }
+        }
     }
 }
 </script>
+
 
 <style lang="scss" scoped>
 body {
@@ -140,7 +188,6 @@ nav {
     background-color: transparent !important;
 }
 
-
 .back-button:hover,
 button:hover {
     transform: scale(1.07);
@@ -169,15 +216,18 @@ main {
     gap: 100px;
 }
 
-.form-group {
+.form-container {
     display: flex;
-    align-items: flex-start;
-    gap: 50px;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
 }
 
-.form-group label {
-    font-size: 18px;
-    text-align: right;
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
 }
 
 .form-group input {
@@ -189,8 +239,9 @@ main {
     text-align: center;
     border-bottom: 3px solid #0083BB;
     padding-bottom: 5px;
-    width: 400px;
+    width: 300px;
     box-sizing: border-box;
+    appearance: none;
 }
 
 .form-group input::placeholder {
@@ -200,6 +251,32 @@ main {
 
 input:focus::placeholder {
     color: transparent;
+}
+
+.form-group input[type="date"],
+.form-group input[type="time"] {
+    color: inherit;
+    font-family: inherit;
+    font-size: 18px;
+    background-color: inherit;
+    border: none;
+    text-align: center;
+    border-bottom: 3px solid #0083BB;
+    padding-bottom: 5px;
+    width: 300px;
+    box-sizing: border-box;
+    appearance: none;
+}
+
+.form-group input[type="date"]::-webkit-calendar-picker-indicator,
+.form-group input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+#room-number,
+#start-date {
+    margin-bottom: 30px;
 }
 
 .container {
@@ -227,7 +304,7 @@ input:focus::placeholder {
 }
 
 .header-item-large {
-    width: 55%;
+    width: 45%;
     text-align: center;
 }
 
@@ -262,7 +339,7 @@ table {
 }
 
 .cell-large {
-    width: 55%;
+    width: 45%;
 }
 
 .button-group {
@@ -286,8 +363,6 @@ table {
     cursor: pointer;
 }
 
-
-/* Custom scrollbar styles */
 ::-webkit-scrollbar {
     width: 7px;
 }
@@ -302,7 +377,6 @@ table {
     border-radius: 10px;
 }
 
-/* Autofill input styles */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -322,7 +396,15 @@ select:-webkit-autofill:focus {
     outline: none;
 }
 
-/* Responsive design */
+.error-message {
+    width: 100%;
+    color: white;
+    font-size: 1.4em;
+    margin-top: 20px;
+    text-align: center;
+}
+
+
 @media (max-width: 1040px) {
     .button-group {
         gap: 10px;
@@ -364,7 +446,9 @@ select:-webkit-autofill:focus {
         max-height: 150px;
     }
 
-    .form-group input {
+    .form-group input,
+    .form-group input[type="date"],
+    .form-group input[type="time"] {
         font-size: 16px;
         width: 300px;
     }
@@ -378,7 +462,9 @@ select:-webkit-autofill:focus {
         display: none;
     }
 
-    .form-group input {
+    .form-group input,
+    .form-group input[type="date"],
+    .form-group input[type="time"] {
         font-size: 14px;
         width: 200px;
     }

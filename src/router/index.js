@@ -14,6 +14,7 @@ import EditNote from '@/components/EditNote.vue';
 import ScanConciergeCard from '@/components/ScanUserCard.vue';
 import MainProcess from '@/components/MainProcess.vue';
 import DeviceNote from '@/components/DeviceNote.vue';
+import Mapa_usun from '@/components/mapa_usun.vue';
 
 
 
@@ -95,6 +96,11 @@ const routes = [
     name: 'DeviceNote',
     component: DeviceNote
   },
+  {
+    path: '/usun',
+    name: 'UsunTo',
+    component: Mapa_usun
+  }
 
 
 ]
