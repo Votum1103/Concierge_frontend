@@ -1,7 +1,7 @@
 <template lang="html">
     <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg"
         xmlns:xlink="http://www.w3.org/1999/xlink">
-        <circle cx="15.7812" cy="15.4938" r="14.875" fill="#A72727" />
+        <circle cx="15.7812" cy="15.4938" r="16" fill="#A72727" />
         <rect x="7.6001" y="7.3125" width="16.3625" height="16.3625" fill="url(#pattern0_107_7)" />
         <defs>
             <pattern id="pattern0_107_7" patternContentUnits="objectBoundingBox" width="1" height="1">

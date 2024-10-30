@@ -75,7 +75,7 @@
       </div>
       <div class="">
         <div class="navigtionButtons">
-          <RouteButton class="showMap" routeName="Mapa" buttonText="Mapa">
+          <RouteButton class="showMap" routeName="UsunTo" buttonText="Mapa">
             <template #icon>
             </template>
           </RouteButton>
@@ -228,7 +228,7 @@ export default {
         Authorization: `Bearer ${token}`
       };
       try {
-      axios.post('http://127.0.0.1:8000/logout/', {}, { headers });
+        axios.post('http://127.0.0.1:8000/logout/', {}, { headers });
         this.$router.push(`/`);
       } catch (error) {
         console.error(error);
