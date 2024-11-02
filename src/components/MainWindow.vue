@@ -75,7 +75,7 @@
       </div>
       <div class="">
         <div class="navigtionButtons">
-          <RouteButton class="showMap" routeName="UsunTo" buttonText="Mapa">
+          <RouteButton class="showMap" routeName="MapWindow" buttonText="Mapa">
             <template #icon>
             </template>
           </RouteButton>
@@ -309,18 +309,16 @@ $text-color: white;
 $avatar-bg: #494A4D;
 $border-radius-large: 30px;
 $button-height: 45px;
-$font-family: 'Open Sans', sans-serif;
-
+$font-family-main: 'Open Sans', sans-serif;
+$background-color: black;
 
 body {
-  background: $primary-bg url('../assets/back.jpg') no-repeat top;
-  background-size: 10920px 10080px;
+  background: $background-color url('../assets/back.jpg') top no-repeat;
+  background-size: cover;
   color: $text-color;
-  margin: 0;
-  font-family: $font-family;
   text-align: center;
-  height: 100vh;
-  width: 100vw;
+  margin: 0;
+  font-family: $font-family-main;
   overflow: hidden;
 }
 
@@ -369,6 +367,7 @@ button,
 
 .logOut {
   color: $text-color;
+  font-family: $font-family-main;
 }
 
 .avatars,
@@ -591,6 +590,9 @@ td svg {
   display: flex;
   justify-content: space-evenly;
 }
+
+
+
 
 @media (max-width: 768px) {
   .main-page {

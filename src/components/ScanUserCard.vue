@@ -1,37 +1,29 @@
 <template>
+  <GoogleFonts />
+  <nav>
+    <BackButton class="back-button" routeName="MainWindow" buttonText="Wróć">
+      <template #icon>
+        <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+          class="bi bi-chevron-left" viewBox="0 0 16 16">
+          <path fill-rule="evenodd"
+            d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
+        </svg>
+      </template>
+    </BackButton>
+    <WUoT_Logo />
+  </nav>
 
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <GoogleFonts />
-    <title>e-portiernia - zeskanuj kartę</title>
-  </head>
-
-  <body>
-    <nav>
-      <BackButton class="back-button" routeName="MainWindow" buttonText="Wróć">
-                <template #icon>
-                    <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                        class="bi bi-chevron-left" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd"
-                            d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
-                    </svg>
-                </template>
-            </BackButton>
-      <WUoT_Logo />
-    </nav>
-
-    <main>
-      <section class="container">
-        <h1>Zeskanuj kartę pracownika</h1>
-        <span class="loader"></span>
-        <div class="button-group">
-          <RouteButton routeName="ConciergeLogin" buttonText="Zaloguj się" />
-        </div>
-      </section>
-    </main>
-  </body>
+  <main>
+    <section class="container">
+      <h1>Zeskanuj kartę pracownika</h1>
+      <span class="loader"></span>
+      <div class="button-group">
+        <RouteButton routeName="UserLogin" buttonText="Zaloguj się" />
+      </div>
+    </section>
+  </main>
 </template>
+
 
 <script>
 import GoogleFonts from './googleFonts.vue';
@@ -206,12 +198,12 @@ button:hover {
 }
 
 .back-button {
-    text-decoration: none;
-    margin: 15px;
-    display: inline-flex;
-    align-items: center;
-    color: #FFFFFF;
-    background-color: transparent;
+  text-decoration: none;
+  margin: 15px;
+  display: inline-flex;
+  align-items: center;
+  color: #FFFFFF;
+  background-color: transparent;
 }
 
 @media (max-width: 1040px) {

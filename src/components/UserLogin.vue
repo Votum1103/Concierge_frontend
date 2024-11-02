@@ -1,36 +1,36 @@
 <template>
-        <GoogleFonts />
-        <nav>
-            <BackButton class="back-button" routeName="eConcierge" buttonText="Wróć">
-                <template #icon>
-                    <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                        class="bi bi-chevron-left" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd"
-                            d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
-                    </svg>
-                </template>
-            </BackButton>
-            <WUoT_Logo />
-        </nav>
+    <GoogleFonts />
+    <nav>
+        <BackButton class="back-button" routeName="ScanUserCard" buttonText="Wróć">
+            <template #icon>
+                <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="bi bi-chevron-left" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd"
+                        d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
+                </svg>
+            </template>
+        </BackButton>
+        <WUoT_Logo />
+    </nav>
 
-        <main>
-            <section class="container">
-                <h1>Podaj login i hasło</h1>
-                <form @submit.prevent="login">
-                    <div>
-                        <input type="text" id="login" name="login" placeholder="Login" v-model="username" required>
-                    </div>
+    <main>
+        <section class="container">
+            <h1>Podaj login i hasło</h1>
+            <form @submit.prevent="login">
+                <div>
+                    <input type="text" id="login" name="login" placeholder="Login" v-model="username" required>
+                </div>
 
-                    <div>
-                        <input type="password" id="password" name="password" placeholder="Hasło" v-model="password"
-                            required>
-                    </div>
-                    <div class="login-button-group">
-                        <RouteButton @click="login" buttonText="Zaloguj się" class="primary-button" />
-                    </div>
-                </form>
-            </section>
-        </main>
+                <div>
+                    <input type="password" id="password" name="password" placeholder="Hasło" v-model="password"
+                        required>
+                </div>
+                <div class="login-button-group">
+                    <RouteButton @click="login" buttonText="Zaloguj się" class="primary-button" />
+                </div>
+            </form>
+        </section>
+    </main>
 </template>
 
 <script>
@@ -41,7 +41,7 @@ import WUoT_Logo from './WUoT_Logo.vue';
 import axios from 'axios';
 
 export default {
-    name: 'ConciergeLogin',
+    name: 'UserLogin',
     components: {
         GoogleFonts,
         WUoT_Logo,
@@ -67,7 +67,7 @@ export default {
 
                 sessionStorage.setItem('access_token', accessToken);
 
-                this.$router.push({ name: 'MainWindow' });
+                this.$router.push({ name: 'MainProcess' });
             } catch (error) {
                 console.error('Błąd logowania:', error);
             }

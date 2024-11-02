@@ -140,12 +140,12 @@ export default {
     methods: {
         async fetchUsers() {
             try {
-                const token = localStorage.getItem('access_token');
-                const response = await axios.get('http://127.0.0.1:8000/users/', {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
+
+                const accesToken = sessionStorage.getItem('access_token')
+                const headers = { Authorization: `Bearer ${accesToken}` };
+
+                const response = await axios.get('http://127.0.0.1:8000/users/', { headers });
+
                 this.users = response.data;
             } catch (error) {
                 console.error('Błąd przy pobieraniu użytkowników:', error);
@@ -156,7 +156,7 @@ export default {
                 const user = this.users.find(user => user.id === id);
                 return user ? `${user.name} ${user.surname}` : 'Nieznany użytkownik';
             });
-            return names.join(', '); // Łączenie imion w string
+            return names.join(', ');
         },
     },
 }

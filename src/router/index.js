@@ -14,7 +14,8 @@ import EditNote from '@/components/EditNote.vue';
 import ScanConciergeCard from '@/components/ScanUserCard.vue';
 import MainProcess from '@/components/MainProcess.vue';
 import DeviceNote from '@/components/DeviceNote.vue';
-import Mapa_usun from '@/components/mapa_usun.vue';
+import UserLogin from '@/components/UserLogin.vue';
+import MapWindow from '@/components/MapWindow.vue';
 
 
 
@@ -97,10 +98,15 @@ const routes = [
     component: DeviceNote
   },
   {
-    path: '/usun',
-    name: 'UsunTo',
-    component: Mapa_usun
-  }
+    path: '/mapwindow',
+    name: 'MapWindow',
+    component: MapWindow
+  },
+  {
+    path: '/userlogin',
+    name: 'UserLogin',
+    component: UserLogin
+  },
 
 
 ]

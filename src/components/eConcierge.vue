@@ -1,27 +1,18 @@
 <template>
+  <GoogleFonts />
+  <nav>
+    <WUoT_Logo />
+  </nav>
 
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <GoogleFonts />
-    <title>e-portiernia - zeskanuj kartę</title>
-  </head>
-
-  <body>
-    <nav>
-      <WUoT_Logo />
-    </nav>
-
-    <main>
-      <section class="main-window">
-        <h1>Zeskanuj kartę portiera</h1>
-        <span class="loader"></span>
-        <div class="button-group">
-          <RouteButton routeName="ConciergeLogin" buttonText="Zaloguj się" />
-        </div>
-      </section>
-    </main>
-  </body>
+  <main>
+    <section class="main-window">
+      <h1>Zeskanuj kartę portiera</h1>
+      <span class="loader"></span>
+      <div class="button-group">
+        <RouteButton routeName="ConciergeLogin" buttonText="Zaloguj się" />
+      </div>
+    </section>
+  </main>
 </template>
 
 <script>
