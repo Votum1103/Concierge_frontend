@@ -1,5 +1,4 @@
 <template>
-
     <body>
         <nav>
             <BackButton class="back-button" routeName="MainWindow" buttonText="Wróć">
@@ -31,17 +30,16 @@
 
             <!-- Kontener na przyciski -->
             <div class="button-container">
-                <button class="add-button" v-if="!isAdding" @click="addNote">Dodaj notatkę</button>
+                <button class="add-button" v-if="!isAdding && editingIndex === null" @click="addNote">Dodaj notatkę</button>
 
                 <button class="save-button" v-if="isAdding" @click="saveNewNote()">Zapisz</button>
-                <button class="cancel-button" v-if="isAdding" @click="cancelAdding">Anuluj</button>
+                <button class="save-button" v-if="editingIndex !== null && !isAdding" @click="saveEditedNote">Zapisz</button>
+                <button class="cancel-button" v-if="isAdding || editingIndex !== null" @click="cancelEditingOrAdding">Anuluj</button>
 
                 <button class="edit-button" v-if="selectedNote !== null && editingIndex === null && !isAdding"
                     @click="editNote">Edytuj</button>
-                <button class="save-button" v-if="selectedNote !== null && editingIndex !== null && !isAdding"
-                    @click="saveEditedNote">Zapisz</button>
 
-                <button class="delete-button" v-if="selectedNote !== null && !isAdding"
+                <button class="delete-button" v-if="selectedNote !== null && editingIndex === null && !isAdding"
                     @click="deleteNote">Usuń</button>
             </div>
         </div>
@@ -78,95 +76,76 @@ export default {
         this.devVersion = selectedDevice.dev_version;
         console.log(this.devType, this.devVersion);
         this.fetchNotes(selectedDevice.device_id);
-        
     },
     methods: {
         async fetchNotes(device_id) {
             try {
                 const accesToken = sessionStorage.getItem('access_token');
-
                 const headers = { Authorization: `Bearer ${accesToken}` };
-                const response = await axios.get(`http://127.0.0.1:8000/notes/devices/${device_id}`, { headers });
-               
+                const response = await axios.get(`http://127.0.0.1:8000/notes/devices/?device_id=${device_id}`, { headers });
                 this.notes = response.data.map(noteObj => ({ "id": noteObj.id, "device": device_id, "note": noteObj.note }));
             } catch (error) {
                 if (error.status == "404") {
                     this.notes = [];
                 }
             }
-
         },
         addNote() {
             this.notes.push({ text: '', isEditing: true });
             this.editingIndex = this.notes.length - 1;
             this.isAdding = true;
-            this.editedNote = this.notes[this.editingIndex].note
-
+            this.editedNote = this.notes[this.editingIndex].note;
         },
         toggleNoteSelection(index) {
             if (this.editingIndex === null) {
                 this.selectedNote = this.selectedNote === index ? null : index;
             }
         },
-        cancelAdding() {
-            this.selectedNote = null;
-            this.isAdding = false;
-            this.notes.pop();
-            this.editedNote = '';
+        cancelEditingOrAdding() {
+            if (this.isAdding) {
+                this.notes.pop(); // Usuń pustą notatkę, jeśli jest dodawana
+                this.isAdding = false;
+            }
             this.editingIndex = null;
+            this.editedNote = '';
+            this.selectedNote = null;
         },
         async saveNewNote() {
             const accesToken = sessionStorage.getItem('access_token');
             const headers = { Authorization: `Bearer ${accesToken}` };
             const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
-
             const device_id = selectedDevice.device_id;
 
             try {
-
                 await axios.post('http://127.0.0.1:8000/notes/devices/', { device_id: device_id, note: this.editedNote }, { headers });
-
                 this.notes[this.editingIndex].note = this.editedNote;
-
                 this.editingIndex = null;
                 this.isAdding = false;
                 this.editedNote = '';
                 this.fetchNotes(selectedDevice.device_id);
-
             } catch (error) {
                 console.error("Błąd podczas dodawania notatki: ", error);
             }
         },
-
         editNote() {
             this.editingIndex = this.selectedNote;
             this.editedNote = this.notes[this.selectedNote].note;
             this.isAdding = false;
         },
-
         async saveEditedNote() {
-            const accessToken = sessionStorage.getItem('access_token')
-            const headers = { Authorization: `Bearer ${accessToken}` }
-            const noteId = this.notes[this.editingIndex].id
+            const accessToken = sessionStorage.getItem('access_token');
+            const headers = { Authorization: `Bearer ${accessToken}` };
+            const noteId = this.notes[this.editingIndex].id;
 
             try {
-                await axios.put(`http://127.0.0.1:8000/notes/devices/${noteId}`, { note: this.editedNote },
-                    { headers });
-
-
+                await axios.put(`http://127.0.0.1:8000/notes/devices/${noteId}`, { note: this.editedNote }, { headers });
                 this.notes[this.editingIndex].note = this.editedNote;
-
                 this.editingIndex = null;
                 this.editedNote = '';
-
-
             } catch (error) {
                 console.error('Błąd podczas zapisywania notatki:', error);
             }
-
-
         },
-
         async deleteNote() {
             const accesToken = sessionStorage.getItem('access_token');
             const headers = { Authorization: `Bearer ${accesToken}` };
@@ -174,8 +153,7 @@ export default {
             const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
 
             try {
-                await axios.delete(`http://127.0.0.1:8000/notes/devices/${noteId}`, { headers })
-
+                await axios.delete(`http://127.0.0.1:8000/notes/devices/${noteId}`, { headers });
                 this.notes.pop();
                 this.editingIndex = null;
                 this.editedNote = '';
@@ -186,7 +164,6 @@ export default {
             this.fetchNotes(selectedDevice.device_id);
         }
     },
-
 };
 </script>
 

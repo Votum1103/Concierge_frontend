@@ -188,10 +188,10 @@ export default {
   },
   data() {
     return {
-      items: [], // Będziemy przechowywać wszystkie urządzenia w tej tablicy
-      currentView: 'keys', // Domyślnie widok to 'keys'
-      selectedItemType: 'key', // Domyślny typ to 'key'
-      selectedItemVersion: 'primary', // Domyślna wersja to 'primary'
+      items: [],
+      currentView: 'keys', 
+      selectedItemType: 'key', 
+      selectedItemVersion: 'primary', 
     };
   },
   computed: {
