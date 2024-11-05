@@ -44,7 +44,7 @@
           </button>
         </div>
         <div class="itemsVersionsButtons">
-          <button @click="selectItemVersion('primary')" :class="{ selected: selectedItemVersion === 'primary' }"
+          <button @click="selectItemVersion('primary')" :class="{ selected: version === 'primary' }"
             class="primary-version">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" class="bi bi-1-circle-fill"
               viewBox="0 0 16 16">
@@ -53,7 +53,7 @@
             </svg>
           </button>
 
-          <button @click="selectItemVersion('backup')" :class="{ selected: selectedItemVersion === 'backup' }"
+          <button @click="selectItemVersion('backup')" :class="{ selected: version === 'backup' }"
             class="reserve-version">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" class="bi bi-2-circle-fill"
               viewBox="0 0 16 16">
@@ -76,6 +76,13 @@
         <div v-if="selectedRoom && selectedRoom.nazwa_skrocona !== 'nr nieznany'">
           <p><b>Sala:</b> {{ selectedRoom.nazwa_skrocona }}</p>
           <p><b>Piętro:</b> {{ selectedRoom.pietro }}</p>
+          <p>
+            <b>Pobrany:</b>
+            {{ selectedRoom.is_taken === "brak" ? "brak urządzenia dla sali" : selectedRoom.is_taken ? "Tak" : "Nie" }}
+          </p>
+          <p v-if="selectedRoom.owner_name && selectedRoom.owner_surname">
+            <b>Posiadacz klucza:</b> {{ selectedRoom.owner_name }} {{ selectedRoom.owner_surname }}
+          </p>
           <p><b>Typ dostępu:</b> {{ selectedRoom.typ_dostepu }}</p>
           <p><b>Funkcja:</b> {{ selectedRoom.funkcja }}</p>
           <p><b>Organizacja:</b> {{ selectedRoom.organizacja }}</p>
@@ -85,15 +92,16 @@
         </div>
       </div>
       <div class="deviceStatus">
-        <p class="status available"><span class="circle"></span>klucz dostępny</p>
-        <p class="status unavailable"><span class="circle"></span>klucz niedostępny</p>
-        <p class="status nonexistent"><span class="circle"></span>klucz nie istnieje</p>
+        <p class="status available"><span class="circle"></span>{{ selectedItemType }} dostępny</p>
+        <p class="status unavailable"><span class="circle"></span>{{ selectedItemType }} niedostępny</p>
+        <p class="status nonexistent"><span class="circle"></span>{{ selectedItemType }} nie istnieje</p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+
 import { shallowRef, ref, onMounted, watch, onUnmounted } from "vue";
 import axios from "axios";
 import Map from "@arcgis/core/Map";
@@ -117,19 +125,34 @@ export default {
     const roomStatus = ref({});
     const highlightedRoomId = ref(null);
     const selectedFloor = ref(1);
-    let view = null; // Zmienna view zdefiniowana globalnie w setup
+    const selectedItemType = ref("key");
+    const version = ref("primary");
+    let view = null;
 
     const floors = [
-      { label: 0, value: 1 },
+      { label: 0, value: [1] },
       { label: 1, value: 2 },
       { label: 2, value: 3 },
       { label: 3, value: 4 },
       { label: 4, value: 5 },
     ];
 
-    const resizeHandler = () => {
-      if (view) {
-        view.container = mapViewDiv.value; // Wymuszenie odświeżenia widoku
+    const resetRoomSelection = () => {
+      selectedRoom.value = null;
+      highlightedRoomId.value = null;
+    };
+
+    const fetchRooms = async () => {
+      try {
+        const token = sessionStorage.getItem("access_token");
+        const headers = { Authorization: `Bearer ${token}` };
+        const response = await axios.get(`http://127.0.0.1:8000/rooms/`, { headers });
+        roomStatus.value = {};
+        response.data.forEach((room) => {
+          roomStatus.value[room.number] = { is_taken: "brak", owner_name: null, owner_surname: null };
+        });
+      } catch (error) {
+        console.error("Error fetching rooms:", error);
       }
     };
 
@@ -137,19 +160,78 @@ export default {
       try {
         const token = sessionStorage.getItem("access_token");
         const headers = { Authorization: `Bearer ${token}` };
-        const response = await axios.get(`http://127.0.0.1:8000/devices/`, { headers });
+        const response = await axios.get(
+          `http://127.0.0.1:8000/devices/?dev_type=${selectedItemType.value}&dev_version=${version.value}`,
+          { headers }
+        );
+
+        Object.keys(roomStatus.value).forEach((roomNumber) => {
+          roomStatus.value[roomNumber].is_taken = "brak";
+          roomStatus.value[roomNumber].owner_name = null;
+          roomStatus.value[roomNumber].owner_surname = null;
+        });
         response.data.forEach((device) => {
-          roomStatus.value[device.room_number] = device.is_taken;
+          if (roomStatus.value[device.room_number]) {
+            roomStatus.value[device.room_number].is_taken = device.is_taken;
+            roomStatus.value[device.room_number].owner_name = device.owner_name;
+            roomStatus.value[device.room_number].owner_surname = device.owner_surname;
+          }
         });
       } catch (error) {
         console.error("Error fetching room status:", error);
       }
     };
 
-    onMounted(async () => {
-      await fetchRoomStatus();
+    const updateRenderer = () => {
+      if (view) {
+        view.map.layers.items[0].renderer = getRenderer();
+      }
+    };
 
-      window.addEventListener("resize", resizeHandler);
+    const getRenderer = () => {
+      const uniqueValueInfos = Object.keys(roomStatus.value).map((roomNumber) => ({
+        value: roomNumber,
+        symbol: {
+          type: "simple-fill",
+          color:
+            roomStatus.value[roomNumber].is_taken === "brak"
+              ? [244, 238, 177, 0.8]
+              : roomStatus.value[roomNumber].is_taken
+                ? [167, 39, 39, 0.8]
+                : [57, 112, 49, 0.8],
+          outline: {
+            color: highlightedRoomId.value === roomNumber ? [0, 120, 255, 1] : [0, 0, 0, 0.5],
+            width: highlightedRoomId.value === roomNumber ? 2 : 1,
+          },
+        },
+      }));
+
+      uniqueValueInfos.push({
+        value: "nr nieznany",
+        symbol: {
+          type: "simple-fill",
+          color: [211, 211, 211, 0.8],
+          outline: { color: [0, 0, 0, 0.5], width: 1 },
+        },
+      });
+
+      return new UniqueValueRenderer({
+        field: "nazwa_skrocona",
+        uniqueValueInfos: uniqueValueInfos,
+        defaultSymbol: {
+          type: "simple-fill",
+          color: [244, 238, 177, 0.8],
+          outline: {
+            color: [0, 0, 0, 0.5],
+            width: 1,
+          },
+        },
+      });
+    };
+
+    onMounted(async () => {
+      await fetchRooms();
+      await fetchRoomStatus();
 
       const map = new Map({ basemap: "topo-vector" });
       view = new MapView({
@@ -159,53 +241,13 @@ export default {
         zoom: 19,
         constraints: {
           minZoom: 19,
-          maxZoom: 22
-        }
+          maxZoom: 22,
+        },
       });
-
-
-      const getRenderer = () => {
-        const uniqueValueInfos = Object.keys(roomStatus.value).map((roomNumber) => ({
-          value: roomNumber,
-          symbol: {
-            type: "simple-fill",
-            color: roomStatus.value[roomNumber] ? [167, 39, 39, 0.8] : [57, 112, 49, 0.8],
-            outline: {
-              color: highlightedRoomId.value === roomNumber ? [0, 120, 255, 1] : [0, 0, 0, 0.5],
-              width: highlightedRoomId.value === roomNumber ? 2 : 1,
-            },
-          },
-        }));
-
-        uniqueValueInfos.push({
-          value: "nr nieznany",
-          symbol: {
-            type: "simple-fill",
-            color: [211, 211, 211, 0.8],
-            outline: { color: [0, 0, 0, 0.5], width: 1 },
-          },
-        });
-
-        return new UniqueValueRenderer({
-          field: "nazwa_skrocona",
-          uniqueValueInfos: uniqueValueInfos,
-          defaultSymbol: {
-            type: "simple-fill",
-            color: [244, 238, 177, 0.8],
-            outline: { color: [0, 0, 0, 0.5], width: 1 },
-          },
-        });
-      };
 
       const featureLayer = new FeatureLayer({
         url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
-        outFields: [
-          "nazwa_skrocona",
-          "pietro",
-          "typ_dostepu",
-          "funkcja",
-          "organizacja",
-        ],
+        outFields: ["nazwa_skrocona", "pietro", "typ_dostepu", "funkcja", "organizacja"],
         renderer: getRenderer(),
         definitionExpression: `budynek_nazwa = 'Gmach Główny' AND poziom=${selectedFloor.value}`,
       });
@@ -219,39 +261,70 @@ export default {
             const graphic = results.filter((result) => result.graphic.layer === featureLayer)[0]?.graphic;
             if (graphic) {
               selectedRoom.value = graphic.attributes;
+              const roomInfo = roomStatus.value[selectedRoom.value.nazwa_skrocona];
+              if (roomInfo) {
+                selectedRoom.value.is_taken = roomInfo.is_taken;
+                selectedRoom.value.owner_name = roomInfo.owner_name;
+                selectedRoom.value.owner_surname = roomInfo.owner_surname;
+              }
               highlightedRoomId.value = graphic.attributes.nazwa_skrocona;
             } else {
-              selectedRoom.value = null;
-              highlightedRoomId.value = null;
+              resetRoomSelection();
             }
           } else {
-            selectedRoom.value = null;
-            highlightedRoomId.value = null;
+            resetRoomSelection();
           }
         });
       });
 
-      watch(highlightedRoomId, () => {
-        featureLayer.renderer = getRenderer();
-      });
+      watch(highlightedRoomId, updateRenderer);
+
       watch(selectedFloor, () => {
-        featureLayer.definitionExpression = `budynek_nazwa = 'Gmach Główny' AND poziom=${selectedFloor.value}`;
+        resetRoomSelection();
+        const floorNumbers = Array.isArray(selectedFloor.value) ? selectedFloor.value.join(", ") : selectedFloor.value;
+        featureLayer.definitionExpression = `budynek_nazwa = 'Gmach Główny' AND poziom IN (${floorNumbers})`;
+      });
+
+      watch([selectedItemType, version], async () => {
+        resetRoomSelection();
+        await fetchRoomStatus();
+        updateRenderer();
       });
     });
 
     onUnmounted(() => {
+
+      const resizeHandler = () => {
+        if (view) {
+          view.container = mapViewDiv.value;
+          view.resize();
+        }
+      };
       window.removeEventListener("resize", resizeHandler);
     });
 
     const updateFloor = (floor) => {
       selectedFloor.value = floor;
+      const floorNumbers = Array.isArray(floor) ? floor.join(", ") : floor;
+      FeatureLayer.definitionExpression = `budynek_nazwa = 'Gmach Główny' AND poziom IN (${floorNumbers})`;
+    };
+
+    const selectItemType = (type) => {
+      selectedItemType.value = type;
+    };
+
+    const selectItemVersion = (ver) => {
+      version.value = ver;
     };
 
     return {
       mapViewDiv,
       selectedRoom,
-      fetchRoomStatus,
       floors,
+      selectedItemType,
+      version,
+      selectItemType,
+      selectItemVersion,
       updateFloor,
     };
   },
@@ -308,10 +381,12 @@ nav {
 
 .item-type-overlay {
   position: absolute;
-  top: 13vh; /* Umieszczone wyżej niż przyciski pięter */
+  top: 13vh;
+  /* Umieszczone wyżej niż przyciski pięter */
   right: 45vh;
   display: flex;
-  flex-direction: row; /* Układ w jednym rzędzie */
+  flex-direction: row;
+  /* Układ w jednym rzędzie */
   gap: 15px;
   z-index: 10;
 }
@@ -365,6 +440,19 @@ button:hover {
   background-color: transparent !important;
 }
 
+button.microphones,
+button.remote-controllers,
+button.keys,
+button.primary-version,
+button.reserve-version {
+  background-color: transparent;
+}
+
+.selected {
+  transform: scale(1.7); // Powiększenie aktywnego przycisku
+  transition: transform 0.2s ease-in-out; // Płynna animacja powiększenia
+}
+
 .back-button:hover,
 button:hover {
   transform: scale(1.07);
@@ -394,7 +482,6 @@ button:hover {
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
-  /* Równomierne rozłożenie informacji */
 }
 
 .room-info p {
@@ -409,7 +496,6 @@ button:hover {
   align-items: start;
   margin-top: 1.5em;
   color: white;
-  /* Kolor tekstu */
   font-family: 'Open Sans', sans-serif;
   font-size: 20px;
   padding-left: 2.5em;
@@ -424,16 +510,13 @@ button:hover {
   display: flex;
   align-items: center;
   margin: 8px 0;
-  /* Odstęp między elementami */
 }
 
 .circle {
   width: 16px;
-  /* Średnica kółka */
   height: 16px;
   border-radius: 50%;
   margin-right: 12px;
-  /* Odstęp między kółkiem a tekstem */
 }
 
 .available .circle {
@@ -451,9 +534,6 @@ button:hover {
   /* Szary kolor dla "klucz nie istnieje" */
 }
 
-/* Media Queries for Responsiveness */
-
-/* Dla urządzeń mobilnych (szerokość poniżej 576px) */
 @media (max-width: 575px) {
   .content-wrapper {
     flex-direction: column;

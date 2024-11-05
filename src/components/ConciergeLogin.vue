@@ -1,36 +1,40 @@
 <template>
-        <GoogleFonts />
-        <nav>
-            <BackButton class="back-button" routeName="eConcierge" buttonText="Wróć">
-                <template #icon>
-                    <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                        class="bi bi-chevron-left" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd"
-                            d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
-                    </svg>
-                </template>
-            </BackButton>
-            <WUoT_Logo />
-        </nav>
+    <GoogleFonts />
+    <nav>
+        <BackButton class="back-button" routeName="eConcierge" buttonText="Wróć">
+            <template #icon>
+                <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="bi bi-chevron-left" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd"
+                        d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
+                </svg>
+            </template>
+        </BackButton>
+        <WUoT_Logo />
+    </nav>
 
-        <main>
-            <section class="container">
-                <h1>Podaj login i hasło</h1>
-                <form @submit.prevent="login">
-                    <div>
-                        <input type="text" id="login" name="login" placeholder="Login" v-model="username" required>
-                    </div>
-
-                    <div>
-                        <input type="password" id="password" name="password" placeholder="Hasło" v-model="password"
-                            required>
-                    </div>
-                    <div class="login-button-group">
-                        <RouteButton @click="login" buttonText="Zaloguj się" class="primary-button" />
-                    </div>
-                </form>
-            </section>
-        </main>
+    <main>
+        <section class="container">
+            <h1>Podaj login i hasło</h1>
+            <form @submit.prevent="login">
+                <div>
+                    <input :class="{ 'error-border': loginError }" type="text" id="login" name="login"
+                        placeholder="Login" v-model="username" required>
+                </div>
+                <div>
+                    <input :class="{ 'error-border': loginError }" type="password" id="password" name="password"
+                        placeholder="Hasło" v-model="password" required>
+                </div>
+                <!-- Stałe miejsce na komunikat o błędzie -->
+                <div class="error-placeholder">
+                    <span v-if="loginError" class="error-message">Niepoprawny login lub hasło</span>
+                </div>
+                <div class="login-button-group">
+                    <RouteButton @click="login" buttonText="Zaloguj się" class="primary-button" />
+                </div>
+            </form>
+        </section>
+    </main>
 </template>
 
 <script>
@@ -51,24 +55,23 @@ export default {
     data() {
         return {
             username: '',
-            password: ''
+            password: '',
+            loginError: false
         };
     },
     methods: {
         async login() {
             try {
-
                 const response = await axios.post('http://127.0.0.1:8000/login', new URLSearchParams({
                     username: this.username,
                     password: this.password
                 }));
 
                 const accessToken = response.data.access_token;
-
                 sessionStorage.setItem('access_token', accessToken);
-
                 this.$router.push({ name: 'MainWindow' });
             } catch (error) {
+                this.loginError = true; // Ustawienie flagi loginError na true przy błędzie
                 console.error('Błąd logowania:', error);
             }
         },
@@ -78,6 +81,7 @@ export default {
 
 <style lang="scss" scoped>
 $primary-color: #0083BB;
+$error-color: #ff4d4d;
 $text-color: #FFFFFF;
 $background-color: rgb(41, 38, 38);
 $font-main: 'Open Sans', sans-serif;
@@ -129,7 +133,6 @@ nav {
     background-color: transparent !important;
 }
 
-
 main {
     height: 100vh;
     display: flex;
@@ -169,6 +172,24 @@ input {
 input::placeholder {
     text-align: left;
     color: #edede9;
+    font-size: 1rem;
+}
+
+.error-border {
+    border-bottom: 3px solid $error-color;
+    /* Czerwony border przy błędzie */
+}
+
+.error-placeholder {
+    height: 1.5rem;
+    /* Rezerwuje miejsce na komunikat o błędzie */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.error-message {
+    color: $error-color;
     font-size: 1rem;
 }
 

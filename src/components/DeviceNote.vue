@@ -1,4 +1,5 @@
 <template>
+
     <body>
         <nav>
             <BackButton class="back-button" routeName="MainWindow" buttonText="Wróć">
@@ -30,11 +31,14 @@
 
             <!-- Kontener na przyciski -->
             <div class="button-container">
-                <button class="add-button" v-if="!isAdding && editingIndex === null" @click="addNote">Dodaj notatkę</button>
+                <button class="add-button" v-if="!isAdding && editingIndex === null" @click="addNote">Dodaj
+                    notatkę</button>
 
                 <button class="save-button" v-if="isAdding" @click="saveNewNote()">Zapisz</button>
-                <button class="save-button" v-if="editingIndex !== null && !isAdding" @click="saveEditedNote">Zapisz</button>
-                <button class="cancel-button" v-if="isAdding || editingIndex !== null" @click="cancelEditingOrAdding">Anuluj</button>
+                <button class="save-button" v-if="editingIndex !== null && !isAdding"
+                    @click="saveEditedNote">Zapisz</button>
+                <button class="cancel-button" v-if="isAdding || editingIndex !== null"
+                    @click="cancelEditingOrAdding">Anuluj</button>
 
                 <button class="edit-button" v-if="selectedNote !== null && editingIndex === null && !isAdding"
                     @click="editNote">Edytuj</button>
