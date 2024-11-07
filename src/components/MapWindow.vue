@@ -1,3 +1,4 @@
+<!-- TODO napis pod mapą i kolory od JUlii i piętra -->
 <template>
   <GoogleFonts />
   <nav>
@@ -14,9 +15,19 @@
   </nav>
   <div id="app">
     <div class="content-wrapper">
+      <div ref="mapViewDiv" class="map-view"></div>
+      <div class="floor-selection-overlay">
+        <button v-for="floor in floors" :key="floor.value" @click="updateFloor(floor.value)"
+          :class="{ selected: selectedFloor === floor.value }">
+          {{ floor.label }}
+        </button>
+      </div>
+    </div>
+    <div class="informations">
       <div class="item-type-overlay">
         <div class="itemTypesButtons">
-          <button @click="selectItemType('key')" :class="{ selected: selectedItemType === 'key' }" class="keys">
+          <button @click="selectItemType('klucz')" :class="{ selectedButton: selectedItemType === 'klucz' }"
+            class="keys">
             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-key-fill"
               viewBox="0 0 16 16">
               <path
@@ -24,7 +35,7 @@
             </svg>
           </button>
 
-          <button @click="selectItemType('microphone')" :class="{ selected: selectedItemType === 'microphone' }"
+          <button @click="selectItemType('mikrofon')" :class="{ selectedButton: selectedItemType === 'mikrofon' }"
             class="microphones">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-mic-fill"
               viewBox="0 0 16 16">
@@ -34,8 +45,8 @@
             </svg>
           </button>
 
-          <button @click="selectItemType('remote_controler')"
-            :class="{ selected: selectedItemType === 'remote_controler' }" class="remote-controllers">
+          <button @click="selectItemType('pilot')" :class="{ selectedButton: selectedItemType === 'pilot' }"
+            class="remote-controllers">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-file-spreadsheet"
               viewBox="0 0 16 16">
               <path
@@ -44,7 +55,7 @@
           </button>
         </div>
         <div class="itemsVersionsButtons">
-          <button @click="selectItemVersion('primary')" :class="{ selected: version === 'primary' }"
+          <button @click="selectItemVersion('podstawowa')" :class="{ selectedButton: version === 'podstawowa' }"
             class="primary-version">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" class="bi bi-1-circle-fill"
               viewBox="0 0 16 16">
@@ -53,7 +64,7 @@
             </svg>
           </button>
 
-          <button @click="selectItemVersion('backup')" :class="{ selected: version === 'backup' }"
+          <button @click="selectItemVersion('zapasowa')" :class="{ selectedButton: version === 'zapasowa' }"
             class="reserve-version">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" class="bi bi-2-circle-fill"
               viewBox="0 0 16 16">
@@ -63,14 +74,6 @@
           </button>
         </div>
       </div>
-      <div ref="mapViewDiv" class="map-view"></div>
-      <div class="floor-selection-overlay">
-        <button v-for="floor in floors" :key="floor.value" @click="updateFloor(floor.value)">
-          {{ floor.label }}
-        </button>
-      </div>
-    </div>
-    <div class="informations">
       <div class="room-info">
         <h2>Informacje o pomieszczeniu</h2>
         <div v-if="selectedRoom && selectedRoom.nazwa_skrocona !== 'nr nieznany'">
@@ -125,15 +128,15 @@ export default {
     const roomStatus = ref({});
     const highlightedRoomId = ref(null);
     const selectedFloor = ref(1);
-    const selectedItemType = ref("key");
-    const version = ref("primary");
+    const selectedItemType = ref("klucz");
+    const version = ref("podstawowa");
     let view = null;
 
     const floors = [
-      { label: 0, value: [1] },
+      { label: 0, value: [9,1] },
       { label: 1, value: 2 },
-      { label: 2, value: 3 },
-      { label: 3, value: 4 },
+      { label: 2, value: [3,6] },
+      { label: 3, value: [4,8] },
       { label: 4, value: 5 },
     ];
 
@@ -197,11 +200,11 @@ export default {
             roomStatus.value[roomNumber].is_taken === "brak"
               ? [244, 238, 177, 0.8]
               : roomStatus.value[roomNumber].is_taken
-                ? [167, 39, 39, 0.8]
-                : [57, 112, 49, 0.8],
+                ? [218, 44, 56, 0.8]
+                : [34, 111, 84, 0.8],
           outline: {
-            color: highlightedRoomId.value === roomNumber ? [0, 120, 255, 1] : [0, 0, 0, 0.5],
-            width: highlightedRoomId.value === roomNumber ? 2 : 1,
+            color: highlightedRoomId.value === roomNumber ? [0, 0, 0, 0.8] : [0, 0, 0, 0.5],
+            width: highlightedRoomId.value === roomNumber ? 3 : 1,
           },
         },
       }));
@@ -220,7 +223,7 @@ export default {
         uniqueValueInfos: uniqueValueInfos,
         defaultSymbol: {
           type: "simple-fill",
-          color: [244, 238, 177, 0.8],
+          color: [244, 240, 187, 0.8],
           outline: {
             color: [0, 0, 0, 0.5],
             width: 1,
@@ -305,8 +308,6 @@ export default {
 
     const updateFloor = (floor) => {
       selectedFloor.value = floor;
-      const floorNumbers = Array.isArray(floor) ? floor.join(", ") : floor;
-      FeatureLayer.definitionExpression = `budynek_nazwa = 'Gmach Główny' AND poziom IN (${floorNumbers})`;
     };
 
     const selectItemType = (type) => {
@@ -321,6 +322,7 @@ export default {
       mapViewDiv,
       selectedRoom,
       floors,
+      selectedFloor,
       selectedItemType,
       version,
       selectItemType,
@@ -379,16 +381,13 @@ nav {
   margin-left: 100px;
 }
 
+
 .item-type-overlay {
-  position: absolute;
-  top: 13vh;
-  /* Umieszczone wyżej niż przyciski pięter */
-  right: 45vh;
   display: flex;
   flex-direction: row;
-  /* Układ w jednym rzędzie */
   gap: 15px;
   z-index: 10;
+  transform: translate(-39vh, 3vh);
 }
 
 .map-view {
@@ -398,19 +397,18 @@ nav {
   overflow: hidden;
 }
 
-.esri-view-surface canvas {
-  border-radius: 100px;
+.map-view .esri-view-bottom-left .esri-attribution__sources {
+  color: black;
 }
 
 .floor-selection-overlay {
-  position: absolute;
-  bottom: 15vh;
-  right: 45vh;
   display: flex;
   flex-direction: column;
   gap: 30px;
   z-index: 10;
+  transform: translate(-7vh, 15vh);
 }
+
 
 button {
   width: 40px;
@@ -428,6 +426,11 @@ button {
 
 button:hover {
   background-color: #0d1016;
+}
+
+button.selected:hover {
+  transform: none;
+  /* Zapobiega zmniejszeniu przycisku, gdy jest aktywny */
 }
 
 .back-button {
@@ -449,12 +452,16 @@ button.reserve-version {
 }
 
 .selected {
-  transform: scale(1.7); // Powiększenie aktywnego przycisku
-  transition: transform 0.2s ease-in-out; // Płynna animacja powiększenia
+  transform: scale(1.3); // Powiększenie aktywnego przycisku
+  transition: transform 0.1s ease-in-out; // Płynna animacja powiększenia
 }
 
-.back-button:hover,
-button:hover {
+.selectedButton {
+  transform: scale(1.7);
+  transition: transform 0.2s ease-in-out;
+}
+
+.back-button:hover {
   transform: scale(1.07);
   cursor: pointer;
 }
@@ -462,14 +469,13 @@ button:hover {
 .room-info {
   flex: 1;
   height: 55%;
-  padding: 20px;
   overflow-y: auto;
   background-color: transparent;
   color: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  /* Rozprowadza elementy równomiernie na całej wysokości kontenera */
+
 }
 
 .room-info h2 {
@@ -493,17 +499,17 @@ button:hover {
 .deviceStatus {
   display: flex;
   flex-direction: column;
-  align-items: start;
-  margin-top: 1.5em;
+  align-items: center;
   color: white;
   font-family: 'Open Sans', sans-serif;
   font-size: 20px;
-  padding-left: 2.5em;
 }
 
 
 .deviceStatus p {
+  width: 300px;
   margin-bottom: 1em;
+  text-align: left;
 }
 
 .status {
@@ -520,142 +526,17 @@ button:hover {
 }
 
 .available .circle {
-  background-color: rgba(57, 112, 49, 0.8);
+  background-color: rgba(34, 111, 84, 0.8);
   /* Zielony kolor dla "klucz dostępny" */
 }
 
 .unavailable .circle {
-  background-color: rgba(167, 39, 39, 0.8);
+  background-color: rgba(218, 44, 56, 0.8);
   /* Czerwony kolor dla "klucz niedostępny" */
 }
 
 .nonexistent .circle {
   background-color: rgba(244, 238, 177, 0.8);
   /* Szary kolor dla "klucz nie istnieje" */
-}
-
-@media (max-width: 575px) {
-  .content-wrapper {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .floor-selection-overlay {
-    top: 400px;
-    right: 10px;
-    gap: 10px;
-  }
-
-  button {
-    width: 30px;
-    height: 30px;
-    font-size: 12px;
-  }
-
-  .room-info {
-    padding: 8px;
-  }
-
-  .room-info h2 {
-    font-size: 18px;
-  }
-
-  .room-info p {
-    font-size: 10px;
-  }
-}
-
-/* Dla małych urządzeń (szerokość od 576px do 767px) */
-@media (min-width: 576px) and (max-width: 767px) {
-  .content-wrapper {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .floor-selection-overlay {
-    top: 450px;
-    right: 20px;
-    gap: 15px;
-  }
-
-  button {
-    width: 35px;
-    height: 35px;
-    font-size: 14px;
-  }
-
-  .room-info {
-    padding: 10px;
-  }
-
-  .room-info h2 {
-    font-size: 20px;
-  }
-
-  .room-info p {
-    font-size: 12px;
-  }
-}
-
-/* Dla tabletów (szerokość od 768px do 1024px) */
-@media (min-width: 768px) and (max-width: 1024px) {
-  .content-wrapper {
-    width: 90%;
-  }
-
-  .floor-selection-overlay {
-    top: 500px;
-    right: 150px;
-    gap: 20px;
-  }
-
-  button {
-    width: 38px;
-    height: 38px;
-    font-size: 15px;
-  }
-
-  .room-info {
-    padding: 15px;
-  }
-
-  .room-info h2 {
-    font-size: 22px;
-  }
-
-  .room-info p {
-    font-size: 13px;
-  }
-}
-
-/* Dla średnich ekranów (szerokość od 1025px do 1499px) */
-@media (min-width: 1025px) and (max-width: 1499px) {
-  .content-wrapper {
-    width: 85%;
-  }
-
-  .floor-selection-overlay {
-    top: 550px;
-    right: 300px;
-    gap: 25px;
-  }
-
-  button {
-    width: 40px;
-    height: 40px;
-    font-size: 16px;
-  }
-
-  .room-info {
-    padding: 18px;
-  }
-
-  .room-info h2 {
-    font-size: 24px;
-  }
-
-  .room-info p {
-    font-size: 14px;
-  }
 }
 </style>

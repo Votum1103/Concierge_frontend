@@ -1,6 +1,7 @@
 <template lang="html">
     <svg width="31" height="31" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg"
         xmlns:xlink="http://www.w3.org/1999/xlink">
+        <rect x="0" y="0" width="29" height="29" fill="#226f54cc" />
         <rect x="0.987305" y="0.9375" width="27.5187" height="24.5438" fill="url(#pattern0_108_1673)" />
         <defs>
             <pattern id="pattern0_108_1673" patternContentUnits="objectBoundingBox" width="1" height="1">

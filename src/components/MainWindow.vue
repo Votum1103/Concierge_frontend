@@ -81,7 +81,7 @@
           </RouteButton>
 
           <div class="itemTypesButtons">
-            <button @click="selectItemType('key')" :class="{ selected: selectedItemType === 'key' }" class="keys">
+            <button @click="selectItemType('klucz')" :class="{ selected: selectedItemType === 'klucz' }" class="keys">
               <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-key-fill"
                 viewBox="0 0 16 16">
                 <path
@@ -89,7 +89,7 @@
               </svg>
             </button>
 
-            <button @click="selectItemType('microphone')" :class="{ selected: selectedItemType === 'microphone' }"
+            <button @click="selectItemType('mikrofon')" :class="{ selected: selectedItemType === 'mikrofon' }"
               class="microphones">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-mic-fill"
                 viewBox="0 0 16 16">
@@ -99,8 +99,8 @@
               </svg>
             </button>
 
-            <button @click="selectItemType('remote_controler')"
-              :class="{ selected: selectedItemType === 'remote_controler' }" class="remote-controllers">
+            <button @click="selectItemType('pilot')" :class="{ selected: selectedItemType === 'pilot' }"
+              class="remote-controllers">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-file-spreadsheet"
                 viewBox="0 0 16 16">
                 <path
@@ -111,7 +111,7 @@
 
           </div>
           <div class="itemsVersionsButtons">
-            <button @click="selectItemVersion('primary')" :class="{ selected: selectedItemVersion === 'primary' }"
+            <button @click="selectItemVersion('podstawowa')" :class="{ selected: selectedItemVersion === 'podstawowa' }"
               class="primary-version">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" class="bi bi-1-circle-fill"
                 viewBox="0 0 16 16">
@@ -120,7 +120,7 @@
               </svg>
             </button>
 
-            <button @click="selectItemVersion('backup')" :class="{ selected: selectedItemVersion === 'backup' }"
+            <button @click="selectItemVersion('zapasowa')" :class="{ selected: selectedItemVersion === 'zapasowa' }"
               class="reserve-version">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" class="bi bi-2-circle-fill"
                 viewBox="0 0 16 16">
@@ -146,20 +146,20 @@
             </table>
           </div>
         </div>
-        <div class="itemsStatus">
-          <div class="keysStatus" v-if="selectedItemType === 'key'">
-            <p>Dostępne: {{ availableDevicesCount }}</p>
-            <p>Pobrane: {{ takenDevicesCount }}</p>
-          </div>
-          <div class="microphonesStatus" v-if="selectedItemType === 'microphone'">
-            <p>Dostępne: {{ availableDevicesCount }}</p>
-            <p>Pobrane: {{ takenDevicesCount }}</p>
-          </div>
-          <div class="remoteControllersStatus" v-if="selectedItemType === 'remote_controler'">
-            <p>Dostępne: {{ availableDevicesCount }}</p>
-            <p> Pobrane: {{ takenDevicesCount }}</p>
-          </div>
-        </div>
+      </div>
+    </div>
+    <div class="itemsStatus">
+      <div class="keysStatus" v-if="selectedItemType === 'klucz'">
+        <p>Dostępne: {{ availableDevicesCount }}</p>
+        <p>Pobrane: {{ takenDevicesCount }}</p>
+      </div>
+      <div class="microphonesStatus" v-if="selectedItemType === 'mikrofon'">
+        <p>Dostępne: {{ availableDevicesCount }}</p>
+        <p>Pobrane: {{ takenDevicesCount }}</p>
+      </div>
+      <div class="remoteControllersStatus" v-if="selectedItemType === 'pilot'">
+        <p>Dostępne: {{ availableDevicesCount }}</p>
+        <p> Pobrane: {{ takenDevicesCount }}</p>
       </div>
     </div>
   </body>
@@ -189,9 +189,9 @@ export default {
   data() {
     return {
       items: [],
-      currentView: 'keys', 
-      selectedItemType: 'key', 
-      selectedItemVersion: 'primary', 
+      currentView: 'keys',
+      selectedItemType: 'klucz',
+      selectedItemVersion: 'podstawowa',
     };
   },
   computed: {
@@ -331,11 +331,6 @@ select:-webkit-autofill {
   transition: background-color 5000s ease-in-out 0s;
 }
 
-svg.bi:focus,
-svg.bi:hover {
-  width: 120%;
-  height: 120%;
-}
 
 *:focus {
   outline: none;
@@ -437,7 +432,7 @@ button.reserve-version {
 .main-page {
   display: flex;
   margin-top: 40px;
-  height: 700px;
+  height: 730px;
 }
 
 .left-action-buttons {
@@ -446,7 +441,7 @@ button.reserve-version {
   justify-content: space-between;
   align-items: flex-end;
   margin-right: 2em;
-  width: 30%;
+  width: 21%;
   height: 100%;
 
   ul {

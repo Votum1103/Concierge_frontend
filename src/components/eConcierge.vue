@@ -95,9 +95,7 @@ main {
   min-width: 300px;
   max-width: 600px;
   background: rgb(0, 0, 0);
-  padding: 50px 20px;
-  height: auto;
-  max-height: calc(100vh - 100px);
+  height: 500px;
   gap: 100px;
   overflow: auto;
 }

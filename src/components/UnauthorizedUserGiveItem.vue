@@ -3,14 +3,15 @@
     <body>
         <GoogleFonts />
         <nav>
-            <a class="back-button" href="#" aria-label="Wróć">
-                <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                    class="bi bi-chevron-left" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd"
-                        d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
-                </svg>
-                Wróć
-            </a>
+            <BackButton class="back-button" routeName="MainWindow" buttonText="Wróć">
+                <template #icon>
+                    <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-chevron-left" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
+                    </svg>
+                </template>
+            </BackButton>
             <WUoT_Logo />
         </nav>
 
@@ -49,12 +50,14 @@
 import axios from 'axios';
 import GoogleFonts from './googleFonts.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
+import BackButton from './BackButton.vue';
 
 export default {
     name: 'UnauthorizedUserGiveItem',
     components: {
         GoogleFonts,
-        WUoT_Logo
+        WUoT_Logo,
+        BackButton
     },
     data() {
         return {
