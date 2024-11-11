@@ -175,7 +175,7 @@ import RouteButton from './RouteButton.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
 import AcceptanceIcon from './AcceptanceIcon.vue';
 import NegativeIcon from './NegativeIcon.vue';
-import axios from 'axios';
+import api from '../api.js';  // Importuj skonfigurowany Axios
 
 export default {
   name: 'MainWindow',
@@ -199,7 +199,6 @@ export default {
       const chunkSize = 5;
       const result = [];
 
-      // Podzielenie na grupy po 5 elementów
       for (let i = 0; i < this.items.length; i += chunkSize) {
         result.push(this.items.slice(i, i + chunkSize));
       }
@@ -220,39 +219,26 @@ export default {
     }
   },
   methods: {
-
     logOut() {
-
-      const token = sessionStorage.getItem('access_token');
-      const headers = {
-        Authorization: `Bearer ${token}`
-      };
-      try {
-        axios.post('http://127.0.0.1:8000/logout/', {}, { headers });
-        this.$router.push(`/`);
-      } catch (error) {
-        console.error(error);
-      }
-
+      sessionStorage.clear();
+      this.$router.push(`/`);
     },
 
     handleClick(item) {
-
       if (!item || !item.room_number || !item.id || !item.dev_type) {
         console.error('Błąd: Brak jednej z właściwości w item:', item);
         return;
       }
 
-      // Zapisz dane urządzenia do sessionStorage, aby były dostępne w notatkach
       const selectedDevice = {
         room_number: item.room_number,
-        device_id: item.id, // Zakładam, że item ma pole "id", które jest device_id
+        device_id: item.id,
         dev_type: item.dev_type,
         dev_version: item.dev_version
       };
 
       sessionStorage.setItem('selectedDevice', JSON.stringify(selectedDevice));
-      const encodeRoomNumber = encodeURIComponent(item.room_number)
+      const encodeRoomNumber = encodeURIComponent(item.room_number);
       this.$router.push(`/DeviceNote/${encodeRoomNumber}`);
     },
 
@@ -269,33 +255,16 @@ export default {
 
     async fetchDevices(deviceType, version) {
       try {
-        const token = sessionStorage.getItem('access_token');
-        const headers = {
-          Authorization: `Bearer ${token}`
-        };
-
-        // Pobierz urządzenia z serwera
-        const response = await axios.get(
-          `http://127.0.0.1:8000/devices/?dev_type=${deviceType}&dev_version=${version}`,
-          { headers }
-        );
-
-        // Przypisz dane do `items`
+        const response = await api.get(`/devices/?dev_type=${deviceType}&dev_version=${version}`);
         this.items = response.data;
-
       } catch (error) {
-        if (error.response) {
-          console.error(`Error fetching ${deviceType}:`, error.response.data);
-        } else if (error.request) {
-          console.error(`Error fetching ${deviceType}: No response received`, error.request);
-        } else {
-          console.error(`Error fetching ${deviceType}:`, error.message);
-        }
+        console.error(`Błąd pobierania urządzeń ${deviceType}:`, error);
       }
     }
   }
 };
 </script>
+
 
 
 

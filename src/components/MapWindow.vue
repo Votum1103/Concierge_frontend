@@ -1,4 +1,3 @@
-<!-- TODO napis pod mapą i kolory od JUlii i piętra -->
 <template>
   <GoogleFonts />
   <nav>
@@ -34,7 +33,6 @@
                 d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2M2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2" />
             </svg>
           </button>
-
           <button @click="selectItemType('mikrofon')" :class="{ selectedButton: selectedItemType === 'mikrofon' }"
             class="microphones">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-mic-fill"
@@ -44,7 +42,6 @@
                 d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5" />
             </svg>
           </button>
-
           <button @click="selectItemType('pilot')" :class="{ selectedButton: selectedItemType === 'pilot' }"
             class="remote-controllers">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-file-spreadsheet"
@@ -63,7 +60,6 @@
                 d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M9.283 4.002H7.971L6.072 5.385v1.271l1.834-1.318h.065V12h1.312z" />
             </svg>
           </button>
-
           <button @click="selectItemVersion('zapasowa')" :class="{ selectedButton: version === 'zapasowa' }"
             class="reserve-version">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" class="bi bi-2-circle-fill"
@@ -104,16 +100,19 @@
 </template>
 
 <script>
-
-import { shallowRef, ref, onMounted, watch, onUnmounted } from "vue";
+import { shallowRef, ref, onMounted, watch } from "vue";
 import axios from "axios";
 import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer";
+import Search from "@arcgis/core/widgets/Search";
+import Home from "@arcgis/core/widgets/Home";
 import BackButton from "./BackButton.vue";
 import GoogleFonts from "./googleFonts.vue";
 import WUoT_Logo from "./WUoT_Logo.vue";
+import Graphic from "@arcgis/core/Graphic";
+import Zoom from "@arcgis/core/widgets/Zoom";
 
 export default {
   name: "MapWindow",
@@ -123,6 +122,7 @@ export default {
     BackButton,
   },
   setup() {
+    const isAutoFloorChange = ref(false);
     const mapViewDiv = shallowRef(null);
     const selectedRoom = ref(null);
     const roomStatus = ref({});
@@ -130,13 +130,14 @@ export default {
     const selectedFloor = ref(1);
     const selectedItemType = ref("klucz");
     const version = ref("podstawowa");
+    const isSearchHighlightActive = ref(false); // Śledzenie zaznaczenia po wyszukiwaniu
     let view = null;
 
     const floors = [
-      { label: 0, value: [9,1] },
+      { label: 0, value: [9, 1] },
       { label: 1, value: 2 },
-      { label: 2, value: [3,6] },
-      { label: 3, value: [4,8] },
+      { label: 2, value: [3, 6] },
+      { label: 3, value: [4, 8] },
       { label: 4, value: 5 },
     ];
 
@@ -187,7 +188,7 @@ export default {
 
     const updateRenderer = () => {
       if (view) {
-        view.map.layers.items[0].renderer = getRenderer();
+        view.map.layers.items[0].renderer = getRenderer(); // Aktualizuj renderer na podstawie nowego stanu
       }
     };
 
@@ -246,7 +247,95 @@ export default {
           minZoom: 19,
           maxZoom: 22,
         },
+        ui: {
+          components: ["attribution"], // Dodaj tylko te komponenty, które chcesz zachować
+        }
       });
+
+
+      const zoomWidget = new Zoom({
+        view: view
+      });
+      view.ui.add(zoomWidget, "bottom-left");
+
+      const homeWidget = new Home({ view: view });
+      view.ui.add(homeWidget, "bottom-left");
+
+      const searchWidget = new Search({
+        view: view,
+        allPlaceholder: "Szukaj pokoju",
+        popupEnabled: false,
+        resultGraphicEnabled: false,
+        includeDefaultSources: false,
+        sources: [
+          {
+            layer: new FeatureLayer({
+              url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
+              outFields: ["nazwa_skrocona", "pietro"],
+            }),
+            searchFields: ["nazwa_skrocona"],
+            displayField: "nazwa_skrocona",
+            exactMatch: true, // Ustawienie dokładnego dopasowania
+            outFields: ["*"],
+            name: "Pokoje",
+            placeholder: "Wyszukaj pokój",
+            filter: { where: "budynek_nazwa = 'Gmach Główny'" },
+          },
+        ],
+      });
+      searchWidget.on("search-complete", (event) => {
+        resetRoomSelection();
+        view.graphics.removeAll();
+
+        event.results.forEach((result) => {
+          result.results.forEach((feature) => {
+            const roomFloor = feature.feature.attributes.poziom;
+
+            if (
+              (!Array.isArray(selectedFloor.value) && roomFloor !== selectedFloor.value) ||
+              (Array.isArray(selectedFloor.value) && !selectedFloor.value.includes(roomFloor))
+            ) {
+              isAutoFloorChange.value = true; // Ustawienie flagi dla automatycznej zmiany piętra
+              selectedFloor.value = roomFloor;
+            }
+
+            const graphic = new Graphic({
+              geometry: feature.feature.geometry,
+              symbol: {
+                type: "simple-fill",
+                color: [0, 0, 0, 0],
+                outline: { color: [0, 0, 0, 0.8], width: 3 },
+              },
+            });
+            view.graphics.add(graphic);
+            isSearchHighlightActive.value = true;
+          });
+        });
+      });
+      view.on("click", (event) => {
+        resetRoomSelection();
+        view.graphics.removeAll();
+        isSearchHighlightActive.value = false; // Deaktywacja zaznaczenia po kliknięciu
+
+        view.hitTest(event).then((response) => {
+          const results = response.results;
+          if (results.length > 0) {
+            const graphic = results.filter((result) => result.graphic.layer === featureLayer)[0]?.graphic;
+            if (graphic) {
+              selectedRoom.value = graphic.attributes;
+              const roomInfo = roomStatus.value[selectedRoom.value.nazwa_skrocona];
+              if (roomInfo) {
+                selectedRoom.value.is_taken = roomInfo.is_taken;
+                selectedRoom.value.owner_name = roomInfo.owner_name;
+                selectedRoom.value.owner_surname = roomInfo.owner_surname;
+              }
+              highlightedRoomId.value = graphic.attributes.nazwa_skrocona;
+            }
+          }
+        });
+      });
+
+      view.ui.add(searchWidget, "top-left");
 
       const featureLayer = new FeatureLayer({
         url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
@@ -283,7 +372,15 @@ export default {
       watch(highlightedRoomId, updateRenderer);
 
       watch(selectedFloor, () => {
-        resetRoomSelection();
+        if (!isAutoFloorChange.value) {
+          resetRoomSelection();
+          if (isSearchHighlightActive.value) {
+            view.graphics.removeAll();
+            isSearchHighlightActive.value = false;
+          }
+        }
+        isAutoFloorChange.value = false; // Resetowanie flagi po zakończeniu automatycznej zmiany piętra
+
         const floorNumbers = Array.isArray(selectedFloor.value) ? selectedFloor.value.join(", ") : selectedFloor.value;
         featureLayer.definitionExpression = `budynek_nazwa = 'Gmach Główny' AND poziom IN (${floorNumbers})`;
       });
@@ -291,31 +388,29 @@ export default {
       watch([selectedItemType, version], async () => {
         resetRoomSelection();
         await fetchRoomStatus();
-        updateRenderer();
+        updateRenderer(); // Upewnij się, że renderer jest aktualizowany po zmianie wersji lub typu urządzenia
       });
     });
 
-    onUnmounted(() => {
-
-      const resizeHandler = () => {
-        if (view) {
-          view.container = mapViewDiv.value;
-          view.resize();
-        }
-      };
-      window.removeEventListener("resize", resizeHandler);
-    });
-
     const updateFloor = (floor) => {
+      resetRoomSelection();
+      if (isSearchHighlightActive.value) {
+        view.graphics.removeAll(); // Usunięcie grafiki tylko przy zmianie piętra
+        isSearchHighlightActive.value = false; // Wyłączenie zaznaczenia po wyszukiwaniu
+      }
       selectedFloor.value = floor;
     };
 
     const selectItemType = (type) => {
+      resetRoomSelection();
       selectedItemType.value = type;
+      fetchRoomStatus().then(() => updateRenderer()); // Aktualizuj status pokoi i renderer po wyborze typu urządzenia
     };
 
     const selectItemVersion = (ver) => {
+      resetRoomSelection();
       version.value = ver;
+      fetchRoomStatus().then(() => updateRenderer()); // Aktualizuj status pokoi i renderer po wyborze wersji urządzenia
     };
 
     return {
@@ -331,8 +426,8 @@ export default {
     };
   },
 };
-
 </script>
+
 
 <style lang="scss" scoped>
 $primary-bg: black;
@@ -344,8 +439,6 @@ $border-radius-large: 30px;
 $button-height: 45px;
 $font-family: 'Open Sans', sans-serif;
 
-/* Style globalne */
-/* Style globalne */
 html,
 body {
   background: $primary-bg url('../assets/back.jpg') no-repeat top;
@@ -381,7 +474,6 @@ nav {
   margin-left: 100px;
 }
 
-
 .item-type-overlay {
   display: flex;
   flex-direction: row;
@@ -409,13 +501,11 @@ nav {
   transform: translate(-7vh, 15vh);
 }
 
-
 button {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   aspect-ratio: 1 / 1;
-  /* Wymuszenie proporcji 1:1 */
   background-color: #0d1016;
   color: #ffffff;
   font-size: 16px;
@@ -430,7 +520,6 @@ button:hover {
 
 button.selected:hover {
   transform: none;
-  /* Zapobiega zmniejszeniu przycisku, gdy jest aktywny */
 }
 
 .back-button {
@@ -452,8 +541,8 @@ button.reserve-version {
 }
 
 .selected {
-  transform: scale(1.3); // Powiększenie aktywnego przycisku
-  transition: transform 0.1s ease-in-out; // Płynna animacja powiększenia
+  transform: scale(1.3);
+  transition: transform 0.1s ease-in-out;
 }
 
 .selectedButton {
@@ -475,7 +564,6 @@ button.reserve-version {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
 }
 
 .room-info h2 {
@@ -505,7 +593,6 @@ button.reserve-version {
   font-size: 20px;
 }
 
-
 .deviceStatus p {
   width: 300px;
   margin-bottom: 1em;
@@ -527,16 +614,13 @@ button.reserve-version {
 
 .available .circle {
   background-color: rgba(34, 111, 84, 0.8);
-  /* Zielony kolor dla "klucz dostępny" */
 }
 
 .unavailable .circle {
   background-color: rgba(218, 44, 56, 0.8);
-  /* Czerwony kolor dla "klucz niedostępny" */
 }
 
 .nonexistent .circle {
   background-color: rgba(244, 238, 177, 0.8);
-  /* Szary kolor dla "klucz nie istnieje" */
 }
 </style>
