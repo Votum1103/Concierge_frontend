@@ -16,8 +16,8 @@
     <div class="content-wrapper">
       <div ref="mapViewDiv" class="map-view"></div>
       <div class="floor-selection-overlay">
-        <button v-for="floor in floors" :key="floor.value" @click="updateFloor(floor.value)"
-          :class="{ selected: selectedFloor === floor.value }">
+        <button v-for="floor in floors" :key="floor.label" @click="updateFloor(floor.value)"
+          :class="['floor-button', { selected: isSelectedFloor(floor.value) }]">
           {{ floor.label }}
         </button>
       </div>
@@ -113,6 +113,7 @@ import GoogleFonts from "./googleFonts.vue";
 import WUoT_Logo from "./WUoT_Logo.vue";
 import Graphic from "@arcgis/core/Graphic";
 import Zoom from "@arcgis/core/widgets/Zoom";
+import ScaleBar from "@arcgis/core/widgets/ScaleBar"
 
 export default {
   name: "MapWindow",
@@ -127,19 +128,27 @@ export default {
     const selectedRoom = ref(null);
     const roomStatus = ref({});
     const highlightedRoomId = ref(null);
-    const selectedFloor = ref(1);
+    const selectedFloor = ref([9, 1]);
     const selectedItemType = ref("klucz");
     const version = ref("podstawowa");
     const isSearchHighlightActive = ref(false); // Śledzenie zaznaczenia po wyszukiwaniu
     let view = null;
 
+
     const floors = [
       { label: 0, value: [9, 1] },
-      { label: 1, value: 2 },
+      { label: 1, value: [2] },
       { label: 2, value: [3, 6] },
       { label: 3, value: [4, 8] },
-      { label: 4, value: 5 },
+      { label: 4, value: [5] },
     ];
+
+    const isSelectedFloor = (floorValue) => {
+      if (Array.isArray(selectedFloor.value)) {
+        return selectedFloor.value.some(val => Array.isArray(floorValue) ? floorValue.includes(val) : val === floorValue);
+      }
+      return Array.isArray(floorValue) ? floorValue.includes(selectedFloor.value) : selectedFloor.value === floorValue;
+    };
 
     const resetRoomSelection = () => {
       selectedRoom.value = null;
@@ -248,18 +257,45 @@ export default {
           maxZoom: 22,
         },
         ui: {
-          components: ["attribution"], // Dodaj tylko te komponenty, które chcesz zachować
-        }
-      });
+          components: ["attribution"],
+        },
+      })
 
+      let widgetContainer = document.createElement("div");
+      widgetContainer.style.position = "absolute";
+      widgetContainer.style.bottom = "60px";
+      widgetContainer.style.left = "15px";
+      widgetContainer.style.display = "flex";
+      widgetContainer.style.flexDirection = "column";
+      widgetContainer.style.gap = "10px";
 
+      widgetContainer.id = "widgetContainer";
+
+      // Dodajemy niestandardowy kontener do mapy
+      view.ui.add(widgetContainer, "manual");
+
+      // Dodajemy widżety Zoom i Home bezpośrednio do kontenera mapy
       const zoomWidget = new Zoom({
         view: view
       });
-      view.ui.add(zoomWidget, "bottom-left");
+      const homeWidget = new Home({
+        view: view
+      });
+      const scaleBarWidget = new ScaleBar({
+        view: view
+      });
 
-      const homeWidget = new Home({ view: view });
-      view.ui.add(homeWidget, "bottom-left");
+      // Dodanie widgetów do UI i przypisanie do widgetContainer
+      view.ui.add([zoomWidget, homeWidget], "manual");
+
+      // Stylizacja CSS dla pionowego układu widżetów
+      zoomWidget.container.classList.add("custom-widget");
+      homeWidget.container.classList.add("custom-widget");
+
+      widgetContainer.appendChild(homeWidget.container);
+      widgetContainer.appendChild(zoomWidget.container);
+
+      view.ui.add(scaleBarWidget, 'bottom-left');
 
       const searchWidget = new Search({
         view: view,
@@ -275,30 +311,43 @@ export default {
             }),
             searchFields: ["nazwa_skrocona"],
             displayField: "nazwa_skrocona",
-            exactMatch: true, // Ustawienie dokładnego dopasowania
+            exactMatch: true,
             outFields: ["*"],
             name: "Pokoje",
             placeholder: "Wyszukaj pokój",
-            filter: { where: "budynek_nazwa = 'Gmach Główny'" },
+            filter: { where: "UPPER(budynek_nazwa) = 'GMACH GŁÓWNY'" },
           },
         ],
       });
+
+
+      view.ui.add(searchWidget, "top-left");
+
       searchWidget.on("search-complete", (event) => {
+        // Resetowanie stanu zaznaczenia
         resetRoomSelection();
         view.graphics.removeAll();
 
         event.results.forEach((result) => {
           result.results.forEach((feature) => {
+            const roomAttributes = feature.feature.attributes;
+            const roomKey = roomAttributes.nazwa_skrocona;
             const roomFloor = feature.feature.attributes.poziom;
 
-            if (
-              (!Array.isArray(selectedFloor.value) && roomFloor !== selectedFloor.value) ||
-              (Array.isArray(selectedFloor.value) && !selectedFloor.value.includes(roomFloor))
-            ) {
-              isAutoFloorChange.value = true; // Ustawienie flagi dla automatycznej zmiany piętra
-              selectedFloor.value = roomFloor;
+            // Znajdź odpowiadający label na podstawie poziomu (roomFloor)
+            const floorMapping = floors.find(floor =>
+              Array.isArray(floor.value)
+                ? floor.value.includes(roomFloor)
+                : floor.value === roomFloor
+            );
+
+            // Zmień piętro tylko jeśli nie jest aktualnie widoczne
+            if (!isSelectedFloor(roomFloor)) {
+              isAutoFloorChange.value = true; // Oznaczenie automatycznej zmiany piętra
+              selectedFloor.value = floorMapping ? floorMapping.value : [roomFloor];
             }
 
+            // Tworzenie grafiki do zaznaczenia na mapie
             const graphic = new Graphic({
               geometry: feature.feature.geometry,
               symbol: {
@@ -308,45 +357,60 @@ export default {
               },
             });
             view.graphics.add(graphic);
+
+            // Ustawienie aktywnego pokoju
+            selectedRoom.value = roomAttributes;
+
+            // Pobranie szczegółowych informacji o pokoju
+            const roomInfo = roomStatus.value[roomKey];
+            if (roomInfo) {
+              selectedRoom.value.is_taken = roomInfo.is_taken;
+              selectedRoom.value.owner_name = roomInfo.owner_name;
+              selectedRoom.value.owner_surname = roomInfo.owner_surname;
+            }
+
+            highlightedRoomId.value = roomKey;
+
+            // Aktywacja podświetlenia po wyszukiwaniu
             isSearchHighlightActive.value = true;
           });
         });
       });
-      view.on("click", (event) => {
-        resetRoomSelection();
-        view.graphics.removeAll();
-        isSearchHighlightActive.value = false; // Deaktywacja zaznaczenia po kliknięciu
-
-        view.hitTest(event).then((response) => {
-          const results = response.results;
-          if (results.length > 0) {
-            const graphic = results.filter((result) => result.graphic.layer === featureLayer)[0]?.graphic;
-            if (graphic) {
-              selectedRoom.value = graphic.attributes;
-              const roomInfo = roomStatus.value[selectedRoom.value.nazwa_skrocona];
-              if (roomInfo) {
-                selectedRoom.value.is_taken = roomInfo.is_taken;
-                selectedRoom.value.owner_name = roomInfo.owner_name;
-                selectedRoom.value.owner_surname = roomInfo.owner_surname;
-              }
-              highlightedRoomId.value = graphic.attributes.nazwa_skrocona;
-            }
-          }
-        });
-      });
-
-      view.ui.add(searchWidget, "top-left");
 
       const featureLayer = new FeatureLayer({
         url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
         outFields: ["nazwa_skrocona", "pietro", "typ_dostepu", "funkcja", "organizacja"],
         renderer: getRenderer(),
-        definitionExpression: `budynek_nazwa = 'Gmach Główny' AND poziom=${selectedFloor.value}`,
+        labelingInfo: [
+          {
+            labelExpressionInfo: {
+              expression: "IIF($feature.nazwa_skrocona != 'nr nieznany', $feature.nazwa_skrocona, '')"
+            },
+            symbol: {
+              type: "text",
+              color: "#000000",
+              font: {
+                size: 10,
+                weight: "bold",
+                family: "Arial",
+              },
+              haloColor: "#ffffff",
+              haloSize: 0.7,
+            },
+            minScale: 1000,
+            maxScale: 0,
+          },
+        ],
+        definitionExpression: `budynek_nazwa = 'Gmach Główny' AND poziom IN (${Array.isArray(selectedFloor.value) ? selectedFloor.value.join(", ") : selectedFloor.value})`,
       });
 
       map.add(featureLayer);
 
       view.on("click", (event) => {
+
+        resetRoomSelection();
+        view.graphics.removeAll();
+        isSearchHighlightActive.value = false; // Deaktywacja zaznaczenia po kliknięciu
         view.hitTest(event).then((response) => {
           const results = response.results;
           if (results.length > 0) {
@@ -369,8 +433,10 @@ export default {
         });
       });
 
+      // Aktualizacja renderera przy zmianie podświetlonego pokoju
       watch(highlightedRoomId, updateRenderer);
 
+      // Aktualizacja warstwy przy zmianie piętra
       watch(selectedFloor, () => {
         if (!isAutoFloorChange.value) {
           resetRoomSelection();
@@ -378,29 +444,31 @@ export default {
             view.graphics.removeAll();
             isSearchHighlightActive.value = false;
           }
+        } else {
+          isAutoFloorChange.value = false; // Reset automatycznego przełączenia
         }
-        isAutoFloorChange.value = false; // Resetowanie flagi po zakończeniu automatycznej zmiany piętra
 
-        const floorNumbers = Array.isArray(selectedFloor.value) ? selectedFloor.value.join(", ") : selectedFloor.value;
+        // Generowanie dynamicznego wyrażenia dla wielu pięter
+        const floorNumbers = selectedFloor.value.join(", ");
         featureLayer.definitionExpression = `budynek_nazwa = 'Gmach Główny' AND poziom IN (${floorNumbers})`;
       });
 
+      // Aktualizacja warstwy przy zmianie typu i wersji urządzenia
       watch([selectedItemType, version], async () => {
         resetRoomSelection();
         await fetchRoomStatus();
-        updateRenderer(); // Upewnij się, że renderer jest aktualizowany po zmianie wersji lub typu urządzenia
+        updateRenderer();
       });
     });
 
-    const updateFloor = (floor) => {
+    const updateFloor = (floorValue) => {
       resetRoomSelection();
       if (isSearchHighlightActive.value) {
-        view.graphics.removeAll(); // Usunięcie grafiki tylko przy zmianie piętra
-        isSearchHighlightActive.value = false; // Wyłączenie zaznaczenia po wyszukiwaniu
+        view.graphics.removeAll();
+        isSearchHighlightActive.value = false;
       }
-      selectedFloor.value = floor;
+      selectedFloor.value = Array.isArray(floorValue) ? floorValue : [floorValue];
     };
-
     const selectItemType = (type) => {
       resetRoomSelection();
       selectedItemType.value = type;
@@ -423,6 +491,7 @@ export default {
       selectItemType,
       selectItemVersion,
       updateFloor,
+      isSelectedFloor
     };
   },
 };
@@ -506,8 +575,8 @@ button {
   height: 40px;
   border-radius: 50%;
   aspect-ratio: 1 / 1;
-  background-color: #0d1016;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #0d1016;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
@@ -518,8 +587,26 @@ button:hover {
   background-color: #0d1016;
 }
 
-button.selected:hover {
-  transform: none;
+.floor-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  color: #0d1016;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.floor-button:hover {
+  background-color: #dcdee4;
+}
+
+.floor-button.selected {
+  transform: scale(1.3);
+  transition: transform 0.1s ease-in-out;
 }
 
 .back-button {
@@ -553,6 +640,15 @@ button.reserve-version {
 .back-button:hover {
   transform: scale(1.07);
   cursor: pointer;
+}
+
+.custom-widget-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Wyrównaj widgety do środka */
+  gap: 5px;
+  /* Opcjonalnie: odstęp między widgetami */
 }
 
 .room-info {
