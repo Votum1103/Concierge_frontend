@@ -20,13 +20,12 @@
                 <div>
                     <input type="text" id="login" name="login" placeholder="Login" v-model="username" required>
                 </div>
-
                 <div>
                     <input type="password" id="password" name="password" placeholder="Hasło" v-model="password"
                         required>
                 </div>
                 <div class="login-button-group">
-                    <RouteButton @click="login" buttonText="Zaloguj się" class="primary-button" />
+                    <RouteButton buttonText="Zaloguj się" class="primary-button" />
                 </div>
             </form>
         </section>
@@ -56,16 +55,31 @@ export default {
     },
     methods: {
         async login() {
-            try {
 
-                const response = await axios.post('http://127.0.0.1:8000/login', new URLSearchParams({
+            try {
+                const token = sessionStorage.getItem("access_token");
+                const headers = { Authorization: `Bearer ${token}` };
+                const response = await axios.post('http://127.0.0.1:8000/start-session/login', new URLSearchParams({
                     username: this.username,
                     password: this.password
-                }));
+                }), { headers });
 
-                const accessToken = response.data.access_token;
+                const username = response.data.user.name;
 
-                sessionStorage.setItem('access_token', accessToken);
+                const surname = response.data.user.surname;
+                const faculty = response.data.user.faculty;
+                const role = response.data.user.role;
+                const userId = response.data.user.id;
+
+                sessionStorage.setItem('userId', userId);
+                sessionStorage.setItem('username', username);
+
+                sessionStorage.setItem('surname', surname);
+                sessionStorage.setItem('faculty', faculty);
+                sessionStorage.setItem('role', role);
+
+
+
 
                 this.$router.push({ name: 'MainProcess' });
             } catch (error) {

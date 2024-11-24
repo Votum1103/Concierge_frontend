@@ -1,10 +1,5 @@
 <template>
-
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <GoogleFonts />
-    </head>
+    <GoogleFonts />
 
     <body>
         <nav>
@@ -19,10 +14,10 @@
                         <path
                             d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m-1 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0m-3 4c2.623 0 4.146.826 5 1.755V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-1.245C3.854 11.825 5.377 11 8 11" />
                     </svg>
-                    <h1 id="employee-data">Jan Kowalski</h1>
+                    <h1 id="employee-data">{{ username }} {{ surname }}</h1>
                 </div>
-                <h2>Pracownik</h2>
-                <h2>Wydział: Geodezji i Kartografii</h2>
+                <h2>{{ role }}</h2>
+                <h2>Wydział {{ faculty }}</h2>
             </header>
 
             <div class="header-container">
@@ -30,7 +25,8 @@
                     <div class="header-items">
                         <div class="header-item">Godzina</div>
                         <div class="header-item">Sala</div>
-                        <div class="header-item header-item-large">Pobrane</div>
+                        <div class="header-item ">Przedmiot</div>
+                        <div class="header-item">Wesja</div>
                     </div>
                     <div id="permissions-header">Uprawnienia</div>
                 </div>
@@ -45,7 +41,6 @@
                                     <td class="table-cell">{{ item.roomNumber }}</td>
                                     <td class="table-cell">{{ item.items[0] }}</td>
                                     <td class="table-cell">{{ item.items[1] }}</td>
-                                    <td class="table-cell">{{ item.items[2] }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -53,20 +48,10 @@
                     <div class="permissions-table">
                         <table>
                             <tbody>
-                                <tr class="table-row">
-                                    <td class="table-cell">14</td>
-                                    <td class="table-cell">25</td>
-                                </tr>
-                                <tr class="table-row">
-                                    <td class="table-cell">89</td>
-                                    <td class="table-cell">100A</td>
-                                </tr>
-                                <tr class="table-row">
-                                    <td class="table-cell">401</td>
-                                    <td class="table-cell">415</td>
-                                </tr>
-                                <tr class="table-row">
-                                    <td class="table-cell">422A</td>
+                                <tr class="table-row-permissions" v-for="(permission, index) in permissions"
+                                    :key="index">
+                                    <td class="table-cell">{{ permission.col1 }}</td>
+                                    <td class="table-cell">{{ permission.col2 }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -112,44 +97,91 @@
 
 </template>
 <script>
-import axios from 'axios';
 import GoogleFonts from './googleFonts.vue';
 import RouteButton from './RouteButton.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
-
+import api from '../api';
 
 export default {
     name: "MainProcess",
     components: {
         WUoT_Logo,
         GoogleFonts,
-        RouteButton
+        RouteButton,
     },
     data() {
         return {
+            username: '',
+            surname: '',
+            role: '',
+            faculty: '',
+            userId: '',
             users: [],
-            items: [
-                { userIds: [10], roomNumber: '402A', items: ['klucz', 'mikrofon', 'pilot'] },
-                { userIds: [13], roomNumber: '342', items: ['', 'mikrofon', ''] },
-            ],
+            items: [],
+            permissions: [], // Lista uprawnień (z danych API)
         };
     },
     mounted() {
         this.fetchUsers();
+        this.loadUserData();
+        this.fetchLoggedUser();
+        this.fetchPermissions(); // Pobranie uprawnień
     },
     methods: {
         async fetchUsers() {
             try {
-
-                const accesToken = sessionStorage.getItem('access_token')
-                const headers = { Authorization: `Bearer ${accesToken}` };
-
-                const response = await axios.get('http://127.0.0.1:8000/users/', { headers });
-
+                const response = await api.get('/users/');
                 this.users = response.data;
             } catch (error) {
                 console.error('Błąd przy pobieraniu użytkowników:', error);
             }
+        },
+        loadUserData() {
+            this.username = sessionStorage.getItem('username') || 'Nieznane imię';
+            this.userId = sessionStorage.getItem('userId');
+            this.surname = sessionStorage.getItem('surname') || 'Nieznane nazwisko';
+            this.role = sessionStorage.getItem('role') || 'Nieznana rola';
+            this.faculty = sessionStorage.getItem('faculty') || 'Nieznany wydział';
+        },
+        async fetchPermissions() {
+            try {
+                const response = await api.get(`/permissions/?user_id=${this.userId}`);
+                // Pobranie tylko numerów pokoi
+                const roomNumbers = response.data.map(permission => permission.room.number);
+
+                // Grupowanie numerów pokoi w pary
+                this.permissions = [];
+                for (let i = 0; i < roomNumbers.length; i += 2) {
+                    this.permissions.push({
+                        col1: roomNumbers[i],
+                        col2: roomNumbers[i + 1] || '', // Jeśli brak drugiego numeru, zostaw puste
+                    });
+                }
+            } catch (error) {
+                console.error('Błąd przy pobieraniu uprawnień:', error);
+            }
+        },
+        async fetchLoggedUser() {
+            try {
+                const response = await api.get(`/operations/users/${this.userId}`);
+                const operations = response.data;
+
+                console.log("Fetched operations:", operations);
+
+                this.items = operations.map(op => ({
+                    userIds: [op.session.user_id],
+                    roomNumber: op.device.room.number,
+                    items: this.formatItems(op),
+                }));
+            } catch (error) {
+                console.error('Błąd przy pobieraniu informacji o zalogowanym użytkowniku:', error);
+            }
+        },
+        formatItems(operation) {
+            const items = [];
+            if (operation.device.dev_type) items.push(operation.device.dev_type);
+            if (operation.device.dev_version) items.push(operation.device.dev_version);
+            return items;
         },
         getUserNames(userIds) {
             const names = userIds.map(id => {
@@ -158,8 +190,14 @@ export default {
             });
             return names.join(', ');
         },
+        getPermissionsForUser(employeeId) {
+            return this.permissions
+                .filter(permission => permission.employeeId === employeeId)
+                .map(permission => permission.roomNumber)
+                .join(', ');
+        },
     },
-}
+};
 
 </script>
 <style lang="scss" scoped>
@@ -217,7 +255,7 @@ header {
 #employee-data {
     margin-left: 20px;
     display: inline;
-    font-size: 1.75rem;
+    font-size: 2.25rem;
 }
 
 h2 {
@@ -231,9 +269,15 @@ h2 {
     width: 100%;
 }
 
-.header-tab,
-.table-section,
-.info-section,
+.info-section {
+    display: flex;
+    width: 90%;
+    min-width: 400px;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+
 .button-group {
     display: flex;
     width: 70%;
@@ -243,10 +287,34 @@ h2 {
     margin-bottom: 10px;
 }
 
+.header-tab {
+    display: flex;
+    width: 90%;
+    min-width: 400px;
+    margin-bottom: 10px;
+    justify-content: space-between;
+
+}
+
+.header-item {
+    width: 24.8%;
+    font-size: 20px;
+}
+
 .header-items {
     display: flex;
     width: 70%;
 }
+
+.table-section {
+    display: flex;
+    flex-direction: row;
+    width: 90%; // Dopasowanie szerokości sekcji do okna
+    align-items: center;
+    justify-content: space-between;
+}
+
+
 
 .items-table,
 .permissions-table {
@@ -254,24 +322,42 @@ h2 {
     align-items: flex-start;
     background-color: $secondary-color;
     border-radius: 15px;
-    max-height: 100px;
+    max-height: 200px;
+    width: 100%;
     overflow-y: auto;
+    overflow-x: hidden;
 }
+
 
 .items-table {
     width: 70%;
 }
 
-.permissions-table,
-#permissions-header,
-.header-item {
-    width: 20%;
+.permissions-table {
+    width: 18%;
+    height: 200px;
+}
+
+
+#permissions-header {
+    width: 18%;
+    font-size: 20px;
 }
 
 .table-cell {
     text-align: center;
     height: 30px;
+    width: 100%;
     font-size: 1.25rem;
+    text-wrap: nowrap;
+}
+
+.table-row {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.table-row-permissions {
+    grid-template-columns: repeat(2, 1fr);
 }
 
 .items-table table,
@@ -279,6 +365,10 @@ h2 {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
+}
+
+.items-table td:nth-child(1) {
+    width: 1.5fr; // Pierwsza kolumna ma szerokość 1.5x w stosunku do innych
 }
 
 .header-item-large {
@@ -358,6 +448,8 @@ h2 {
     display: flex;
     justify-content: space-around;
 }
+
+
 
 .primary-button,
 .secondary-button {

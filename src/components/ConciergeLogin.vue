@@ -30,7 +30,7 @@
                     <span v-if="loginError" class="error-message">Niepoprawny login lub hasło</span>
                 </div>
                 <div class="login-button-group">
-                    <RouteButton @click="login" buttonText="Zaloguj się" class="primary-button" />
+                    <RouteButton buttonText="Zaloguj się" class="primary-button" />
                 </div>
             </form>
         </section>

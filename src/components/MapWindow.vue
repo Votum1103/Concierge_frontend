@@ -80,7 +80,7 @@
             {{ selectedRoom.is_taken === "brak" ? "brak urządzenia dla sali" : selectedRoom.is_taken ? "Tak" : "Nie" }}
           </p>
           <p v-if="selectedRoom.owner_name && selectedRoom.owner_surname">
-            <b>Posiadacz klucza:</b> {{ selectedRoom.owner_name }} {{ selectedRoom.owner_surname }}
+            <b>Posiadacz {{selectedItemType}}a:</b> {{ selectedRoom.owner_name }} {{ selectedRoom.owner_surname }}
           </p>
           <p><b>Typ dostępu:</b> {{ selectedRoom.typ_dostepu }}</p>
           <p><b>Funkcja:</b> {{ selectedRoom.funkcja }}</p>

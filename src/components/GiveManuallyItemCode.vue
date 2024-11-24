@@ -1,11 +1,5 @@
 <template>
-
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <GoogleFonts />
-        <title>e-portiernia - zeskanuj kartę</title>
-    </head>
+    <GoogleFonts />
 
     <body>
         <nav>
@@ -24,44 +18,75 @@
         <main>
             <section class="main-group">
                 <h1>Podaj kod przedmiotu</h1>
-                <form @submit.prevent="submitForm">
+                <form @submit.prevent="fetchItemDetails">
                     <div class="form-group">
                         <input type="text" v-model="itemCode" id="code-input" name="code-input"
-                            placeholder="Kod przemiotu" required>
+                            placeholder="Kod przedmiotu" required />
                     </div>
-                    <div class="button-group"><button class="primary-button">Potwierdź</button></div>
+                    <div class="button-group">
+                        <button class="primary-button">Potwierdź</button>
+                    </div>
                 </form>
+                <div v-if="itemDetails" class="item-details">
+                    <h2>Szczegóły przedmiotu:</h2>
+                    <p><strong>ID:</strong> {{ itemDetails.id }}</p>
+                    <p><strong>Code:</strong> {{ itemDetails.code }}</p>
+                    <p><strong>Type:</strong> {{ itemDetails.dev_type }}</p>
+                    <p><strong>Version:</strong> {{ itemDetails.dev_version }}</p>
+                    <p><strong>Room:</strong> {{ itemDetails.room.number }}</p>
+                </div>
+                <div v-if="error" class="error-message">
+                    <p>{{ error }}</p>
+                </div>
             </section>
         </main>
     </body>
 </template>
 
 <script>
-import GoogleFonts from './googleFonts.vue';
-import WUoT_Logo from './WUoT_Logo.vue';
-import BackButton from './BackButton.vue';
-
+import api from "../api"; // Import Twojego pliku API
+import GoogleFonts from "./googleFonts.vue";
+import WUoT_Logo from "./WUoT_Logo.vue";
+import BackButton from "./BackButton.vue";
+//#TODO Tutaj musze zrobić tak, że pobiore info na temat uprawnień z MainProcess w sessionStorage i dodatkowo będę musiał przechowywac info jakie klucze już wyporzyczyłem. 
+// Dalej trzeba będzie sprawdzić czy klucz, którego kod wpisałem jest już u mnie czy jednak nie jest. W sessionstorage trzeba będzie wrzucić pustą liste i z nią porównywać 
 export default {
-    name: 'GiveManuallyItemCode',
+    name: "GiveManuallyItemCode",
     components: {
         GoogleFonts,
         WUoT_Logo,
-        BackButton
+        BackButton,
     },
     data() {
         return {
-            itemCode: ''  
+            itemCode: "", // Kod wprowadzany przez użytkownika
+            itemDetails: null, // Szczegóły przedmiotu
+            error: null, // Komunikat błędu
         };
     },
     methods: {
-        submitForm() {
-            this.$emit('submit-item-code', this.itemCode);
-            this.itemCode = '';
-        }
-    }
+        async fetchItemDetails() {
+            this.error = null;
+            this.itemDetails = null;
+
+            try {
+                // Używamy Twojego klienta API
+                const response = await api.get(`/devices/code/${this.itemCode}`);
+                this.itemDetails = response.data;
+                console.log(this.itemDetails)
+            } catch (error) {
+                if (error.response && error.response.status === 404) {
+                    this.error = "Nie znaleziono przedmiotu o podanym kodzie.";
+                } else {
+                    this.error = "Wystąpił błąd podczas pobierania danych.";
+                }
+            }
+
+            this.itemCode = ""; // Czyszczenie pola po wysłaniu
+        },
+    },
 };
 </script>
-
 
 
 <style lang="scss" scoped>
