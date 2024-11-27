@@ -1,37 +1,9 @@
 <template>
-    <!DOCTYPE html>
-    <html lang="en">
-
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <GoogleFonts />
-    </head>
-
     <body>
         <nav>
-            <a class="back-button" href="#" aria-label="Wróć">
-                <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                    class="bi bi-chevron-left" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd"
-                        d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
-                </svg>Wróć</a>
             <WUoT_Logo />
         </nav>
-
-        <main>
-            <header>
-                <div class="employee-container ">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="60px" fill="currentColor"
-                        class="bi bi-file-person-fill" viewBox="0 0 16 16">
-                        <path
-                            d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m-1 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0m-3 4c2.623 0 4.146.826 5 1.755V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-1.245C3.854 11.825 5.377 11 8 11" />
-                    </svg>
-                    <h1 id="employee-data">Jan Kowalski</h1>
-                </div>
-                <h2>Pracownik</h2>
-                <h2>Wydział: Geodezji i Kartografii</h2>
-            </header>
             <section>
                 <div class="alert danger-alert">
                     <svg xmlns="http://www.w3.org/2000/svg" width="50px" fill=#661111 class="bi bi-x-circle-fill"
@@ -46,11 +18,7 @@
                     <button class="secondary-button">Anuluj</button>
                 </div>
             </section>
-        </main>
     </body>
-
-    </html>
-
 </template>
 <script>
 import GoogleFonts from './googleFonts.vue';
@@ -103,7 +71,7 @@ p {
 
 nav {
     text-align: left;
-    height: 3.125em;
+    height: 5vh;
 }
 
 .back-button {
@@ -157,6 +125,8 @@ section {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    height: 95vh;
 }
 
 .alert {
@@ -164,6 +134,7 @@ section {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    align-content: center;
     padding: 0.9375em 0.625em;
     width: 60%;
     max-width: 37.5em;

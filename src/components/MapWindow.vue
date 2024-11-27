@@ -23,11 +23,11 @@
       </div>
     </div>
     <div class="informations">
-      <div class="item-type-overlay">
+      <div v-if="areOverlaysVisible" class="item-type-overlay">
         <div class="itemTypesButtons">
           <button @click="selectItemType('klucz')" :class="{ selectedButton: selectedItemType === 'klucz' }"
             class="keys">
-            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-key-fill"
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-key-fill"
               viewBox="0 0 16 16">
               <path
                 d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2M2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2" />
@@ -75,22 +75,22 @@
         <div v-if="selectedRoom && selectedRoom.nazwa_skrocona !== 'nr nieznany'">
           <p><b>Sala:</b> {{ selectedRoom.nazwa_skrocona }}</p>
           <p><b>Piętro:</b> {{ selectedRoom.pietro }}</p>
-          <p>
+          <p v-if="areOverlaysVisible">
             <b>Pobrany:</b>
             {{ selectedRoom.is_taken === "brak" ? "brak urządzenia dla sali" : selectedRoom.is_taken ? "Tak" : "Nie" }}
           </p>
-          <p v-if="selectedRoom.owner_name && selectedRoom.owner_surname">
+          <p v-if="selectedRoom.owner_name && selectedRoom.owner_surname && areOverlaysVisible">
             <b>Posiadacz {{selectedItemType}}a:</b> {{ selectedRoom.owner_name }} {{ selectedRoom.owner_surname }}
           </p>
           <p><b>Typ dostępu:</b> {{ selectedRoom.typ_dostepu }}</p>
           <p><b>Funkcja:</b> {{ selectedRoom.funkcja }}</p>
-          <p><b>Organizacja:</b> {{ selectedRoom.organizacja }}</p>
+          <p><b>Klasa:</b> {{ selectedRoom.klasa }}</p>
         </div>
         <div v-else>
           <p>Wybierz pomieszczenie, by zobaczyć szczegóły.</p>
         </div>
       </div>
-      <div class="deviceStatus">
+      <div  v-if="areOverlaysVisible" class="deviceStatus">
         <p class="status available"><span class="circle"></span>{{ selectedItemType }} dostępny</p>
         <p class="status unavailable"><span class="circle"></span>{{ selectedItemType }} niedostępny</p>
         <p class="status nonexistent"><span class="circle"></span>{{ selectedItemType }} nie istnieje</p>
@@ -123,6 +123,7 @@ export default {
     BackButton,
   },
   setup() {
+    const filterButtonText = ref("Klasy pomieszczeń");
     const isAutoFloorChange = ref(false);
     const mapViewDiv = shallowRef(null);
     const selectedRoom = ref(null);
@@ -133,6 +134,8 @@ export default {
     const version = ref("podstawowa");
     const isSearchHighlightActive = ref(false); // Śledzenie zaznaczenia po wyszukiwaniu
     let view = null;
+    const isFilterApplied = ref(false);
+    const areOverlaysVisible = ref(true);
 
 
     const floors = [
@@ -143,6 +146,62 @@ export default {
       { label: 4, value: [5] },
     ];
 
+    const applyClassFilter = () => {
+  isFilterApplied.value = !isFilterApplied.value;
+  areOverlaysVisible.value = !isFilterApplied.value;
+
+  if (isFilterApplied.value) {
+    filterButtonText.value = "Dostępność urządzeń";
+    // Zastosowanie filtra według funkcji pomieszczeń
+    const classColorMapping = {
+      "administracyjny": [101, 166, 185, 1],
+      "działalności edukacyjnej lub badawczej": [167, 203, 188, 1],
+      "przechowywania": [161, 167, 166, 1],
+      "rekreacyjny": [204, 146, 114, 1],
+      "sanitarne": [230, 209, 90, 1],
+      "komunikacji": [202, 205, 207, 1],
+      "funkcyjny": [161, 167, 166, 1],
+      "biznesu lub handlu": [224, 182, 90, 1],
+      "konferencyjny": [204, 146, 114, 1],
+      "dostarczania żywności": [176, 178, 217, 1],
+    };
+
+    const renderer = new UniqueValueRenderer({
+      field: "klasa",
+      uniqueValueInfos: Object.entries(classColorMapping).map(([key, color]) => ({
+        value: key,
+        symbol: {
+          type: "simple-fill",
+          color,
+          outline: {
+            color: [0, 0, 0, 0.5],
+            width: 1,
+          },
+        },
+      })),
+      defaultSymbol: {
+        type: "simple-fill",
+        color: [211, 211, 211, 0.8], // Kolor domyślny dla nieznanych klas
+        outline: {
+          color: [0, 0, 0, 0.5],
+          width: 1,
+        },
+      },
+    });
+
+    if (view && view.map && view.map.layers.items.length > 0) {
+      const featureLayer = view.map.layers.items[0];
+      featureLayer.renderer = renderer;
+      console.log("Renderer ustawiony na funkcję pomieszczeń.");
+    }
+  } else {
+    // Powrót do filtra dostępności kluczy/pilotów/mikrofonów
+    filterButtonText.value = "Klasy pomieszczeń";
+    updateRenderer();
+    console.log("Renderer ustawiony na dostępność urządzeń.");
+  }
+};
+
     const isSelectedFloor = (floorValue) => {
       if (Array.isArray(selectedFloor.value)) {
         return selectedFloor.value.some(val => Array.isArray(floorValue) ? floorValue.includes(val) : val === floorValue);
@@ -151,14 +210,19 @@ export default {
     };
 
     const resetRoomSelection = () => {
-      selectedRoom.value = null;
-      highlightedRoomId.value = null;
-    };
+  selectedRoom.value = null;
+  highlightedRoomId.value = null;
+  
+  // Wyłącz filtr tylko wtedy, gdy użytkownik zmienia piętro
+  if (!isFilterApplied.value) {
+    isFilterApplied.value = false;
+  }
+};
 
     const fetchRooms = async () => {
       try {
         const token = sessionStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
+        const headers = { Authorization: `Bearer ${token}`};
         const response = await axios.get(`http://127.0.0.1:8000/rooms/`, { headers });
         roomStatus.value = {};
         response.data.forEach((room) => {
@@ -196,10 +260,15 @@ export default {
     };
 
     const updateRenderer = () => {
-      if (view) {
-        view.map.layers.items[0].renderer = getRenderer(); // Aktualizuj renderer na podstawie nowego stanu
-      }
-    };
+  if (isFilterApplied.value) {
+    console.log("Filtr klasy jest aktywny - pomijam zmianę renderera.");
+    return; // Nie zmieniaj renderera, jeśli filtr klasy jest aktywny
+  }
+
+  if (view) {
+    view.map.layers.items[0].renderer = getRenderer(); // Aktualizuj renderer na podstawie nowego stanu
+  }
+};
 
     const getRenderer = () => {
       const uniqueValueInfos = Object.keys(roomStatus.value).map((roomNumber) => ({
@@ -208,10 +277,10 @@ export default {
           type: "simple-fill",
           color:
             roomStatus.value[roomNumber].is_taken === "brak"
-              ? [244, 238, 177, 0.8]
+              ? [224, 182, 90, 1]
               : roomStatus.value[roomNumber].is_taken
-                ? [218, 44, 56, 0.8]
-                : [34, 111, 84, 0.8],
+                ? [223, 128, 128, 1]
+                : [167, 203, 188, 1],
           outline: {
             color: highlightedRoomId.value === roomNumber ? [0, 0, 0, 0.8] : [0, 0, 0, 0.5],
             width: highlightedRoomId.value === roomNumber ? 3 : 1,
@@ -223,7 +292,7 @@ export default {
         value: "nr nieznany",
         symbol: {
           type: "simple-fill",
-          color: [211, 211, 211, 0.8],
+          color: [202, 205, 207, 1],
           outline: { color: [0, 0, 0, 0.5], width: 1 },
         },
       });
@@ -243,143 +312,204 @@ export default {
     };
 
     onMounted(async () => {
-      await fetchRooms();
-      await fetchRoomStatus();
+  // Pobierz dane o pokojach i ich statusie
+  await fetchRooms();
+  await fetchRoomStatus();
 
-      const map = new Map({ basemap: "topo-vector" });
-      view = new MapView({
-        container: mapViewDiv.value,
-        map: map,
-        center: [21.01010, 52.22072],
-        zoom: 19,
-        constraints: {
-          minZoom: 19,
-          maxZoom: 22,
-        },
-        ui: {
-          components: ["attribution"],
-        },
-      })
+  // Utwórz mapę i widok
+  const map = new Map({ basemap: "topo-vector" });
+  view = new MapView({
+    container: mapViewDiv.value,
+    map: map,
+    center: [21.01010, 52.22072],
+    zoom: 19,
+    constraints: {
+      minZoom: 19,
+      maxZoom: 22,
+    },
+    ui: {
+      components: ["attribution"],
+    },
+  });
 
-      let widgetContainer = document.createElement("div");
-      widgetContainer.style.position = "absolute";
-      widgetContainer.style.bottom = "60px";
-      widgetContainer.style.left = "15px";
-      widgetContainer.style.display = "flex";
-      widgetContainer.style.flexDirection = "column";
-      widgetContainer.style.gap = "10px";
+  // Tworzenie kontenera na niestandardowe widgety
+  let widgetContainer = document.createElement("div");
+  widgetContainer.style.position = "absolute";
+  widgetContainer.style.bottom = "70px";
+  widgetContainer.style.left = "15px";
+  widgetContainer.style.display = "flex";
+  widgetContainer.style.flexDirection = "column";
+  widgetContainer.style.gap = "10px";
+  widgetContainer.id = "widgetContainer";
 
-      widgetContainer.id = "widgetContainer";
+  // Dodaj kontener do interfejsu mapy
+  view.ui.add(widgetContainer, "manual");
 
-      // Dodajemy niestandardowy kontener do mapy
-      view.ui.add(widgetContainer, "manual");
+  // Dodanie widgetów Zoom, Home i ScaleBar bezpośrednio do mapy
+  const zoomWidget = new Zoom({ view });
+  const homeWidget = new Home({ view });
+  const scaleBarWidget = new ScaleBar({ view });
 
-      // Dodajemy widżety Zoom i Home bezpośrednio do kontenera mapy
-      const zoomWidget = new Zoom({
-        view: view
-      });
-      const homeWidget = new Home({
-        view: view
-      });
-      const scaleBarWidget = new ScaleBar({
-        view: view
-      });
+  // Dodaj ScaleBar do mapy
+  
+  view.ui.add([zoomWidget, homeWidget], "manual");
 
-      // Dodanie widgetów do UI i przypisanie do widgetContainer
-      view.ui.add([zoomWidget, homeWidget], "manual");
+  widgetContainer.appendChild(homeWidget.container);
+  widgetContainer.appendChild(zoomWidget.container);
 
-      // Stylizacja CSS dla pionowego układu widżetów
-      zoomWidget.container.classList.add("custom-widget");
-      homeWidget.container.classList.add("custom-widget");
+  // Dodanie niestandardowego przycisku "Zmień filtr"
+  const customButton = document.createElement("button");
+customButton.classList.add("filter-button");
 
-      widgetContainer.appendChild(homeWidget.container);
-      widgetContainer.appendChild(zoomWidget.container);
+// Tworzymy statyczną strukturę HTML
+customButton.innerHTML = `
+  <span class="filter-icon">
+    <svg  xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="black" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/>
+    </svg>
+  </span>
+  <span class="filter-text" style="display:none;">Klasy pomieszczeń</span>
+`;
+  customButton.style.transition = "width 0.2s ease";
+  customButton.style.display = "flex"; // Użycie flexboxa do rozmieszczenia elementów
+  customButton.style.alignItems = "center"; // Wyrównanie w pionie
+  customButton.style.justifyContent = "flex-start"; // Wyrównanie do lewej strony
+  customButton.style.backgroundColor = "#ffffff";
+  customButton.style.gap = "10px";
+  customButton.style.height = "32px"
+  customButton.style.cursor = "pointer";
 
-      view.ui.add(scaleBarWidget, 'bottom-left');
+  watch(filterButtonText, (newValue) => {
+  const filterTextElement = customButton.querySelector(".filter-text");
+  if (filterTextElement) {
+    filterTextElement.textContent = newValue; // Aktualizuje tylko tekst
+  }
+});
 
-      const searchWidget = new Search({
-        view: view,
-        allPlaceholder: "Szukaj pokoju",
-        popupEnabled: false,
-        resultGraphicEnabled: false,
-        includeDefaultSources: false,
-        sources: [
-          {
-            layer: new FeatureLayer({
-              url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
-              outFields: ["nazwa_skrocona", "pietro"],
-            }),
-            searchFields: ["nazwa_skrocona"],
-            displayField: "nazwa_skrocona",
-            exactMatch: true,
-            outFields: ["*"],
-            name: "Pokoje",
-            placeholder: "Wyszukaj pokój",
-            filter: { where: "UPPER(budynek_nazwa) = 'GMACH GŁÓWNY'" },
+  // Dodanie zdarzenia kliknięcia do przycisku
+  customButton.addEventListener("mouseenter", () => {
+  const filterText = customButton.querySelector(".filter-text");
+  setTimeout(() => {
+    filterText.style.display = "inline"; // Pojawia się po zakończeniu animacji szerokości
+  }, 200);
+  customButton.style.width = "180px"; // Zmienia rozmiar przycisku
+});
+
+customButton.addEventListener("mouseleave", () => {
+  const filterText = customButton.querySelector(".filter-text");
+  filterText.style.display = "none"; // Ukrywa tekst
+  customButton.style.width = "32px"; // Przywraca początkowy rozmiar
+});
+
+// Kliknięcie obsługuje logikę filtra
+customButton.addEventListener("click", () => {
+  applyClassFilter(); // Obsługa logiki filtra
+});
+
+
+  // Dodanie przycisku do kontenera widgetów
+  view.ui.add(customButton, "bottom-left");
+  view.ui.add(scaleBarWidget, "bottom-left");
+
+  // Dodanie widgetów Zoom i Home do kontenera widgetów
+  const zoomNode = document.createElement("div");
+  zoomNode.style.display = "inline-block";
+  zoomNode.appendChild(zoomWidget.container || document.createElement("div"));
+  widgetContainer.appendChild(zoomNode);
+
+  const homeNode = document.createElement("div");
+  homeNode.style.display = "inline-block";
+  homeNode.appendChild(homeWidget.container || document.createElement("div"));
+  widgetContainer.appendChild(homeNode);
+
+  const itemTypeOverlayNode = document.querySelector(".item-type-overlay");
+  if (itemTypeOverlayNode) {
+    view.ui.add(itemTypeOverlayNode, "top-right");
+  }
+
+  // Dodanie .deviceStatus do prawego dolnego rogu mapy
+  const deviceStatusNode = document.querySelector(".floor-selection-overlay");
+  if (deviceStatusNode) {
+    view.ui.add(deviceStatusNode, "bottom-right");
+  }
+
+  // Obsługa wyszukiwania
+  const searchWidget = new Search({
+    view,
+    allPlaceholder: "Szukaj pokoju",
+    popupEnabled: false,
+    resultGraphicEnabled: false,
+    includeDefaultSources: false,
+    sources: [
+      {
+        layer: new FeatureLayer({
+          url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
+          outFields: ["nazwa_skrocona", "pietro"],
+        }),
+        searchFields: ["nazwa_skrocona"],
+        displayField: "nazwa_skrocona",
+        exactMatch: true,
+        outFields: ["*"],
+        name: "Pokoje",
+        placeholder: "Wyszukaj pokój",
+        filter: { where: "UPPER(budynek_nazwa) = 'GMACH GŁÓWNY'" },
+      },
+    ],
+  });
+
+  view.ui.add(searchWidget, "top-left");
+
+  // Obsługa zdarzenia wyszukiwania
+  searchWidget.on("search-complete", (event) => {
+    resetRoomSelection();
+    view.graphics.removeAll();
+
+    event.results.forEach((result) => {
+      result.results.forEach((feature) => {
+        const roomAttributes = feature.feature.attributes;
+        const roomKey = roomAttributes.nazwa_skrocona;
+        const roomFloor = feature.feature.attributes.poziom;
+
+        // Znajdź odpowiadający label na podstawie poziomu (roomFloor)
+        const floorMapping = floors.find((floor) =>
+          Array.isArray(floor.value)
+            ? floor.value.includes(roomFloor)
+            : floor.value === roomFloor
+        );
+
+        if (!isSelectedFloor(roomFloor)) {
+          isAutoFloorChange.value = true;
+          selectedFloor.value = floorMapping ? floorMapping.value : [roomFloor];
+        }
+
+        const graphic = new Graphic({
+          geometry: feature.feature.geometry,
+          symbol: {
+            type: "simple-fill",
+            color: [0, 0, 0, 0],
+            outline: { color: [0, 0, 0, 0.8], width: 3 },
           },
-        ],
-      });
-
-
-      view.ui.add(searchWidget, "top-left");
-
-      searchWidget.on("search-complete", (event) => {
-        // Resetowanie stanu zaznaczenia
-        resetRoomSelection();
-        view.graphics.removeAll();
-
-        event.results.forEach((result) => {
-          result.results.forEach((feature) => {
-            const roomAttributes = feature.feature.attributes;
-            const roomKey = roomAttributes.nazwa_skrocona;
-            const roomFloor = feature.feature.attributes.poziom;
-
-            // Znajdź odpowiadający label na podstawie poziomu (roomFloor)
-            const floorMapping = floors.find(floor =>
-              Array.isArray(floor.value)
-                ? floor.value.includes(roomFloor)
-                : floor.value === roomFloor
-            );
-
-            // Zmień piętro tylko jeśli nie jest aktualnie widoczne
-            if (!isSelectedFloor(roomFloor)) {
-              isAutoFloorChange.value = true; // Oznaczenie automatycznej zmiany piętra
-              selectedFloor.value = floorMapping ? floorMapping.value : [roomFloor];
-            }
-
-            // Tworzenie grafiki do zaznaczenia na mapie
-            const graphic = new Graphic({
-              geometry: feature.feature.geometry,
-              symbol: {
-                type: "simple-fill",
-                color: [0, 0, 0, 0],
-                outline: { color: [0, 0, 0, 0.8], width: 3 },
-              },
-            });
-            view.graphics.add(graphic);
-
-            // Ustawienie aktywnego pokoju
-            selectedRoom.value = roomAttributes;
-
-            // Pobranie szczegółowych informacji o pokoju
-            const roomInfo = roomStatus.value[roomKey];
-            if (roomInfo) {
-              selectedRoom.value.is_taken = roomInfo.is_taken;
-              selectedRoom.value.owner_name = roomInfo.owner_name;
-              selectedRoom.value.owner_surname = roomInfo.owner_surname;
-            }
-
-            highlightedRoomId.value = roomKey;
-
-            // Aktywacja podświetlenia po wyszukiwaniu
-            isSearchHighlightActive.value = true;
-          });
         });
+        view.graphics.add(graphic);
+
+        selectedRoom.value = roomAttributes;
+
+        const roomInfo = roomStatus.value[roomKey];
+        if (roomInfo) {
+          selectedRoom.value.is_taken = roomInfo.is_taken;
+          selectedRoom.value.owner_name = roomInfo.owner_name;
+          selectedRoom.value.owner_surname = roomInfo.owner_surname;
+        }
+
+        highlightedRoomId.value = roomKey;
+        isSearchHighlightActive.value = true;
       });
+    });
+  });
 
       const featureLayer = new FeatureLayer({
         url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
-        outFields: ["nazwa_skrocona", "pietro", "typ_dostepu", "funkcja", "organizacja"],
+        outFields: ["nazwa_skrocona", "pietro", "typ_dostepu", "funkcja", "klasa"],
         renderer: getRenderer(),
         labelingInfo: [
           {
@@ -491,7 +621,10 @@ export default {
       selectItemType,
       selectItemVersion,
       updateFloor,
-      isSelectedFloor
+      isSelectedFloor,
+      applyClassFilter,
+      areOverlaysVisible,
+      filterButtonText,
     };
   },
 };
@@ -535,31 +668,37 @@ nav {
 
 .content-wrapper {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 80vh;
-  width: 75%;
-  flex-shrink: 0;
-  margin-left: 100px;
+  flex: 1;
+  justify-content: center; /* Utrzymuje mapę wyśrodkowaną */
+}
+
+.informations {
+  width: 400px; /* Ustaw stałą szerokość dla panelu bocznego */
+  flex-shrink: 0; /* Zapobiega zmniejszaniu panelu bocznego */
+  overflow-y: auto; /* Umożliwia przewijanie dłuższych treści */
 }
 
 .item-type-overlay {
   display: flex;
   flex-direction: row;
+  pointer-events: auto; /* Zapewnia, że kliknięcia są przekazywane */
+  position: relative;
   gap: 15px;
   z-index: 10;
-  transform: translate(-39vh, 3vh);
 }
 
 .map-view {
-  width: 100%;
-  height: 100%;
+  width: 95%; /* Dopasuj szerokość mapy, zmniejszając ją o szerokość paneli bocznych */
+  height: 80%;
   border-radius: 30px;
   overflow: hidden;
+  position: relative; /* Aby upewnić się, że elementy wewnętrzne są poprawnie pozycjonowane */
 }
 
-.map-view .esri-view-bottom-left .esri-attribution__sources {
-  color: black;
+.esri-ui .esri-component, .esri-ui .esri-widget {
+  background: none;
+  border: none;
+  box-shadow: none;
 }
 
 .floor-selection-overlay {
@@ -567,7 +706,6 @@ nav {
   flex-direction: column;
   gap: 30px;
   z-index: 10;
-  transform: translate(-7vh, 15vh);
 }
 
 button {
@@ -581,6 +719,10 @@ button {
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s;
+}
+.itemsVersionsButtons, .itemsTypesButtons
+{
+  height:45px;
 }
 
 button:hover {
@@ -633,7 +775,7 @@ button.reserve-version {
 }
 
 .selectedButton {
-  transform: scale(1.7);
+  transform: scale(1.6);
   transition: transform 0.2s ease-in-out;
 }
 
@@ -646,9 +788,6 @@ button.reserve-version {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Wyrównaj widgety do środka */
-  gap: 5px;
-  /* Opcjonalnie: odstęp między widgetami */
 }
 
 .room-info {
@@ -680,6 +819,7 @@ button.reserve-version {
   line-height: 1.5;
 }
 
+
 .deviceStatus {
   display: flex;
   flex-direction: column;
@@ -709,14 +849,15 @@ button.reserve-version {
 }
 
 .available .circle {
-  background-color: rgba(34, 111, 84, 0.8);
+  background-color: rgba(167, 203, 188, 1);
 }
 
 .unavailable .circle {
-  background-color: rgba(218, 44, 56, 0.8);
+  background-color: rgba(223, 128, 128, 1);
 }
 
 .nonexistent .circle {
-  background-color: rgba(244, 238, 177, 0.8);
+  background-color: rgba(224, 182, 90, 1);
 }
+
 </style>

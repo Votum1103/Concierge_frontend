@@ -23,33 +23,26 @@
                         <input type="text" v-model="itemCode" id="code-input" name="code-input"
                             placeholder="Kod przedmiotu" required />
                     </div>
+                    <div class="error-container">
+                        <div v-if="permissionError" class="error-message">
+                            <p style="color: red;">{{ permissionError }}</p>
+                        </div>
+                    </div>
                     <div class="button-group">
                         <button class="primary-button">Potwierdź</button>
                     </div>
                 </form>
-                <div v-if="itemDetails" class="item-details">
-                    <h2>Szczegóły przedmiotu:</h2>
-                    <p><strong>ID:</strong> {{ itemDetails.id }}</p>
-                    <p><strong>Code:</strong> {{ itemDetails.code }}</p>
-                    <p><strong>Type:</strong> {{ itemDetails.dev_type }}</p>
-                    <p><strong>Version:</strong> {{ itemDetails.dev_version }}</p>
-                    <p><strong>Room:</strong> {{ itemDetails.room.number }}</p>
-                </div>
-                <div v-if="error" class="error-message">
-                    <p>{{ error }}</p>
-                </div>
             </section>
         </main>
     </body>
 </template>
 
 <script>
-import api from "../api"; // Import Twojego pliku API
+import api from "../api";
 import GoogleFonts from "./googleFonts.vue";
 import WUoT_Logo from "./WUoT_Logo.vue";
 import BackButton from "./BackButton.vue";
-//#TODO Tutaj musze zrobić tak, że pobiore info na temat uprawnień z MainProcess w sessionStorage i dodatkowo będę musiał przechowywac info jakie klucze już wyporzyczyłem. 
-// Dalej trzeba będzie sprawdzić czy klucz, którego kod wpisałem jest już u mnie czy jednak nie jest. W sessionstorage trzeba będzie wrzucić pustą liste i z nią porównywać 
+
 export default {
     name: "GiveManuallyItemCode",
     components: {
@@ -59,36 +52,56 @@ export default {
     },
     data() {
         return {
-            itemCode: "", // Kod wprowadzany przez użytkownika
-            itemDetails: null, // Szczegóły przedmiotu
-            error: null, // Komunikat błędu
+            itemCode: "",
+            itemDetails: null,
+            error: null,
+            permissionError: null,
+            statusChange: "",
+            session_id: sessionStorage.getItem('sessionId'),
         };
     },
     methods: {
         async fetchItemDetails() {
             this.error = null;
+            this.permissionError = null;
             this.itemDetails = null;
+            
 
             try {
-                // Używamy Twojego klienta API
                 const response = await api.get(`/devices/code/${this.itemCode}`);
-                this.itemDetails = response.data;
-                console.log(this.itemDetails)
+                const item = response.data;
+
+                this.itemCode = item.code;
+
+                const changeStatusResponse = await api.post('/operations/change-status', {
+                    device_code: this.itemCode,
+                    session_id: this.session_id,
+                    force: false
+                });
+
+                this.statusChange = changeStatusResponse.data;
+
+                this.$router.push({ name: 'MainProcess' });
+
+                console.log(this.statusChange);
+
+
             } catch (error) {
                 if (error.response && error.response.status === 404) {
-                    this.error = "Nie znaleziono przedmiotu o podanym kodzie.";
-                } else {
-                    this.error = "Wystąpił błąd podczas pobierania danych.";
+                    this.error = "Nie znaleziono przedmiotu o podanym kodzie";}
+                else if (error.response && error.response.status === 403) {
+                    this.$router.push({ name: 'UnauthorizedUserAlert' });
+                }
+                 else {
+                    this.error = "Wystąpił błąd podczas pobierania danych";
                 }
             }
 
-            this.itemCode = ""; // Czyszczenie pola po wysłaniu
-        },
-    },
+            this.itemCode = "";
+        }
+    }
 };
 </script>
-
-
 <style lang="scss" scoped>
 body {
     background: rgb(41, 38, 38);
@@ -128,7 +141,6 @@ nav {
     background-color: transparent !important;
 }
 
-
 .logo {
     position: absolute;
     top: 0;
@@ -156,6 +168,27 @@ main {
     padding: 50px 0 50px 0;
     margin-top: 7%;
     height: 450px;
+}
+
+.error-container {
+    height: 20px;
+    /* Stała wysokość kontenera na komunikat błędu */
+    display: flex;
+    align-items: center;
+    /* Wyśrodkowanie treści w pionie */
+    justify-content: center;
+    /* Wyśrodkowanie treści w poziomie */
+}
+
+.error-message {
+    font-size: 16px;
+    color: red;
+    visibility: visible;
+}
+
+.error-container:not(:has(.error-message)) .error-message {
+    visibility: hidden;
+    /* Ukryj komunikat, jeśli nie ma błędu */
 }
 
 h1 {

@@ -70,16 +70,15 @@ export default {
                 const faculty = response.data.user.faculty;
                 const role = response.data.user.role;
                 const userId = response.data.user.id;
-
+                const sessionId = response.data.id;
+                
+                sessionStorage.setItem('sessionId', sessionId);
                 sessionStorage.setItem('userId', userId);
                 sessionStorage.setItem('username', username);
 
                 sessionStorage.setItem('surname', surname);
                 sessionStorage.setItem('faculty', faculty);
                 sessionStorage.setItem('role', role);
-
-
-
 
                 this.$router.push({ name: 'MainProcess' });
             } catch (error) {

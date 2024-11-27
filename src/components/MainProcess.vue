@@ -59,18 +59,10 @@
                 </div>
 
                 <div class="info-section">
-                    <aside class="info-item">Wydano:</aside>
-                    <aside class="info-item">Odebrano:</aside>
+                    <aside class="info-item">Wydano: {{ issued }}</aside>
+                    <aside class="info-item">Odebrano: {{ received }}</aside>
                 </div>
             </div>
-            <!-- <div>
-                <h1>Lista użytkowników</h1>
-                <ul>
-                    <li v-for="user in users" :key="user.id">
-                        {{ user.name }} {{ user.surname }} Imię i nazwisko 
-                    </li>
-                </ul>
-            </div> -->
 
             <section class="scan-section">
                 <h1>Zeskanuj kod przedmiotu</h1>
@@ -97,6 +89,7 @@
 
 </template>
 <script>
+//#TODO nie zapomnij o tym, ze jeszcze jakoś trzeba odwzrorwać działąnie skanera
 import GoogleFonts from './googleFonts.vue';
 import RouteButton from './RouteButton.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
@@ -119,6 +112,8 @@ export default {
             users: [],
             items: [],
             permissions: [], // Lista uprawnień (z danych API)
+            issued: [],
+            received: [],
         };
     },
     mounted() {
@@ -126,6 +121,7 @@ export default {
         this.loadUserData();
         this.fetchLoggedUser();
         this.fetchPermissions(); // Pobranie uprawnień
+        this.fetchUnapprovedOperations();
     },
     methods: {
         async fetchUsers() {
@@ -175,6 +171,53 @@ export default {
                 }));
             } catch (error) {
                 console.error('Błąd przy pobieraniu informacji o zalogowanym użytkowniku:', error);
+            }
+        },
+
+        async fetchUnapprovedOperations() {
+            this.error = null;
+
+            const sessionId = sessionStorage.getItem("sessionId");
+
+            if (!sessionId) {
+                this.error = "Brak aktywnej sesji. Upewnij się, że jesteś zalogowany.";
+                return;
+            }
+
+            try {
+                const response = await api.get('/operations/unapproved', {
+                    params: {
+                        session_id: sessionId,
+                    }
+                });
+
+                const operations = response.data;
+
+                console.log('tutaj operacje', operations);
+
+                const issuedList = [];
+                const receivedList = [];
+
+                for (const operation of operations) {
+                    const roomNumber = operation.device.room.number;
+                    const itemType = operation.device.dev_type;
+
+                    const formattedEntry = `${roomNumber} (${itemType})`;
+
+                    if (operation.operation_type === 'pobranie') {
+                        issuedList.push(formattedEntry);
+                    } else {
+                        receivedList.push(formattedEntry);
+                    }
+                }
+
+                // Łączenie list w stringi
+                this.issued = issuedList.join(', ');
+                this.received = receivedList.join(', '); 
+
+            } catch (error) {
+                console.error("Błąd podczas pobierania niezatwierdzonych operacji:", error);
+                this.error = "Wystąpił błąd podczas pobierania danych.";
             }
         },
         formatItems(operation) {
