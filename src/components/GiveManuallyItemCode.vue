@@ -65,7 +65,7 @@ export default {
             this.error = null;
             this.permissionError = null;
             this.itemDetails = null;
-            
+
 
             try {
                 const response = await api.get(`/devices/code/${this.itemCode}`);
@@ -73,30 +73,34 @@ export default {
 
                 this.itemCode = item.code;
 
-                const changeStatusResponse = await api.post('/operations/change-status', {
-                    device_code: this.itemCode,
-                    session_id: this.session_id,
-                    force: false
-                });
+                try {
+                    const changeStatusResponse = await api.post('/operations/change-status', {
+                        device_code: this.itemCode,
+                        session_id: this.session_id,
+                        force: false
+                    });
 
-                this.statusChange = changeStatusResponse.data;
+                    this.statusChange = changeStatusResponse.data;
 
-                this.$router.push({ name: 'MainProcess' });
+                    this.$router.push({ name: 'MainProcess' });
 
-                console.log(this.statusChange);
-
-
+                    console.log(this.statusChange);
+                } catch (error) {
+                    if (error.response && error.response.status === 403) {
+                        sessionStorage.setItem('SelectedItemCode', this.itemCode)
+                        console.log(this.itemCode)
+                        this.$router.push({ name: 'UnauthorizedUserAlert'});
+                    } else {
+                        this.error = "Wystąpił błąd podczas zmiany statusu urządzenia";
+                    }
+                }
             } catch (error) {
                 if (error.response && error.response.status === 404) {
-                    this.error = "Nie znaleziono przedmiotu o podanym kodzie";}
-                else if (error.response && error.response.status === 403) {
-                    this.$router.push({ name: 'UnauthorizedUserAlert' });
-                }
-                 else {
-                    this.error = "Wystąpił błąd podczas pobierania danych";
+                    this.error = "Nie znaleziono przedmiotu o podanym kodzie";
+                } else {
+                    this.error = "Wystąpił błąd podczas pobierania danych urządzenia";
                 }
             }
-
             this.itemCode = "";
         }
     }

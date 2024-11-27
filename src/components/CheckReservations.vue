@@ -18,16 +18,16 @@
         </header>
         <main>
             <div class="form-container">
-                <form action="#">
+                <form @submit.prevent="searchReservations" @keyup.enter="searchReservations">
                     <div class="form-group">
-                        <input type="text" id="room-number" v-model="roomNumber" placeholder="Podaj numer sali">
+                        <input type="text" id="room-number" v-model="roomNumber" placeholder="Numer sali">
                     </div>
                     <div class="form-group">
-                        <input type="text" id="start-date" v-model="startDate" placeholder="Podaj datę rezerwacji"
+                        <input type="text" id="start-date" v-model="startDate" placeholder="Data rezerwacji"
                             onfocus="(this.type='date')" onblur="if(this.value==''){this.type='text'}">
                     </div>
                     <div class="form-group">
-                        <input type="text" id="end-time" v-model="endTime" placeholder="Podaj godzinę rezerwacji"
+                        <input type="text" id="end-time" v-model="endTime" placeholder="Godzina rezerwacji"
                             onfocus="(this.type='time')" onblur="if(this.value==''){this.type='text'}">
                     </div>
                 </form>
@@ -49,8 +49,8 @@
                             <tr class="table-row" v-for="reservation in reservations" :key="reservation.id">
                                 <td class="table-cell">{{ reservation.room.number }}</td>
                                 <td class="table-cell">{{ reservation.date }}</td>
-                                <td class="table-cell">{{ reservation.start_time }}</td>
-                                <td class="table-cell">{{ reservation.end_time }}</td>
+                                <td class="table-cell">{{ formatTime(reservation.start_time) }}</td>
+                                <td class="table-cell">{{ formatTime(reservation.end_time) }}</td>
                                 <td class="table-cell cell-large">{{ `${reservation.user.name}
                                     ${reservation.user.surname}` }}
                                 </td>
@@ -107,7 +107,6 @@ export default {
 
                 const queryParams = new URLSearchParams();
 
-                // Dodanie parametru `room_id` tylko jeśli numer sali został podany
                 if (this.roomNumber) {
                     const roomResponse = await axios.get(`http://127.0.0.1:8000/rooms/?number=${this.roomNumber}`, { headers });
                     const roomId = roomResponse.data[0]?.id;
@@ -146,6 +145,10 @@ export default {
                 console.error('Błąd przy pobieraniu danych z API:', error);
                 this.errorMessage = 'Brak rezerwacji o zadanych kryteriach.';
             }
+        },
+        formatTime(time) {
+            const date = new Date(`1970-01-01T${time}`);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
     }
 }
@@ -218,9 +221,17 @@ main {
 
 .form-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    justify-content: center;
     gap: 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: row; /* Ustawienie wszystkich grup w rzędzie */
+    gap: 50px; /* Odstępy między grupami */
+    align-items: center; /* Wyrównanie inputów w pionie */
 }
 
 .form-group {
@@ -239,7 +250,7 @@ main {
     text-align: center;
     border-bottom: 3px solid #0083BB;
     padding-bottom: 5px;
-    width: 300px;
+    width: 200px;
     box-sizing: border-box;
     appearance: none;
 }
@@ -253,21 +264,6 @@ input:focus::placeholder {
     color: transparent;
 }
 
-.form-group input[type="date"],
-.form-group input[type="time"] {
-    color: inherit;
-    font-family: inherit;
-    font-size: 18px;
-    background-color: inherit;
-    border: none;
-    text-align: center;
-    border-bottom: 3px solid #0083BB;
-    padding-bottom: 5px;
-    width: 300px;
-    box-sizing: border-box;
-    appearance: none;
-}
-
 .form-group input[type="date"]::-webkit-calendar-picker-indicator,
 .form-group input[type="time"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
@@ -275,7 +271,8 @@ input:focus::placeholder {
 }
 
 #room-number,
-#start-date {
+#start-date,
+#end-time {
     margin-bottom: 30px;
 }
 

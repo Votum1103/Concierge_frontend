@@ -16,6 +16,7 @@ import MainProcess from '@/components/MainProcess.vue';
 import DeviceNote from '@/components/DeviceNote.vue';
 import UserLogin from '@/components/UserLogin.vue';
 import MapWindow from '@/components/MapWindow.vue';
+import AcceptOperationByConcierge from '@/components/AcceptOperationByConcierge.vue';
 
 
 
@@ -107,8 +108,15 @@ const routes = [
     name: 'UserLogin',
     component: UserLogin
   },
+  {
+    path: '/conciergeaccept',
+    name: 'AcceptOperationByConcierge',
+    component: AcceptOperationByConcierge
+  },
 
 
+
+  
 ]
 
 const router = createRouter({

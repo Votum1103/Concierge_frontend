@@ -94,7 +94,7 @@ nav {
   position: absolute;
   top: 0;
   right: 0;
-  margin: 1rem;
+  margin: 10px;
 }
 
 main {

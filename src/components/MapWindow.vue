@@ -72,28 +72,61 @@
       </div>
       <div class="room-info">
         <h2>Informacje o pomieszczeniu</h2>
-        <div v-if="selectedRoom && selectedRoom.nazwa_skrocona !== 'nr nieznany'">
-          <p><b>Sala:</b> {{ selectedRoom.nazwa_skrocona }}</p>
+        <div
+          v-if="selectedRoom && (selectedRoom.nazwa_skrocona !== 'nr nieznany' || selectedRoom.nazwa_pelna !== null)">
+          <h3>
+            <template v-if="selectedRoom.nazwa_skrocona !== 'nr nieznany'">
+              {{ selectedRoom.nazwa_pelna
+                ? `${selectedRoom.nazwa_skrocona} - ${selectedRoom.nazwa_pelna}`
+                : selectedRoom.nazwa_skrocona }}
+            </template>
+            <template v-else>
+              {{ selectedRoom.nazwa_pelna }}
+            </template>
+          </h3>
           <p><b>Piętro:</b> {{ selectedRoom.pietro }}</p>
           <p v-if="areOverlaysVisible">
             <b>Pobrany:</b>
-            {{ selectedRoom.is_taken === "brak" ? "brak urządzenia dla sali" : selectedRoom.is_taken ? "Tak" : "Nie" }}
+            {{ selectedRoom.is_taken == null || selectedRoom.is_taken == "brak" ? "brak urządzenia" :
+              selectedRoom.is_taken ? "tak" : "nie" }}
           </p>
           <p v-if="selectedRoom.owner_name && selectedRoom.owner_surname && areOverlaysVisible">
-            <b>Posiadacz {{selectedItemType}}a:</b> {{ selectedRoom.owner_name }} {{ selectedRoom.owner_surname }}
+            <b>Pobierający:</b> {{ selectedRoom.owner_name }} {{ selectedRoom.owner_surname }}
           </p>
-          <p><b>Typ dostępu:</b> {{ selectedRoom.typ_dostepu }}</p>
-          <p><b>Funkcja:</b> {{ selectedRoom.funkcja }}</p>
-          <p><b>Klasa:</b> {{ selectedRoom.klasa }}</p>
+          <p v-if="selectedRoom.issue_time !== null && selectedRoom.owner_name && areOverlaysVisible">
+            <b>Dzień pobrania: </b>
+            {{ new Date(selectedRoom.issue_time).toLocaleDateString([], {
+              year: 'numeric', month: '2-digit', day:
+            '2-digit' }) }}
+          </p>
+          <p v-if="selectedRoom.issue_time !== null && selectedRoom.owner_name && areOverlaysVisible">
+            <b>Godzina pobrania: </b>
+            {{ new Date(selectedRoom.issue_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+          </p>
+          <p v-if="!areOverlaysVisible"><b>Funkcja:</b> {{ selectedRoom.funkcja }}</p>
+          <p v-if="!areOverlaysVisible"><b>Klasa:</b> {{ selectedRoom.klasa }}</p>
         </div>
-        <div v-else>
+        <div v-else class="no-room-info">
           <p>Wybierz pomieszczenie, by zobaczyć szczegóły.</p>
         </div>
       </div>
-      <div  v-if="areOverlaysVisible" class="deviceStatus">
+      <h2>Legenda</h2>
+      <div v-if="areOverlaysVisible" class="deviceStatus">
         <p class="status available"><span class="circle"></span>{{ selectedItemType }} dostępny</p>
         <p class="status unavailable"><span class="circle"></span>{{ selectedItemType }} niedostępny</p>
         <p class="status nonexistent"><span class="circle"></span>{{ selectedItemType }} nie istnieje</p>
+      </div>
+      <div v-else class="functionStatus">
+        <p class="status admin"><span class="circle"></span>Administracyjny</p>
+        <p class="status education"><span class="circle"></span>Działalność edukacyjna lub badawcza</p>
+        <p class="status storage"><span class="circle"></span>Przechowywanie</p>
+        <p class="status recreational"><span class="circle"></span>Rekreacyjny</p>
+        <p class="status sanitary"><span class="circle"></span>Sanitarne</p>
+        <p class="status communication"><span class="circle"></span>Komunikacja</p>
+        <p class="status functional"><span class="circle"></span>Funkcyjny</p>
+        <p class="status business"><span class="circle"></span>Biznes lub handel</p>
+        <p class="status conference"><span class="circle"></span>Konferencyjny</p>
+        <p class="status food"><span class="circle"></span>Dostarczanie żywności</p>
       </div>
     </div>
   </div>
@@ -136,6 +169,7 @@ export default {
     let view = null;
     const isFilterApplied = ref(false);
     const areOverlaysVisible = ref(true);
+    const loading = ref(true)
 
 
     const floors = [
@@ -146,61 +180,89 @@ export default {
       { label: 4, value: [5] },
     ];
 
-    const applyClassFilter = () => {
-  isFilterApplied.value = !isFilterApplied.value;
-  areOverlaysVisible.value = !isFilterApplied.value;
 
-  if (isFilterApplied.value) {
-    filterButtonText.value = "Dostępność urządzeń";
-    // Zastosowanie filtra według funkcji pomieszczeń
-    const classColorMapping = {
-      "administracyjny": [101, 166, 185, 1],
-      "działalności edukacyjnej lub badawczej": [167, 203, 188, 1],
-      "przechowywania": [161, 167, 166, 1],
-      "rekreacyjny": [204, 146, 114, 1],
-      "sanitarne": [230, 209, 90, 1],
-      "komunikacji": [202, 205, 207, 1],
-      "funkcyjny": [161, 167, 166, 1],
-      "biznesu lub handlu": [224, 182, 90, 1],
-      "konferencyjny": [204, 146, 114, 1],
-      "dostarczania żywności": [176, 178, 217, 1],
+    const updateOutline = (geometry) => {
+      view.graphics.removeAll(); // Usuń poprzednie zaznaczenie
+
+      // Sprawdź, czy obramowanie powinno być rysowane
+      if (
+        selectedRoom.value &&
+        selectedRoom.value.nazwa_skrocona === "nr nieznany" &&
+        selectedRoom.value.nazwa_pelna === null
+      ) {
+        return; // Nie rysuj obramowania
+      }
+
+      if (geometry) {
+        const highlightGraphic = new Graphic({
+          geometry,
+          symbol: {
+            type: "simple-fill",
+            color: [0, 0, 0, 0], // Przezroczysty wypełniacz
+            outline: {
+              color: [0, 0, 0, 1], // Czarny obrys
+              width: 3, // Pogrubiony obrys
+            },
+          },
+        });
+
+        view.graphics.add(highlightGraphic);
+      }
     };
 
-    const renderer = new UniqueValueRenderer({
-      field: "klasa",
-      uniqueValueInfos: Object.entries(classColorMapping).map(([key, color]) => ({
-        value: key,
-        symbol: {
-          type: "simple-fill",
-          color,
-          outline: {
-            color: [0, 0, 0, 0.5],
-            width: 1,
-          },
-        },
-      })),
-      defaultSymbol: {
-        type: "simple-fill",
-        color: [211, 211, 211, 0.8], // Kolor domyślny dla nieznanych klas
-        outline: {
-          color: [0, 0, 0, 0.5],
-          width: 1,
-        },
-      },
-    });
+    const applyClassFilter = () => {
+      isFilterApplied.value = !isFilterApplied.value;
+      areOverlaysVisible.value = !isFilterApplied.value;
 
-    if (view && view.map && view.map.layers.items.length > 0) {
-      const featureLayer = view.map.layers.items[0];
-      featureLayer.renderer = renderer;
-      console.log("Renderer ustawiony na funkcję pomieszczeń.");
-    }
-  } else {
-    // Powrót do filtra dostępności kluczy/pilotów/mikrofonów
-    filterButtonText.value = "Klasy pomieszczeń";
-    updateRenderer();
-    console.log("Renderer ustawiony na dostępność urządzeń.");
-  }
-};
+      if (isFilterApplied.value) {
+        filterButtonText.value = "Dostępność urządzeń";
+
+        // Mapa kolorów dla funkcji
+        const classColorMapping = {
+          "administracyjny": [101, 166, 185, 1],
+          "działalności edukacyjnej lub badawczej": [167, 203, 188, 1],
+          "przechowywania": [161, 167, 166, 1],
+          "rekreacyjny": [204, 146, 114, 1],
+          "sanitarne": [230, 209, 90, 1],
+          "funkcyjny": [161, 167, 166, 1],
+          "biznesu lub handlu": [224, 182, 90, 1],
+          "konferencyjny": [204, 146, 114, 1],
+          "komunikacji": [202, 205, 207, 1],
+          "dostarczanie żywności": [176, 178, 217, 1],
+        };
+
+        const uniqueValueInfos = Object.entries(classColorMapping).map(([key, color]) => ({
+          value: key,
+          symbol: {
+            type: "simple-fill",
+            color,
+            outline: {
+              color: [0, 0, 0, 0.5],
+              width: 1,
+            },
+          },
+        }));
+
+
+        // Ustawienie renderer
+        const renderer = new UniqueValueRenderer({
+          field: "klasa", // Używamy pola `klasa` zamiast `funkcja`
+          uniqueValueInfos
+        });
+
+        // Zastosowanie renderer do warstwy
+        if (view && view.map && view.map.layers.items.length > 0) {
+          const featureLayer = view.map.layers.items[0];
+          featureLayer.renderer = renderer;
+          console.log("Renderer ustawiony na funkcję pomieszczeń.");
+        }
+      } else {
+        // Powrót do poprzedniego renderera
+        filterButtonText.value = "Klasy pomieszczeń";
+        updateRenderer();
+        console.log("Renderer ustawiony na dostępność urządzeń.");
+      }
+    };
 
     const isSelectedFloor = (floorValue) => {
       if (Array.isArray(selectedFloor.value)) {
@@ -210,23 +272,21 @@ export default {
     };
 
     const resetRoomSelection = () => {
-  selectedRoom.value = null;
-  highlightedRoomId.value = null;
-  
-  // Wyłącz filtr tylko wtedy, gdy użytkownik zmienia piętro
-  if (!isFilterApplied.value) {
-    isFilterApplied.value = false;
-  }
-};
+      selectedRoom.value = null;
+      highlightedRoomId.value = null;
+      loading.value = false; // Resetuj stan ładowania po usunięciu pokoju
+      view.graphics.removeAll();
+    };
+
 
     const fetchRooms = async () => {
       try {
         const token = sessionStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}`};
+        const headers = { Authorization: `Bearer ${token}` };
         const response = await axios.get(`http://127.0.0.1:8000/rooms/`, { headers });
         roomStatus.value = {};
         response.data.forEach((room) => {
-          roomStatus.value[room.number] = { is_taken: "brak", owner_name: null, owner_surname: null };
+          roomStatus.value[room.number] = { is_taken: "brak", owner_name: null, owner_surname: null, issue_time: null };
         });
       } catch (error) {
         console.error("Error fetching rooms:", error);
@@ -246,12 +306,14 @@ export default {
           roomStatus.value[roomNumber].is_taken = "brak";
           roomStatus.value[roomNumber].owner_name = null;
           roomStatus.value[roomNumber].owner_surname = null;
+          roomStatus.value[roomNumber].issue_time = null;
         });
         response.data.forEach((device) => {
           if (roomStatus.value[device.room_number]) {
             roomStatus.value[device.room_number].is_taken = device.is_taken;
             roomStatus.value[device.room_number].owner_name = device.owner_name;
             roomStatus.value[device.room_number].owner_surname = device.owner_surname;
+            roomStatus.value[device.room_number].issue_time = device.issue_time;
           }
         });
       } catch (error) {
@@ -260,15 +322,15 @@ export default {
     };
 
     const updateRenderer = () => {
-  if (isFilterApplied.value) {
-    console.log("Filtr klasy jest aktywny - pomijam zmianę renderera.");
-    return; // Nie zmieniaj renderera, jeśli filtr klasy jest aktywny
-  }
+      if (isFilterApplied.value) {
+        console.log("Filtr klasy jest aktywny - pomijam zmianę renderera.");
+        return; // Nie zmieniaj renderera, jeśli filtr klasy jest aktywny
+      }
 
-  if (view) {
-    view.map.layers.items[0].renderer = getRenderer(); // Aktualizuj renderer na podstawie nowego stanu
-  }
-};
+      if (view) {
+        view.map.layers.items[0].renderer = getRenderer(); // Aktualizuj renderer na podstawie nowego stanu
+      }
+    };
 
     const getRenderer = () => {
       const uniqueValueInfos = Object.keys(roomStatus.value).map((roomNumber) => ({
@@ -282,8 +344,8 @@ export default {
                 ? [223, 128, 128, 1]
                 : [167, 203, 188, 1],
           outline: {
-            color: highlightedRoomId.value === roomNumber ? [0, 0, 0, 0.8] : [0, 0, 0, 0.5],
-            width: highlightedRoomId.value === roomNumber ? 3 : 1,
+            color: highlightedRoomId.value = [0, 0, 0, 0.5],
+            width: highlightedRoomId.value = 1,
           },
         },
       }));
@@ -312,204 +374,221 @@ export default {
     };
 
     onMounted(async () => {
-  // Pobierz dane o pokojach i ich statusie
-  await fetchRooms();
-  await fetchRoomStatus();
+      // Pobierz dane o pokojach i ich statusie
+      await fetchRooms();
+      await fetchRoomStatus();
 
-  // Utwórz mapę i widok
-  const map = new Map({ basemap: "topo-vector" });
-  view = new MapView({
-    container: mapViewDiv.value,
-    map: map,
-    center: [21.01010, 52.22072],
-    zoom: 19,
-    constraints: {
-      minZoom: 19,
-      maxZoom: 22,
-    },
-    ui: {
-      components: ["attribution"],
-    },
-  });
+      // Utwórz mapę i widok
+      const map = new Map({ basemap: "topo-vector" });
+      view = new MapView({
+        container: mapViewDiv.value,
+        map: map,
+        center: [21.01010, 52.22072],
+        zoom: 19,
+        constraints: {
+          minZoom: 19,
+          maxZoom: 22,
+        },
+        ui: {
+          components: ["attribution"],
+        },
+      });
 
-  // Tworzenie kontenera na niestandardowe widgety
-  let widgetContainer = document.createElement("div");
-  widgetContainer.style.position = "absolute";
-  widgetContainer.style.bottom = "70px";
-  widgetContainer.style.left = "15px";
-  widgetContainer.style.display = "flex";
-  widgetContainer.style.flexDirection = "column";
-  widgetContainer.style.gap = "10px";
-  widgetContainer.id = "widgetContainer";
+      // Tworzenie kontenera na niestandardowe widgety
+      let widgetContainer = document.createElement("div");
+      widgetContainer.style.position = "absolute";
+      widgetContainer.style.bottom = "70px";
+      widgetContainer.style.left = "15px";
+      widgetContainer.style.display = "flex";
+      widgetContainer.style.flexDirection = "column";
+      widgetContainer.style.gap = "10px";
+      widgetContainer.id = "widgetContainer";
 
-  // Dodaj kontener do interfejsu mapy
-  view.ui.add(widgetContainer, "manual");
+      // Dodaj kontener do interfejsu mapy
+      view.ui.add(widgetContainer, "manual");
 
-  // Dodanie widgetów Zoom, Home i ScaleBar bezpośrednio do mapy
-  const zoomWidget = new Zoom({ view });
-  const homeWidget = new Home({ view });
-  const scaleBarWidget = new ScaleBar({ view });
+      // Dodanie widgetów Zoom, Home i ScaleBar bezpośrednio do mapy
+      const zoomWidget = new Zoom({ view });
+      const homeWidget = new Home({ view });
+      const scaleBarWidget = new ScaleBar({ view });
 
-  // Dodaj ScaleBar do mapy
-  
-  view.ui.add([zoomWidget, homeWidget], "manual");
+      // Dodaj ScaleBar do mapy
 
-  widgetContainer.appendChild(homeWidget.container);
-  widgetContainer.appendChild(zoomWidget.container);
+      view.ui.add([zoomWidget, homeWidget], "manual");
 
-  // Dodanie niestandardowego przycisku "Zmień filtr"
-  const customButton = document.createElement("button");
-customButton.classList.add("filter-button");
+      widgetContainer.appendChild(homeWidget.container);
+      widgetContainer.appendChild(zoomWidget.container);
 
-// Tworzymy statyczną strukturę HTML
-customButton.innerHTML = `
+      // Dodanie niestandardowego przycisku "Zmień filtr"
+      const customButton = document.createElement("button");
+      customButton.classList.add("filter-button");
+
+      // Tworzymy statyczną strukturę HTML
+      customButton.innerHTML = `
   <span class="filter-icon">
-    <svg  xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="black" viewBox="0 0 16 16">
+    <svg  xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="black" viewBox="0 0 16 16">
       <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/>
     </svg>
   </span>
   <span class="filter-text" style="display:none;">Klasy pomieszczeń</span>
 `;
-  customButton.style.transition = "width 0.2s ease";
-  customButton.style.display = "flex"; // Użycie flexboxa do rozmieszczenia elementów
-  customButton.style.alignItems = "center"; // Wyrównanie w pionie
-  customButton.style.justifyContent = "flex-start"; // Wyrównanie do lewej strony
-  customButton.style.backgroundColor = "#ffffff";
-  customButton.style.gap = "10px";
-  customButton.style.height = "32px"
-  customButton.style.cursor = "pointer";
+      customButton.style.display = "flex"; // Użycie flexboxa do rozmieszczenia elementów
+      customButton.style.alignItems = "center"; // Wyrównanie w pionie
+      customButton.style.justifyContent = "flex-start"; // Wyrównanie do lewej strony
+      customButton.style.backgroundColor = "#ffffff";
+      customButton.style.gap = "10px";
+      customButton.style.height = "32px"
+      customButton.style.width = "32px"
+      customButton.style.cursor = "pointer";
 
-  watch(filterButtonText, (newValue) => {
-  const filterTextElement = customButton.querySelector(".filter-text");
-  if (filterTextElement) {
-    filterTextElement.textContent = newValue; // Aktualizuje tylko tekst
-  }
-});
-
-  // Dodanie zdarzenia kliknięcia do przycisku
-  customButton.addEventListener("mouseenter", () => {
-  const filterText = customButton.querySelector(".filter-text");
-  setTimeout(() => {
-    filterText.style.display = "inline"; // Pojawia się po zakończeniu animacji szerokości
-  }, 200);
-  customButton.style.width = "180px"; // Zmienia rozmiar przycisku
-});
-
-customButton.addEventListener("mouseleave", () => {
-  const filterText = customButton.querySelector(".filter-text");
-  filterText.style.display = "none"; // Ukrywa tekst
-  customButton.style.width = "32px"; // Przywraca początkowy rozmiar
-});
-
-// Kliknięcie obsługuje logikę filtra
-customButton.addEventListener("click", () => {
-  applyClassFilter(); // Obsługa logiki filtra
-});
-
-
-  // Dodanie przycisku do kontenera widgetów
-  view.ui.add(customButton, "bottom-left");
-  view.ui.add(scaleBarWidget, "bottom-left");
-
-  // Dodanie widgetów Zoom i Home do kontenera widgetów
-  const zoomNode = document.createElement("div");
-  zoomNode.style.display = "inline-block";
-  zoomNode.appendChild(zoomWidget.container || document.createElement("div"));
-  widgetContainer.appendChild(zoomNode);
-
-  const homeNode = document.createElement("div");
-  homeNode.style.display = "inline-block";
-  homeNode.appendChild(homeWidget.container || document.createElement("div"));
-  widgetContainer.appendChild(homeNode);
-
-  const itemTypeOverlayNode = document.querySelector(".item-type-overlay");
-  if (itemTypeOverlayNode) {
-    view.ui.add(itemTypeOverlayNode, "top-right");
-  }
-
-  // Dodanie .deviceStatus do prawego dolnego rogu mapy
-  const deviceStatusNode = document.querySelector(".floor-selection-overlay");
-  if (deviceStatusNode) {
-    view.ui.add(deviceStatusNode, "bottom-right");
-  }
-
-  // Obsługa wyszukiwania
-  const searchWidget = new Search({
-    view,
-    allPlaceholder: "Szukaj pokoju",
-    popupEnabled: false,
-    resultGraphicEnabled: false,
-    includeDefaultSources: false,
-    sources: [
-      {
-        layer: new FeatureLayer({
-          url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
-          outFields: ["nazwa_skrocona", "pietro"],
-        }),
-        searchFields: ["nazwa_skrocona"],
-        displayField: "nazwa_skrocona",
-        exactMatch: true,
-        outFields: ["*"],
-        name: "Pokoje",
-        placeholder: "Wyszukaj pokój",
-        filter: { where: "UPPER(budynek_nazwa) = 'GMACH GŁÓWNY'" },
-      },
-    ],
-  });
-
-  view.ui.add(searchWidget, "top-left");
-
-  // Obsługa zdarzenia wyszukiwania
-  searchWidget.on("search-complete", (event) => {
-    resetRoomSelection();
-    view.graphics.removeAll();
-
-    event.results.forEach((result) => {
-      result.results.forEach((feature) => {
-        const roomAttributes = feature.feature.attributes;
-        const roomKey = roomAttributes.nazwa_skrocona;
-        const roomFloor = feature.feature.attributes.poziom;
-
-        // Znajdź odpowiadający label na podstawie poziomu (roomFloor)
-        const floorMapping = floors.find((floor) =>
-          Array.isArray(floor.value)
-            ? floor.value.includes(roomFloor)
-            : floor.value === roomFloor
-        );
-
-        if (!isSelectedFloor(roomFloor)) {
-          isAutoFloorChange.value = true;
-          selectedFloor.value = floorMapping ? floorMapping.value : [roomFloor];
+      watch(filterButtonText, (newValue) => {
+        const filterTextElement = customButton.querySelector(".filter-text");
+        if (filterTextElement) {
+          filterTextElement.textContent = newValue; // Aktualizuje tylko tekst
         }
-
-        const graphic = new Graphic({
-          geometry: feature.feature.geometry,
-          symbol: {
-            type: "simple-fill",
-            color: [0, 0, 0, 0],
-            outline: { color: [0, 0, 0, 0.8], width: 3 },
-          },
-        });
-        view.graphics.add(graphic);
-
-        selectedRoom.value = roomAttributes;
-
-        const roomInfo = roomStatus.value[roomKey];
-        if (roomInfo) {
-          selectedRoom.value.is_taken = roomInfo.is_taken;
-          selectedRoom.value.owner_name = roomInfo.owner_name;
-          selectedRoom.value.owner_surname = roomInfo.owner_surname;
-        }
-
-        highlightedRoomId.value = roomKey;
-        isSearchHighlightActive.value = true;
       });
-    });
-  });
+
+      let enterTimeout, leaveTimeout;
+
+      customButton.addEventListener("mouseenter", () => {
+        // Anulowanie zdarzenia `mouseleave`, jeśli już zostało ustawione
+        clearTimeout(leaveTimeout);
+        // Rozszerzenie przycisku i wyświetlenie tekstu
+        enterTimeout = setTimeout(() => {
+          customButton.style.width = "180px";
+          const filterText = customButton.querySelector(".filter-text");
+          filterText.style.whiteSpace = "nowrap";
+          filterText.style.transition = "opacity 0.2s ease-in-out";
+          filterText.style.pointerEvents = "none";
+
+          filterText.style.display = "inline";
+        }, 100); // Opóźnienie dla płynnej animacji
+      });
+
+      customButton.addEventListener("mouseleave", () => {
+        clearTimeout(enterTimeout);
+
+        // Ukrycie tekstu i zwężenie przycisku
+        leaveTimeout = setTimeout(() => {
+          const filterText = customButton.querySelector(".filter-text");
+          filterText.style.display = "none";
+          customButton.style.width = "32px";
+        }, 100);
+      });
+
+      // Kliknięcie obsługuje logikę filtra
+      customButton.addEventListener("click", () => {
+        applyClassFilter(); // Obsługa logiki filtra
+      });
+
+
+      // Dodanie przycisku do kontenera widgetów
+      view.ui.add(customButton, "bottom-left");
+      view.ui.add(scaleBarWidget, "bottom-left");
+
+      // Dodanie widgetów Zoom i Home do kontenera widgetów
+      const zoomNode = document.createElement("div");
+      zoomNode.style.display = "inline-block";
+      zoomNode.appendChild(zoomWidget.container || document.createElement("div"));
+      widgetContainer.appendChild(zoomNode);
+
+      const homeNode = document.createElement("div");
+      homeNode.style.display = "inline-block";
+      homeNode.appendChild(homeWidget.container || document.createElement("div"));
+      widgetContainer.appendChild(homeNode);
+
+      const itemTypeOverlayNode = document.querySelector(".item-type-overlay");
+      if (itemTypeOverlayNode) {
+        view.ui.add(itemTypeOverlayNode, "top-right");
+      }
+
+      // Dodanie .deviceStatus do prawego dolnego rogu mapy
+      const deviceStatusNode = document.querySelector(".floor-selection-overlay");
+      if (deviceStatusNode) {
+        view.ui.add(deviceStatusNode, "bottom-right");
+      }
+
+      // Obsługa wyszukiwania
+      const searchWidget = new Search({
+        view,
+        allPlaceholder: "Szukaj pokoju",
+        popupEnabled: false,
+        resultGraphicEnabled: false,
+        includeDefaultSources: false,
+        sources: [
+          {
+            layer: new FeatureLayer({
+              url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
+              outFields: ["nazwa_skrocona", "pietro"],
+            }),
+            searchFields: ["nazwa_skrocona"],
+            displayField: "nazwa_skrocona",
+            exactMatch: true,
+            outFields: ["*"],
+            name: "Pokoje",
+            placeholder: "Wyszukaj pokój",
+            filter: { where: "UPPER(budynek_nazwa) = 'GMACH GŁÓWNY'" },
+          },
+        ],
+      });
+
+      view.ui.add(searchWidget, "top-left");
+
+
+      // Obsługa zdarzenia wyszukiwania
+      // Obsługa zdarzenia wyszukiwania
+      searchWidget.on("search-complete", (event) => {
+        resetRoomSelection();
+        view.graphics.removeAll();
+
+        event.results.forEach((result) => {
+          result.results.forEach((feature) => {
+            const roomAttributes = feature.feature.attributes;
+            const roomKey = roomAttributes.nazwa_skrocona;
+            const roomFloor = feature.feature.attributes.poziom;
+
+            // Znajdź odpowiadający label na podstawie poziomu (roomFloor)
+            const floorMapping = floors.find((floor) =>
+              Array.isArray(floor.value)
+                ? floor.value.includes(roomFloor)
+                : floor.value === roomFloor
+            );
+
+            if (!isSelectedFloor(roomFloor)) {
+              isAutoFloorChange.value = true;
+              selectedFloor.value = floorMapping ? floorMapping.value : [roomFloor];
+            }
+
+            const graphic = new Graphic({
+              geometry: feature.feature.geometry,
+              symbol: {
+                type: "simple-fill",
+                color: [0, 0, 0, 0],
+                outline: { color: [0, 0, 0, 0.8], width: 3 },
+              },
+            });
+            view.graphics.add(graphic);
+
+            selectedRoom.value = roomAttributes;
+
+            const roomInfo = roomStatus.value[roomKey];
+            if (roomInfo) {
+              selectedRoom.value.is_taken = roomInfo.is_taken;
+              selectedRoom.value.owner_name = roomInfo.owner_name;
+              selectedRoom.value.owner_surname = roomInfo.owner_surname;
+              selectedRoom.value.issue_time = roomInfo.issue_time;
+            }
+
+            highlightedRoomId.value = roomKey;
+            isSearchHighlightActive.value = true;
+          });
+        });
+
+      });
 
       const featureLayer = new FeatureLayer({
         url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
-        outFields: ["nazwa_skrocona", "pietro", "typ_dostepu", "funkcja", "klasa"],
+        outFields: ["nazwa_skrocona", "nazwa_pelna", "pietro", "funkcja", "klasa"],
         renderer: getRenderer(),
         labelingInfo: [
           {
@@ -537,10 +616,9 @@ customButton.addEventListener("click", () => {
       map.add(featureLayer);
 
       view.on("click", (event) => {
-
         resetRoomSelection();
         view.graphics.removeAll();
-        isSearchHighlightActive.value = false; // Deaktywacja zaznaczenia po kliknięciu
+
         view.hitTest(event).then((response) => {
           const results = response.results;
           if (results.length > 0) {
@@ -552,8 +630,12 @@ customButton.addEventListener("click", () => {
                 selectedRoom.value.is_taken = roomInfo.is_taken;
                 selectedRoom.value.owner_name = roomInfo.owner_name;
                 selectedRoom.value.owner_surname = roomInfo.owner_surname;
+                selectedRoom.value.issue_time = roomInfo.issue_time;
               }
               highlightedRoomId.value = graphic.attributes.nazwa_skrocona;
+
+              // Wywołanie funkcji aktualizującej obrys
+              updateOutline(graphic.geometry);
             } else {
               resetRoomSelection();
             }
@@ -562,25 +644,26 @@ customButton.addEventListener("click", () => {
           }
         });
       });
-
       // Aktualizacja renderera przy zmianie podświetlonego pokoju
       watch(highlightedRoomId, updateRenderer);
 
       // Aktualizacja warstwy przy zmianie piętra
-      watch(selectedFloor, () => {
+      watch(selectedFloor, (newFloor) => {
         if (!isAutoFloorChange.value) {
           resetRoomSelection();
-          if (isSearchHighlightActive.value) {
-            view.graphics.removeAll();
-            isSearchHighlightActive.value = false;
-          }
+          view.graphics.removeAll();
+          isSearchHighlightActive.value = false;
         } else {
-          isAutoFloorChange.value = false; // Reset automatycznego przełączenia
+          isAutoFloorChange.value = false; // Resetuj flagę
         }
 
-        // Generowanie dynamicznego wyrażenia dla wielu pięter
-        const floorNumbers = selectedFloor.value.join(", ");
+        const floorNumbers = newFloor.join(", ");
         featureLayer.definitionExpression = `budynek_nazwa = 'Gmach Główny' AND poziom IN (${floorNumbers})`;
+
+        console.log("Ustawiono definitionExpression:", featureLayer.definitionExpression);
+
+        // Wymuś odświeżenie warstwy
+        featureLayer.refresh();
       });
 
       // Aktualizacja warstwy przy zmianie typu i wersji urządzenia
@@ -669,33 +752,42 @@ nav {
 .content-wrapper {
   display: flex;
   flex: 1;
-  justify-content: center; /* Utrzymuje mapę wyśrodkowaną */
+  justify-content: center;
+  /* Utrzymuje mapę wyśrodkowaną */
 }
 
 .informations {
-  width: 400px; /* Ustaw stałą szerokość dla panelu bocznego */
-  flex-shrink: 0; /* Zapobiega zmniejszaniu panelu bocznego */
-  overflow-y: auto; /* Umożliwia przewijanie dłuższych treści */
+  width: 400px;
+  /* Ustaw stałą szerokość dla panelu bocznego */
+  flex-shrink: 0;
+  /* Zapobiega zmniejszaniu panelu bocznego */
+  overflow-y: auto;
+  /* Umożliwia przewijanie dłuższych treści */
+  margin-right: 2%;
 }
 
 .item-type-overlay {
   display: flex;
   flex-direction: row;
-  pointer-events: auto; /* Zapewnia, że kliknięcia są przekazywane */
+  pointer-events: auto;
+  /* Zapewnia, że kliknięcia są przekazywane */
   position: relative;
   gap: 15px;
   z-index: 10;
 }
 
 .map-view {
-  width: 95%; /* Dopasuj szerokość mapy, zmniejszając ją o szerokość paneli bocznych */
+  width: 95%;
+  /* Dopasuj szerokość mapy, zmniejszając ją o szerokość paneli bocznych */
   height: 80%;
   border-radius: 30px;
   overflow: hidden;
-  position: relative; /* Aby upewnić się, że elementy wewnętrzne są poprawnie pozycjonowane */
+  position: relative;
+  /* Aby upewnić się, że elementy wewnętrzne są poprawnie pozycjonowane */
 }
 
-.esri-ui .esri-component, .esri-ui .esri-widget {
+.esri-ui .esri-component,
+.esri-ui .esri-widget {
   background: none;
   border: none;
   box-shadow: none;
@@ -720,9 +812,10 @@ button {
   cursor: pointer;
   transition: background-color 0.3s;
 }
-.itemsVersionsButtons, .itemsTypesButtons
-{
-  height:45px;
+
+.itemsVersionsButtons,
+.itemsTypesButtons {
+  height: 50px;
 }
 
 button:hover {
@@ -792,7 +885,7 @@ button.reserve-version {
 
 .room-info {
   flex: 1;
-  height: 55%;
+  height: 45%;
   overflow-y: auto;
   background-color: transparent;
   color: #ffffff;
@@ -810,23 +903,13 @@ button.reserve-version {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
+  gap: 20px;
 }
 
 .room-info p {
   margin: 5px 0;
   font-size: 14px;
   line-height: 1.5;
-}
-
-
-.deviceStatus {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: white;
-  font-family: 'Open Sans', sans-serif;
-  font-size: 20px;
 }
 
 .deviceStatus p {
@@ -860,4 +943,104 @@ button.reserve-version {
   background-color: rgba(224, 182, 90, 1);
 }
 
+.functionStatus,
+.deviceStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 15px;
+  border: 1px solid #292323;
+  max-height: 230px;
+  overflow-y: auto;
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+.functionStatus::-webkit-scrollbar {
+  width: 10px;
+}
+
+.functionStatus::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+}
+
+.functionStatus::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+.functionStatus::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.functionStatus p {
+  width: 300px;
+  margin-bottom: 1em;
+  text-align: left;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.admin .circle {
+  background-color: rgba(101, 166, 185, 1);
+}
+
+.education .circle {
+  background-color: rgba(167, 203, 188, 1);
+}
+
+.storage .circle {
+  background-color: rgba(161, 167, 166, 1);
+}
+
+.recreational .circle {
+  background-color: rgba(204, 146, 114, 1);
+}
+
+.sanitary .circle {
+  background-color: rgba(230, 209, 90, 1);
+}
+
+.communication .circle {
+  background-color: rgba(202, 205, 207, 1);
+}
+
+.functional .circle {
+  background-color: rgba(161, 167, 166, 1);
+}
+
+.business .circle {
+  background-color: rgba(224, 182, 90, 1);
+}
+
+.conference .circle {
+  background-color: rgba(204, 146, 114, 1);
+}
+
+.food .circle {
+  background-color: rgba(176, 178, 217, 1);
+}
+
+.no-room-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 200px;
+}
 </style>

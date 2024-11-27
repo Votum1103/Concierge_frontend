@@ -24,6 +24,9 @@
                     <input type="password" id="password" name="password" placeholder="Hasło" v-model="password"
                         required>
                 </div>
+                <div class="error-placeholder">
+                    <span v-if="loginError" class="error-message">Niepoprawny login lub hasło</span>
+                </div>
                 <div class="login-button-group">
                     <RouteButton buttonText="Zaloguj się" class="primary-button" />
                 </div>
@@ -50,7 +53,8 @@ export default {
     data() {
         return {
             username: '',
-            password: ''
+            password: '',
+            loginError: false
         };
     },
     methods: {
@@ -82,6 +86,7 @@ export default {
 
                 this.$router.push({ name: 'MainProcess' });
             } catch (error) {
+                this.loginError = true;
                 console.error('Błąd logowania:', error);
             }
         },
@@ -91,6 +96,7 @@ export default {
 
 <style lang="scss" scoped>
 $primary-color: #0083BB;
+$error-color: #ff4d4d;
 $text-color: #FFFFFF;
 $background-color: rgb(41, 38, 38);
 $font-main: 'Open Sans', sans-serif;
@@ -203,6 +209,24 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.error-border {
+    border-bottom: 3px solid $error-color;
+    /* Czerwony border przy błędzie */
+}
+
+.error-placeholder {
+    height: 1.5rem;
+    /* Rezerwuje miejsce na komunikat o błędzie */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.error-message {
+    color: $error-color;
+    font-size: 1rem;
 }
 
 @media (max-width: 768px) {

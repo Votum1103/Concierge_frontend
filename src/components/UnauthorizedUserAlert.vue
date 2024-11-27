@@ -1,37 +1,100 @@
 <template>
-        <GoogleFonts />
+    <GoogleFonts />
+
     <body>
         <nav>
             <WUoT_Logo />
         </nav>
-            <section>
-                <div class="alert danger-alert">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="50px" fill=#661111 class="bi bi-x-circle-fill"
-                        viewBox="0 0 16 16">
-                        <path
-                            d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
-                    </svg>
-                    <p>Użytkownik nie posiada uprawnień do sali nr 342</p>
-                </div>
-                <div class="button-group">
-                    <button class="primary-button">Wydaj</button>
-                    <button class="secondary-button">Anuluj</button>
-                </div>
-            </section>
+        <section>
+            <div class="alert danger-alert">
+                <svg xmlns="http://www.w3.org/2000/svg" width="50px" fill=#661111 class="bi bi-x-circle-fill"
+                    viewBox="0 0 16 16">
+                    <path
+                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
+                </svg>
+                <!-- Wyświetlenie danych przedmiotu -->
+                <p>Użytkownik nie posiada uprawnień do pokoju {{ roomNumber }}</p>
+            </div>
+            <div class="button-group">
+                <button class="primary-button" @click="changeItemStatus">Potwierdź</button>
+                <button class="secondary-button" @click="cancelOperation">Anuluj</button>
+            </div>
+        </section>
     </body>
 </template>
+
+
 <script>
 import GoogleFonts from './googleFonts.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
+import api from '@/api';
 
 export default {
     name: 'UnauthorizedUserAlert',
     components: {
         GoogleFonts,
         WUoT_Logo
-    }
-}
+    },
+    data() {
+        return {
+            error: '',
+            session_id: sessionStorage.getItem('sessionId'),
+            roomNumber: '',
+        };
+    },
+    mounted() {
+        this.fetchItemDetails()
+    },
+    methods: {
+            async fetchItemDetails() {
+                const selectedItemCode = sessionStorage.getItem('SelectedItemCode');
+
+                try {
+                    const response = await api.get(`/devices/code/${selectedItemCode}`);
+                    const itemDetails = response.data;
+
+                    // Zapisz numer pokoju
+                    this.roomNumber = itemDetails.room.number;
+
+                    console.log(this.roomNumber);
+
+                    return itemDetails;
+                } catch (error) {
+                    console.error('Błąd podczas pobierania szczegółów przedmiotu:', error);
+                    this.error = 'Nie udało się pobrać szczegółów przedmiotu.';
+                    throw error; // Rzuć błąd, aby poinformować wywołującą funkcję
+                }
+            },
+            async changeItemStatus() {
+                try {
+                    const selectedItemCode = sessionStorage.getItem('SelectedItemCode');
+                    const changeStatusResponse = await api.post('/operations/change-status', {
+                        device_code: selectedItemCode,
+                        session_id: this.session_id,
+                        force: true
+                    });
+
+                    console.log('Status zmieniony:', changeStatusResponse.data);
+
+                    // Przekierowanie na widok MainProcess
+                    this.$router.push({ name: 'MainProcess' });
+                } catch (error) {
+                    console.error('Błąd podczas zmiany statusu:', error);
+                    this.error = 'Wystąpił błąd podczas operacji.';
+                }
+            },
+            cancelOperation() {
+                // Resetuj wszystkie dane oprócz session_id
+                this.roomNumber = '';
+                this.error = '';
+                // Przekierowanie do MainProcess
+                this.$router.push({ name: 'MainProcess' });
+            }
+        }
+};
 </script>
+
+
 <style lang="scss" scoped>
 $background-color: black;
 $text-color: white;

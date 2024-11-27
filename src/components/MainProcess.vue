@@ -36,8 +36,7 @@
                         <table>
                             <tbody>
                                 <tr class="table-row" v-for="(item, index) in items" :key="index">
-                                    <!-- #TODO zmienić na  z bazy -->
-                                    <td class="table-cell">{{ getUserNames(item.userIds) }}</td>
+                                    <td class="table-cell">{{ item.time }}</td>
                                     <td class="table-cell">{{ item.roomNumber }}</td>
                                     <td class="table-cell">{{ item.items[0] }}</td>
                                     <td class="table-cell">{{ item.items[1] }}</td>
@@ -59,8 +58,8 @@
                 </div>
 
                 <div class="info-section">
-                    <aside class="info-item">Wydano: {{ issued }}</aside>
-                    <aside class="info-item">Odebrano: {{ received }}</aside>
+                    <aside class="info-item" v-if="issued && issued.length">Wydano: {{ issued }}</aside>
+                    <aside class="info-item" v-if="received && received.length">Odebrano: {{ received }}</aside>
                 </div>
             </div>
 
@@ -111,27 +110,18 @@ export default {
             userId: '',
             users: [],
             items: [],
-            permissions: [], // Lista uprawnień (z danych API)
+            permissions: [],
             issued: [],
             received: [],
         };
     },
     mounted() {
-        this.fetchUsers();
         this.loadUserData();
         this.fetchLoggedUser();
         this.fetchPermissions(); // Pobranie uprawnień
         this.fetchUnapprovedOperations();
     },
     methods: {
-        async fetchUsers() {
-            try {
-                const response = await api.get('/users/');
-                this.users = response.data;
-            } catch (error) {
-                console.error('Błąd przy pobieraniu użytkowników:', error);
-            }
-        },
         loadUserData() {
             this.username = sessionStorage.getItem('username') || 'Nieznane imię';
             this.userId = sessionStorage.getItem('userId');
@@ -141,7 +131,7 @@ export default {
         },
         async fetchPermissions() {
             try {
-                const response = await api.get(`/permissions/?user_id=${this.userId}`);
+                const response = await api.get(`/permissions/active/?user_id=${this.userId}`);
                 // Pobranie tylko numerów pokoi
                 const roomNumbers = response.data.map(permission => permission.room.number);
 
@@ -167,6 +157,7 @@ export default {
                 this.items = operations.map(op => ({
                     userIds: [op.session.user_id],
                     roomNumber: op.device.room.number,
+                    time: this.formatTime(op.timestamp),
                     items: this.formatItems(op),
                 }));
             } catch (error) {
@@ -213,12 +204,16 @@ export default {
 
                 // Łączenie list w stringi
                 this.issued = issuedList.join(', ');
-                this.received = receivedList.join(', '); 
+                this.received = receivedList.join(', ');
 
             } catch (error) {
                 console.error("Błąd podczas pobierania niezatwierdzonych operacji:", error);
                 this.error = "Wystąpił błąd podczas pobierania danych.";
             }
+        },
+        formatTime(timestamp) {
+            const date = new Date(timestamp); // Tworzenie obiektu Date
+            return date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }); // Wyświetlanie godziny i minut
         },
         formatItems(operation) {
             const items = [];
@@ -258,6 +253,8 @@ body {
     text-align: center;
     margin: 0;
     font-family: $font-main;
+    height: 100vh;
+    width: 100vw;
 }
 
 h1,
