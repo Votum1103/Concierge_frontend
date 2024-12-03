@@ -8,7 +8,7 @@
         <button @click="logOut" class="logOut">
           <span class="userbutton">
             <span class="avatars">
-              <span class="userinitials">SH</span>
+              <span class="userinitials">{{ userInitials }}</span>
             </span>
           </span> Wyloguj</button>
       </div>
@@ -192,6 +192,7 @@ export default {
       currentView: 'keys',
       selectedItemType: 'klucz',
       selectedItemVersion: 'podstawowa',
+      userInitials: sessionStorage.getItem('userInitials') || ''
     };
   },
   computed: {
@@ -219,9 +220,17 @@ export default {
     }
   },
   methods: {
-    logOut() {
+    async logOut() {
+      try {
+      await api.post('/logout', {
+        refresh_token: sessionStorage.getItem('refresh_token'),
+      });
+
       sessionStorage.clear();
-      this.$router.push(`/`);
+      console.log('Udalo się')
+      this.$router.push(`/`);} catch(error) {
+        console.log("Nie udało się wylogować", error);
+      }
     },
 
     handleClick(item) {
@@ -265,11 +274,6 @@ export default {
 };
 </script>
 
-
-
-
-
-
 <style lang="scss">
 $primary-bg: black;
 $secondary-bg: #050608;
@@ -289,6 +293,7 @@ body {
   margin: 0;
   font-family: $font-family-main;
   overflow: hidden;
+  height: 100vh;
 }
 
 input:-webkit-autofill,

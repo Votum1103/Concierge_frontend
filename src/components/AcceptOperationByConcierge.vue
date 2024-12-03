@@ -15,8 +15,8 @@
         </nav>
         <header>
             <div class="employee-container">
-                <svg xmlns="http://www.w3.org/2000/svg" width="60px" fill="currentColor"
-                    class="bi bi-file-person-fill" viewBox="0 0 16 16">
+                <svg xmlns="http://www.w3.org/2000/svg" width="60px" fill="currentColor" class="bi bi-file-person-fill"
+                    viewBox="0 0 16 16">
                     <path
                         d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m-1 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0m-3 4c2.623 0 4.146.826 5 1.755V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-1.245C3.854 11.825 5.377 11 8 11" />
                 </svg>
@@ -30,9 +30,9 @@
             <div class="loader"></div>
         </div>
         <div class="button-group">
-                <button class="primary-button" >Podaj login i hasło</button>
-                <button class="secondary-button" >Anuluj</button>
-            </div>
+            <button class="primary-button" @click="moveToAcceptanceOperationByLogin">Podaj login i hasło</button>
+            <button class="secondary-button" @click="cancelAcceptanceOperation">Odrzuć operacje</button>
+        </div>
     </div>
 </template>
 
@@ -42,6 +42,7 @@ import GoogleFonts from './googleFonts.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
 
 export default {
+    name: 'AcceptOperationByConcierge',
     components: {
         GoogleFonts,
         BackButton,
@@ -64,12 +65,19 @@ export default {
             this.surname = sessionStorage.getItem('surname') || 'Nieznane nazwisko';
             this.role = sessionStorage.getItem('role') || 'Nieznana rola';
             this.faculty = sessionStorage.getItem('faculty') || 'Nieznany wydział';
-        }
+        },
+        cancelAcceptanceOperation() {
+            this.$router.push({ name: 'AccpetRejectionOperation' });
+        },
+        moveToAcceptanceOperationByLogin() {
+            this.$router.push({ name: 'ConciergeLoginAcceptOperation' });
+        },
+
     }
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 $primary-color: #0083BB;
 $error-color: #ff4d4d;
 $text-color: #FFFFFF;
@@ -97,7 +105,12 @@ $transition-duration: 0.3s;
     width: 100vw;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: $font-heading;
 }
 
@@ -189,55 +202,50 @@ button:hover {
 }
 
 
-
-
-
-
-
 .loader {
-  color: $text-color;
-  font-size: 3rem;
-  overflow: hidden;
-  width: 1em;
-  height: 1em;
-  border-radius: 50%;
-  transform: translateZ(0);
-  animation: mltShdSpin 1.7s infinite ease, round 1.7s infinite ease;
+    color: $text-color;
+    font-size: 3rem;
+    overflow: hidden;
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    transform: translateZ(0);
+    animation: mltShdSpin 1.7s infinite ease, round 1.7s infinite ease;
 }
 
 @keyframes mltShdSpin {
 
-  0%,
-  5%,
-  95%,
-  100% {
-    box-shadow: 0 -0.83em 0 -0.4em,
-      0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em,
-      0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
-  }
+    0%,
+    5%,
+    95%,
+    100% {
+        box-shadow: 0 -0.83em 0 -0.4em,
+            0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em,
+            0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
+    }
 
-  10%,
-  59% {
-    box-shadow: 0 -0.83em 0 -0.4em,
-      -0.087em -0.825em 0 -0.42em, -0.173em -0.812em 0 -0.44em,
-      -0.256em -0.789em 0 -0.46em, -0.297em -0.775em 0 -0.477em;
-  }
+    10%,
+    59% {
+        box-shadow: 0 -0.83em 0 -0.4em,
+            -0.087em -0.825em 0 -0.42em, -0.173em -0.812em 0 -0.44em,
+            -0.256em -0.789em 0 -0.46em, -0.297em -0.775em 0 -0.477em;
+    }
 
-  20%,
-  38% {
-    box-shadow: 0 -0.83em 0 -0.4em,
-      -0.338em -0.758em 0 -0.42em, -0.555em -0.617em 0 -0.44em,
-      -0.671em -0.488em 0 -0.46em, -0.749em -0.34em 0 -0.477em;
-  }
+    20%,
+    38% {
+        box-shadow: 0 -0.83em 0 -0.4em,
+            -0.338em -0.758em 0 -0.42em, -0.555em -0.617em 0 -0.44em,
+            -0.671em -0.488em 0 -0.46em, -0.749em -0.34em 0 -0.477em;
+    }
 }
 
 @keyframes round {
-  0% {
-    transform: rotate(0deg)
-  }
+    0% {
+        transform: rotate(0deg)
+    }
 
-  100% {
-    transform: rotate(360deg)
-  }
+    100% {
+        transform: rotate(360deg)
+    }
 }
 </style>

@@ -56,6 +56,7 @@ export default {
         WUoT_Logo,
 
     }
+    
 
 }
 </script>

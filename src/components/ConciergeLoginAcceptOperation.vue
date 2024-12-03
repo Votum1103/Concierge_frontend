@@ -1,7 +1,7 @@
 <template>
     <GoogleFonts />
     <nav>
-        <BackButton class="back-button" routeName="eConcierge" buttonText="Wróć">
+        <BackButton class="back-button" routeName="AcceptOperationByConcierge" buttonText="Wróć">
             <template #icon>
                 <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                     class="bi bi-chevron-left" viewBox="0 0 16 16">
@@ -25,7 +25,6 @@
                     <input :class="{ 'error-border': loginError }" type="password" id="password" name="password"
                         placeholder="Hasło" v-model="password" required>
                 </div>
-                <!-- Stałe miejsce na komunikat o błędzie -->
                 <div class="error-placeholder">
                     <span v-if="loginError" class="error-message">Niepoprawny login lub hasło</span>
                 </div>
@@ -42,10 +41,10 @@ import BackButton from './BackButton.vue';
 import GoogleFonts from './googleFonts.vue';
 import RouteButton from './RouteButton.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
-import axios from 'axios';
+import api from '../api'
 
 export default {
-    name: 'ConciergeLogin',
+    name: 'ConciergeLoginAcceptOperation',
     components: {
         GoogleFonts,
         WUoT_Logo,
@@ -62,32 +61,40 @@ export default {
     methods: {
         async login() {
             try {
-                const response = await axios.post('http://127.0.0.1:8000/login', new URLSearchParams({
+                // Logowanie użytkownika
+                const loginResponse = await api.post('/login', new URLSearchParams({
                     username: this.username,
                     password: this.password
                 }));
 
-                const refreshToken = response.data.refresh_token;
-                const accessToken = response.data.access_token;
-
+                // Zapis tokenów w sessionStorage
+                const accessToken = loginResponse.data.access_token;
+                const refreshToken = loginResponse.data.refresh_token;
                 sessionStorage.setItem('access_token', accessToken);
                 sessionStorage.setItem('refresh_token', refreshToken);
-                const userResponse = await axios.get('http://127.0.0.1:8000/concierge', {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`  
-                    }
-                });
-                const name = userResponse.data.name
-                const surname = userResponse.data.surname
-                const initials = (name[0] || '') + (surname[0] || ''); 
-                sessionStorage.setItem('userInitials', initials.toUpperCase());
 
+                // Akceptacja sesji
+                const sessionId = sessionStorage.getItem('sessionId'); // Pobierz session_id
+                if (!sessionId) {
+                    throw new Error("Brak session_id w pamięci sesji");
+                }
+
+                const approveResponse = await api.post(`/approve/login/session/${sessionId}`, new URLSearchParams({
+                    grant_type: 'password',
+                    username: this.username,
+                    password: this.password
+                }));
+
+
+                console.log('Sesja zaakceptowana:', approveResponse.data);
+
+                // Przejście do głównego okna po akceptacji
                 this.$router.push({ name: 'MainWindow' });
             } catch (error) {
-                this.loginError = true; 
-                console.error('Błąd logowania:', error);
+                this.loginError = true; // Ustawienie flagi błędu logowania
+                console.error('Błąd logowania lub akceptacji sesji:', error);
             }
-        },
+        }
     },
 }
 </script>

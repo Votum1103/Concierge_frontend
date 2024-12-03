@@ -51,6 +51,7 @@ import axios from 'axios';
 import GoogleFonts from './googleFonts.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
 import BackButton from './BackButton.vue';
+import api from '../api';
 
 export default {
     name: 'UnauthorizedUserGiveItem',
@@ -73,23 +74,18 @@ export default {
     methods: {
         async submitForm() {
             try {
-                // Ustawienie aktualnej daty i czasu w formacie ISO
-
                 const token = sessionStorage.getItem('access_token');
                 const headers = {
                     Authorization: `Bearer ${token}`
                 };
 
-                // Wyślij dane do backendu przy użyciu axios
-
-                await axios.post('http://127.0.0.1:8000/unauthorized-users', {
+                const response = await axios.post('http://127.0.0.1:8000/unauthorized-users', {
                     name: this.formData.name,
                     surname: this.formData.surname,
                     email: this.formData.email,
                     note: this.formData.note
                 }, { headers });
 
-                // Ewentualnie zresetuj formularz po wysłaniu
                 this.formData = {
                     name: '',
                     surname: '',
@@ -97,8 +93,30 @@ export default {
                     position: '',
                     note: ''
                 };
+
+                const createSessionUA = await api.post(`/start-session/unauthorized/${response.data.id}`);
+
+                sessionStorage.setItem('userId', response.data.id);
+                sessionStorage.setItem('lastPage', this.$route.name);
+                sessionStorage.setItem('username', response.data.name);
+                sessionStorage.setItem('surname', response.data.surname);
+                sessionStorage.setItem('sessionId', createSessionUA.data.id);
+
+                // Zapisz email w sessionStorage
+                sessionStorage.setItem('userEmail', this.formData.email);
+
+                this.$router.push({ name: 'MainProcess' });
             } catch (error) {
                 console.error('Błąd podczas tworzenia użytkownika:', error);
+                
+                // Sprawdzanie kodu błędu 409
+                if (error.response && error.response.status === 409) {
+                    sessionStorage.setItem('userEmail', this.formData.email);
+                    sessionStorage.setItem('username', this.formData.name);
+                    sessionStorage.setItem('surname', this.formData.surname);
+                    
+                    this.$router.push({ name: 'UpdateUACredentials' });
+                }
             }
         }
     }
@@ -144,7 +162,7 @@ p {
 
 nav {
     text-align: left;
-    height: 3.125em;
+    height: 7vh;
 }
 
 
@@ -187,6 +205,7 @@ header h2 {
     flex-direction: column;
     align-items: center;
     gap: 3.125em;
+    height: 93vh;
 }
 
 .form-group {

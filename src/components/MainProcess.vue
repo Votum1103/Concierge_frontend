@@ -5,21 +5,19 @@
         <nav>
             <WUoT_Logo />
         </nav>
-
+        <header :class="headerClass">
+            <div class="employee-container">
+                <svg xmlns="http://www.w3.org/2000/svg" width="60px" fill="currentColor" class="bi bi-file-person-fill"
+                    viewBox="0 0 16 16">
+                    <path
+                        d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m-1 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0m-3 4c2.623 0 4.146.826 5 1.755V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-1.245C3.854 11.825 5.377 11 8 11" />
+                </svg>
+                <h1 id="employee-data">{{ username }} {{ surname }}</h1>
+            </div>
+            <h2>{{ role }}</h2>
+            <h2>Wydział {{ faculty }}</h2>
+        </header>
         <main>
-            <header>
-                <div class="employee-container ">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="60px" fill="currentColor"
-                        class="bi bi-file-person-fill" viewBox="0 0 16 16">
-                        <path
-                            d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m-1 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0m-3 4c2.623 0 4.146.826 5 1.755V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-1.245C3.854 11.825 5.377 11 8 11" />
-                    </svg>
-                    <h1 id="employee-data">{{ username }} {{ surname }}</h1>
-                </div>
-                <h2>{{ role }}</h2>
-                <h2>Wydział {{ faculty }}</h2>
-            </header>
-
             <div class="header-container">
                 <div class="header-tab">
                     <div class="header-items">
@@ -68,7 +66,7 @@
                 <div class="loader"></div>
 
                 <div class="button-group">
-                    <RouteButton class="primary-button" routeName="MainWindow" buttonText="Zakończ">
+                    <RouteButton class="primary-button" routeName="AcceptOperationByConcierge" buttonText="Zakończ">
                         <template #icon>
                         </template>
                     </RouteButton>
@@ -113,21 +111,33 @@ export default {
             permissions: [],
             issued: [],
             received: [],
+            lastPage: sessionStorage.getItem('lastPage') || '',
         };
+    },
+    computed: {
+        headerClass() {
+            if (this.lastPage === 'UserLogin') {
+                return 'text-white'; // Kolor biały dla UserLogin
+            } else if (this.lastPage === 'UnauthorizedUserGiveItem' || this.lastPage === 'UpdateUACredentials') {
+                return 'text-red'; // Kolor czerwony dla UnauthorizedUserGiveItem
+            }
+            return ''; // Domyślnie brak klasy
+        },
     },
     mounted() {
         this.loadUserData();
         this.fetchLoggedUser();
-        this.fetchPermissions(); // Pobranie uprawnień
+        this.fetchPermissions();
         this.fetchUnapprovedOperations();
     },
     methods: {
+
         loadUserData() {
             this.username = sessionStorage.getItem('username') || 'Nieznane imię';
             this.userId = sessionStorage.getItem('userId');
             this.surname = sessionStorage.getItem('surname') || 'Nieznane nazwisko';
-            this.role = sessionStorage.getItem('role') || 'Nieznana rola';
-            this.faculty = sessionStorage.getItem('faculty') || 'Nieznany wydział';
+            this.role = sessionStorage.getItem('role') || 'Rola nieznana';
+            this.faculty = sessionStorage.getItem('faculty') || 'nieznany';
         },
         async fetchPermissions() {
             try {
@@ -332,7 +342,7 @@ h2 {
     width: 90%;
     min-width: 400px;
     margin-bottom: 10px;
-    justify-content: space-between;
+    justify-content: space-evenly;
 
 }
 
@@ -343,7 +353,7 @@ h2 {
 
 .header-items {
     display: flex;
-    width: 70%;
+    width: 60%;
 }
 
 .table-section {
@@ -351,7 +361,7 @@ h2 {
     flex-direction: row;
     width: 90%; // Dopasowanie szerokości sekcji do okna
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-evenly;
 }
 
 
@@ -363,6 +373,7 @@ h2 {
     background-color: $secondary-color;
     border-radius: 15px;
     max-height: 200px;
+    height: 200px;
     width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
@@ -370,12 +381,11 @@ h2 {
 
 
 .items-table {
-    width: 70%;
+    width: 60%;
 }
 
 .permissions-table {
     width: 18%;
-    height: 200px;
 }
 
 
@@ -416,13 +426,20 @@ h2 {
 }
 
 .info-section {
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
+    width: 75%;
+    max-width: 75%;
+    min-width: 400px;
     gap: 5px;
+    overflow-x: auto; /* Dodanie scrolla w poziomie */
+    white-space: nowrap; /* Zapobiega zawijaniu tekstu */
 }
 
 .info-item {
-    font-size: 0.875rem;
+    font-size: 0.925rem;
+    overflow-x: auto;
 }
 
 .scan-section {
@@ -446,6 +463,14 @@ h2 {
     border-radius: 50%;
     transform: translateZ(0);
     animation: mltShdSpin 1.7s infinite ease, round 1.7s infinite ease;
+}
+
+.text-white {
+    color: white;
+}
+
+.text-red {
+    color: #FF4D4D;
 }
 
 @keyframes mltShdSpin {

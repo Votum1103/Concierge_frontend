@@ -15,7 +15,7 @@
   <div id="app">
     <div class="content-wrapper">
       <div ref="mapViewDiv" class="map-view"></div>
-      <div class="floor-selection-overlay">
+      <div v-if="loading" class="floor-selection-overlay">
         <button v-for="floor in floors" :key="floor.label" @click="updateFloor(floor.value)"
           :class="['floor-button', { selected: isSelectedFloor(floor.value) }]">
           {{ floor.label }}
@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="informations">
-      <div v-if="areOverlaysVisible" class="item-type-overlay">
+      <div v-if="areOverlaysVisible && loading" class="item-type-overlay">
         <div class="itemTypesButtons">
           <button @click="selectItemType('klucz')" :class="{ selectedButton: selectedItemType === 'klucz' }"
             class="keys">
@@ -97,7 +97,8 @@
             <b>Dzień pobrania: </b>
             {{ new Date(selectedRoom.issue_time).toLocaleDateString([], {
               year: 'numeric', month: '2-digit', day:
-            '2-digit' }) }}
+                '2-digit'
+            }) }}
           </p>
           <p v-if="selectedRoom.issue_time !== null && selectedRoom.owner_name && areOverlaysVisible">
             <b>Godzina pobrania: </b>
@@ -106,9 +107,9 @@
           <p v-if="!areOverlaysVisible"><b>Funkcja:</b> {{ selectedRoom.funkcja }}</p>
           <p v-if="!areOverlaysVisible"><b>Klasa:</b> {{ selectedRoom.klasa }}</p>
         </div>
-        <div v-else class="no-room-info">
+        <!-- <div v-else class="no-room-info">
           <p>Wybierz pomieszczenie, by zobaczyć szczegóły.</p>
-        </div>
+        </div> -->
       </div>
       <h2>Legenda</h2>
       <div v-if="areOverlaysVisible" class="deviceStatus">
@@ -274,8 +275,11 @@ export default {
     const resetRoomSelection = () => {
       selectedRoom.value = null;
       highlightedRoomId.value = null;
-      loading.value = false; // Resetuj stan ładowania po usunięciu pokoju
       view.graphics.removeAll();
+    };
+
+    const checkConnection = () => {
+      return navigator.onLine;
     };
 
 
@@ -375,6 +379,12 @@ export default {
 
     onMounted(async () => {
       // Pobierz dane o pokojach i ich statusie
+      if (!checkConnection()) {
+        console.log("Brak połączenia z internetem. Mapa nie będzie wyświetlać żadnych danych.");
+        loading.value = false; // Zatrzymanie ładowania danych
+        // Możesz wyłączyć wszystkie warstwy, jeśli połączenie jest niedostępne
+        return;
+      }
       await fetchRooms();
       await fetchRoomStatus();
 
@@ -708,6 +718,7 @@ export default {
       applyClassFilter,
       areOverlaysVisible,
       filterButtonText,
+      loading
     };
   },
 };

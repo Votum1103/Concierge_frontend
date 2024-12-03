@@ -21,11 +21,11 @@
                 <form @submit.prevent="fetchItemDetails">
                     <div class="form-group">
                         <input type="text" v-model="itemCode" id="code-input" name="code-input"
-                            placeholder="Kod przedmiotu" required />
+                            placeholder="Kod przedmiotu" :class="{'input-error': permissionError}" required />
                     </div>
                     <div class="error-container">
                         <div v-if="permissionError" class="error-message">
-                            <p style="color: red;">{{ permissionError }}</p>
+                            <p>{{ permissionError }}</p>
                         </div>
                     </div>
                     <div class="button-group">
@@ -73,12 +73,18 @@ export default {
 
                 this.itemCode = item.code;
 
+                console.log(this.session_id)
+
+                console.log(this.itemCode)
+
                 try {
                     const changeStatusResponse = await api.post('/operations/change-status', {
                         device_code: this.itemCode,
                         session_id: this.session_id,
                         force: false
                     });
+
+                    
 
                     this.statusChange = changeStatusResponse.data;
 
@@ -96,7 +102,7 @@ export default {
                 }
             } catch (error) {
                 if (error.response && error.response.status === 404) {
-                    this.error = "Nie znaleziono przedmiotu o podanym kodzie";
+                    this.permissionError = "Niepoprawny kod przedmiotu"
                 } else {
                     this.error = "Wystąpił błąd podczas pobierania danych urządzenia";
                 }
@@ -176,23 +182,23 @@ main {
 
 .error-container {
     height: 20px;
-    /* Stała wysokość kontenera na komunikat błędu */
     display: flex;
     align-items: center;
-    /* Wyśrodkowanie treści w pionie */
     justify-content: center;
-    /* Wyśrodkowanie treści w poziomie */
+    min-height: 20px;  /* Prevent shifting input */
 }
 
 .error-message {
     font-size: 16px;
-    color: red;
-    visibility: visible;
+    color: #ff4d4d;
 }
 
 .error-container:not(:has(.error-message)) .error-message {
     visibility: hidden;
-    /* Ukryj komunikat, jeśli nie ma błędu */
+}
+
+.input-error {
+    border-bottom: 3px solid #ff4d4d; 
 }
 
 h1 {
@@ -204,8 +210,9 @@ h1 {
 .form-group {
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: space-around;
-    height: 120px;
+    height: 100px;
 }
 
 input,
@@ -228,6 +235,7 @@ input:focus::placeholder {
 .button-group {
     display: flex;
     justify-content: center;
+    margin-top: 20px;
 }
 
 .primary-button {

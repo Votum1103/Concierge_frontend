@@ -112,7 +112,7 @@ export default {
                     const roomId = roomResponse.data[0]?.id;
 
                     if (!roomId) {
-                        this.errorMessage = 'Brak rezerwacji o zadanych kryteriach.';
+                        this.errorMessage = 'Brak rezerwacji o zadanych kryteriach';
                         this.reservations = [];
                         return;
                     }
@@ -139,11 +139,11 @@ export default {
 
                 // Sprawdzenie czy nie znaleziono żadnych wyników
                 if (this.reservations.length === 0) {
-                    this.errorMessage = 'Brak rezerwacji o zadanych kryteriach.';
+                    this.errorMessage = 'Brak rezerwacji o zadanych kryteriach';
                 }
             } catch (error) {
                 console.error('Błąd przy pobieraniu danych z API:', error);
-                this.errorMessage = 'Brak rezerwacji o zadanych kryteriach.';
+                this.errorMessage = 'Brak rezerwacji o zadanych kryteriach';
             }
         },
         formatTime(time) {
@@ -229,9 +229,12 @@ main {
 
 form {
     display: flex;
-    flex-direction: row; /* Ustawienie wszystkich grup w rzędzie */
-    gap: 50px; /* Odstępy między grupami */
-    align-items: center; /* Wyrównanie inputów w pionie */
+    flex-direction: row;
+    /* Ustawienie wszystkich grup w rzędzie */
+    gap: 50px;
+    /* Odstępy między grupami */
+    align-items: center;
+    /* Wyrównanie inputów w pionie */
 }
 
 .form-group {
@@ -397,7 +400,7 @@ select:-webkit-autofill:focus {
     width: 100%;
     color: white;
     font-size: 1.4em;
-    margin-top: 20px;
+    margin: 20px 0;
     text-align: center;
 }
 

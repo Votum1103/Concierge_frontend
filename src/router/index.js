@@ -17,8 +17,9 @@ import DeviceNote from '@/components/DeviceNote.vue';
 import UserLogin from '@/components/UserLogin.vue';
 import MapWindow from '@/components/MapWindow.vue';
 import AcceptOperationByConcierge from '@/components/AcceptOperationByConcierge.vue';
-
-
+import ConciergeLoginAcceptOperation from '@/components/ConciergeLoginAcceptOperation.vue';
+import AccpetRejectionOperation from '@/components/AccpetRejectionOperation.vue';
+import UpdateUACredentials from '@/components/UpdateUACredentials.vue';
 
 const routes = [
   {
@@ -27,7 +28,6 @@ const routes = [
     component: MainWindow,
     meta: { requiresAuth: true }
   },
-
   {
     path: '/',
     name: 'eConcierge',
@@ -113,16 +113,30 @@ const routes = [
     name: 'AcceptOperationByConcierge',
     component: AcceptOperationByConcierge
   },
-
-
-
-  
-]
+  {
+    path: '/conciergeacceptlogin',
+    name: 'ConciergeLoginAcceptOperation',
+    component: ConciergeLoginAcceptOperation
+  },
+  {
+    path: '/conciergeaccept',
+    name: 'AccpetRejectionOperation',
+    component: AccpetRejectionOperation
+  },
+  {
+    path: '/upadateuacredentials',
+    name: 'UpdateUACredentials',
+    component: UpdateUACredentials
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
-})
+});
+
+// Blokowanie cofania na poziomie routera
+let isBackNavigationBlocked = true;  // Od razu blokujemy cofnienie
 
 router.beforeEach((to, from, next) => {
   const isAuthenticated = !!sessionStorage.getItem('access_token');
@@ -132,6 +146,19 @@ router.beforeEach((to, from, next) => {
   } else {
     next();
   }
+});
+
+router.afterEach(() => {
+  // Zabezpieczamy przed powrotem w historii
+  if (isBackNavigationBlocked) {
+    window.history.pushState(null, null, window.location.href);
+  }
+});
+
+// Przechwytywanie akcji 'cofania' przyciskiem wstecz
+window.addEventListener('popstate', () => {
+  window.history.pushState(null, null, window.location.href); // Zapobiegamy cofaniu
+  // Przechwytywanie cofnicia będzie działać zawsze
 });
 
 export default router;
