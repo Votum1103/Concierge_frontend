@@ -68,7 +68,7 @@
 
 
 <script>
-import axios from 'axios';
+import api from '../api';
 import BackButton from './BackButton.vue';
 import GoogleFonts from './googleFonts.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
@@ -86,7 +86,7 @@ export default {
             startDate: '',
             endTime: '',
             reservations: [],
-            errorMessage: ''  // Dodana zmienna do przechowywania komunikatów o błędach
+            errorMessage: '' 
         };
     },
     mounted() {
@@ -102,13 +102,12 @@ export default {
             const headers = { Authorization: `Bearer ${accesToken}` };
 
             try {
-                // Resetowanie wiadomości o błędzie przed zapytaniem
                 this.errorMessage = '';
 
                 const queryParams = new URLSearchParams();
 
                 if (this.roomNumber) {
-                    const roomResponse = await axios.get(`http://127.0.0.1:8000/rooms/?number=${this.roomNumber}`, { headers });
+                    const roomResponse = await api.get(`/rooms/?number=${this.roomNumber}`, { headers });
                     const roomId = roomResponse.data[0]?.id;
 
                     if (!roomId) {
@@ -119,25 +118,18 @@ export default {
                     queryParams.append('room_id', roomId);
                 }
 
-                // Dodanie parametru `date` tylko jeśli data została podana
                 if (this.startDate) {
                     queryParams.append('date', this.startDate);
                 }
 
-                // Dodanie parametru `start_time` tylko jeśli godzina zakończenia została podana
                 if (this.endTime) {
                     queryParams.append('start_time', this.endTime);
                 }
 
-                const url = `http://127.0.0.1:8000/permissions/?${queryParams.toString()}`;
-                console.log('Wysłane zapytanie:', url);
+                const reservationsResponse = await api.get(`/permissions/?${queryParams.toString()}` );
 
-                const reservationsResponse = await axios.get(url, { headers });
-
-                // Aktualizacja danych rezerwacji
                 this.reservations = reservationsResponse.data.length > 0 ? reservationsResponse.data : [];
 
-                // Sprawdzenie czy nie znaleziono żadnych wyników
                 if (this.reservations.length === 0) {
                     this.errorMessage = 'Brak rezerwacji o zadanych kryteriach';
                 }
@@ -156,25 +148,23 @@ export default {
 
 
 <style lang="scss" scoped>
+@import '../assets/style/variables.scss';
+
 body {
-    background: black url('../assets/back.jpg') top no-repeat;
+    background: $background-color url('../assets/back.jpg') top no-repeat;
     background-size: cover;
-    color: white;
+    color: $text-color;
     text-align: center;
     margin: 0;
-    font-family: 'Open Sans', sans-serif;
+    font-family: $font-main;
 }
-
-h1,
-h2 {
-    font-family: 'Ubuntu', sans-serif;
-}
-
 button,
 a,
 p,
-label {
-    font-family: 'Open Sans', sans-serif;
+label,
+h1,
+h2 {
+    font-family: $font-heading;
 }
 
 nav {
@@ -187,8 +177,8 @@ nav {
     margin: 15px;
     display: inline-flex;
     align-items: center;
-    color: #FFFFFF;
-    background-color: transparent !important;
+    color: $text-color;
+    background-color: transparent;
 }
 
 .back-button:hover,
@@ -230,11 +220,8 @@ main {
 form {
     display: flex;
     flex-direction: row;
-    /* Ustawienie wszystkich grup w rzędzie */
     gap: 50px;
-    /* Odstępy między grupami */
     align-items: center;
-    /* Wyrównanie inputów w pionie */
 }
 
 .form-group {
@@ -251,7 +238,7 @@ form {
     background-color: inherit;
     border: none;
     text-align: center;
-    border-bottom: 3px solid #0083BB;
+    border-bottom: 3px solid $primary-color;
     padding-bottom: 5px;
     width: 200px;
     box-sizing: border-box;
@@ -300,7 +287,7 @@ input:focus::placeholder {
     justify-content: flex-end;
     align-items: center;
     width: 15%;
-    font-size: 1.2em;
+    font-size: $font-size-large;
 }
 
 .header-item-large {
@@ -348,14 +335,14 @@ table {
 }
 
 .primary-button {
-    color: #FFFFFF;
-    font-size: 1.2em;
+    color: $text-color;
+    font-size: $font-size-large;
     border: none;
-    background-color: #0083BB;
+    background-color: $primary-color;
     width: 200px;
     height: 50px;
     border-radius: 25px;
-    transition: all 0.3s;
+    transition: all $transition-duration;
 }
 
 .primary-button:hover {
@@ -386,8 +373,8 @@ textarea:-webkit-autofill:focus,
 select:-webkit-autofill,
 select:-webkit-autofill:hover,
 select:-webkit-autofill:focus {
-    border-bottom: 3px solid #0083BB;
-    -webkit-text-fill-color: white;
+    border-bottom: 3px solid $primary-color;
+    -webkit-text-fill-color: $text-color;
     -webkit-box-shadow: 0 0 0px 1000px transparent inset;
     transition: background-color 5000s ease-in-out 0s;
 }
@@ -398,79 +385,11 @@ select:-webkit-autofill:focus {
 
 .error-message {
     width: 100%;
-    color: white;
+    color: $text-color;
     font-size: 1.4em;
     margin: 20px 0;
     text-align: center;
 }
 
 
-@media (max-width: 1040px) {
-    .button-group {
-        gap: 10px;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .primary-button {
-        height: 45px;
-    }
-
-    ::-webkit-scrollbar {
-        width: 5px;
-    }
-}
-
-@media (max-width: 900px) {
-    main {
-        gap: 80px;
-    }
-
-    .primary-button {
-        height: 40px;
-    }
-
-    h1 {
-        font-size: x-large;
-    }
-
-    .form-group label {
-        display: none;
-    }
-
-    .container {
-        font-size: 12px;
-    }
-
-    .items-table {
-        max-height: 150px;
-    }
-
-    .form-group input,
-    .form-group input[type="date"],
-    .form-group input[type="time"] {
-        font-size: 16px;
-        width: 300px;
-    }
-}
-
-@media (max-width: 700px) {
-
-    img,
-    nav,
-    .header-items {
-        display: none;
-    }
-
-    .form-group input,
-    .form-group input[type="date"],
-    .form-group input[type="time"] {
-        font-size: 14px;
-        width: 200px;
-    }
-
-    main {
-        gap: 60px;
-    }
-}
 </style>

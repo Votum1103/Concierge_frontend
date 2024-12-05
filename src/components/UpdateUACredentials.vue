@@ -101,21 +101,7 @@ export default {
 
 
 <style lang="scss" scoped>
-$background-color: black;
-$text-color: white;
-$primary-color: #0083BB;
-$danger-color: #661111;
-$success-color: #397031;
-$info-color: #0083BB;
-$font-family-main: 'Open Sans', sans-serif;
-$font-family-heading: 'Ubuntu';
-$button-width: 12.5em;
-$button-height: 3.125em;
-$border-radius: 1.5625em;
-$font-size-large: 1.2em;
-$font-size-medium: 1.375em;
-$font-size-small: 0.9375em;
-$transition-duration: 0.3s;
+@import '../assets/style/variables.scss';
 
 body {
     background: $background-color url('../assets/back.jpg') top no-repeat;
@@ -123,18 +109,18 @@ body {
     color: $text-color;
     text-align: center;
     margin: 0;
-    font-family: $font-family-main;
+    font-family: $font-main;
 }
 
 h1,
 h2 {
-    font-family: $font-family-heading;
+    font-family: $font-heading;
 }
 
 button,
 a,
 p {
-    font-family: $font-family-main;
+    font-family: $font-main;
 }
 
 nav {
@@ -220,7 +206,7 @@ section {
 }
 
 .info-alert {
-    border: 0.1875em solid $info-color;
+    border: 0.1875em solid $primary-color;
 }
 
 p {

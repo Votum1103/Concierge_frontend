@@ -135,7 +135,7 @@
 
 <script>
 import { shallowRef, ref, onMounted, watch } from "vue";
-import axios from "axios";
+import api from "../api";
 import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
@@ -285,9 +285,7 @@ export default {
 
     const fetchRooms = async () => {
       try {
-        const token = sessionStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
-        const response = await axios.get(`http://127.0.0.1:8000/rooms/`, { headers });
+        const response = await api.get(`/rooms/`);
         roomStatus.value = {};
         response.data.forEach((room) => {
           roomStatus.value[room.number] = { is_taken: "brak", owner_name: null, owner_surname: null, issue_time: null };
@@ -299,12 +297,7 @@ export default {
 
     const fetchRoomStatus = async () => {
       try {
-        const token = sessionStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
-        const response = await axios.get(
-          `http://127.0.0.1:8000/devices/?dev_type=${selectedItemType.value}&dev_version=${version.value}`,
-          { headers }
-        );
+        const response = await api.get(`/devices/?dev_type=${selectedItemType.value}&dev_version=${version.value}`);
 
         Object.keys(roomStatus.value).forEach((roomNumber) => {
           roomStatus.value[roomNumber].is_taken = "brak";
@@ -328,11 +321,11 @@ export default {
     const updateRenderer = () => {
       if (isFilterApplied.value) {
         console.log("Filtr klasy jest aktywny - pomijam zmianę renderera.");
-        return; // Nie zmieniaj renderera, jeśli filtr klasy jest aktywny
+        return; 
       }
 
       if (view) {
-        view.map.layers.items[0].renderer = getRenderer(); // Aktualizuj renderer na podstawie nowego stanu
+        view.map.layers.items[0].renderer = getRenderer();
       }
     };
 
@@ -378,17 +371,14 @@ export default {
     };
 
     onMounted(async () => {
-      // Pobierz dane o pokojach i ich statusie
       if (!checkConnection()) {
         console.log("Brak połączenia z internetem. Mapa nie będzie wyświetlać żadnych danych.");
-        loading.value = false; // Zatrzymanie ładowania danych
-        // Możesz wyłączyć wszystkie warstwy, jeśli połączenie jest niedostępne
+        loading.value = false;
         return;
       }
       await fetchRooms();
       await fetchRoomStatus();
 
-      // Utwórz mapę i widok
       const map = new Map({ basemap: "topo-vector" });
       view = new MapView({
         container: mapViewDiv.value,
@@ -404,7 +394,6 @@ export default {
         },
       });
 
-      // Tworzenie kontenera na niestandardowe widgety
       let widgetContainer = document.createElement("div");
       widgetContainer.style.position = "absolute";
       widgetContainer.style.bottom = "70px";
@@ -414,26 +403,20 @@ export default {
       widgetContainer.style.gap = "10px";
       widgetContainer.id = "widgetContainer";
 
-      // Dodaj kontener do interfejsu mapy
       view.ui.add(widgetContainer, "manual");
 
-      // Dodanie widgetów Zoom, Home i ScaleBar bezpośrednio do mapy
       const zoomWidget = new Zoom({ view });
       const homeWidget = new Home({ view });
       const scaleBarWidget = new ScaleBar({ view });
-
-      // Dodaj ScaleBar do mapy
 
       view.ui.add([zoomWidget, homeWidget], "manual");
 
       widgetContainer.appendChild(homeWidget.container);
       widgetContainer.appendChild(zoomWidget.container);
 
-      // Dodanie niestandardowego przycisku "Zmień filtr"
       const customButton = document.createElement("button");
       customButton.classList.add("filter-button");
 
-      // Tworzymy statyczną strukturę HTML
       customButton.innerHTML = `
   <span class="filter-icon">
     <svg  xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="black" viewBox="0 0 16 16">
@@ -442,9 +425,9 @@ export default {
   </span>
   <span class="filter-text" style="display:none;">Klasy pomieszczeń</span>
 `;
-      customButton.style.display = "flex"; // Użycie flexboxa do rozmieszczenia elementów
-      customButton.style.alignItems = "center"; // Wyrównanie w pionie
-      customButton.style.justifyContent = "flex-start"; // Wyrównanie do lewej strony
+      customButton.style.display = "flex"; 
+      customButton.style.alignItems = "center";
+      customButton.style.justifyContent = "flex-start";
       customButton.style.backgroundColor = "#ffffff";
       customButton.style.gap = "10px";
       customButton.style.height = "32px"
@@ -454,16 +437,14 @@ export default {
       watch(filterButtonText, (newValue) => {
         const filterTextElement = customButton.querySelector(".filter-text");
         if (filterTextElement) {
-          filterTextElement.textContent = newValue; // Aktualizuje tylko tekst
+          filterTextElement.textContent = newValue;
         }
       });
 
       let enterTimeout, leaveTimeout;
 
       customButton.addEventListener("mouseenter", () => {
-        // Anulowanie zdarzenia `mouseleave`, jeśli już zostało ustawione
         clearTimeout(leaveTimeout);
-        // Rozszerzenie przycisku i wyświetlenie tekstu
         enterTimeout = setTimeout(() => {
           customButton.style.width = "180px";
           const filterText = customButton.querySelector(".filter-text");
@@ -472,13 +453,12 @@ export default {
           filterText.style.pointerEvents = "none";
 
           filterText.style.display = "inline";
-        }, 100); // Opóźnienie dla płynnej animacji
+        }, 100);
       });
 
       customButton.addEventListener("mouseleave", () => {
         clearTimeout(enterTimeout);
 
-        // Ukrycie tekstu i zwężenie przycisku
         leaveTimeout = setTimeout(() => {
           const filterText = customButton.querySelector(".filter-text");
           filterText.style.display = "none";
@@ -486,17 +466,13 @@ export default {
         }, 100);
       });
 
-      // Kliknięcie obsługuje logikę filtra
       customButton.addEventListener("click", () => {
-        applyClassFilter(); // Obsługa logiki filtra
+        applyClassFilter();
       });
 
-
-      // Dodanie przycisku do kontenera widgetów
       view.ui.add(customButton, "bottom-left");
       view.ui.add(scaleBarWidget, "bottom-left");
 
-      // Dodanie widgetów Zoom i Home do kontenera widgetów
       const zoomNode = document.createElement("div");
       zoomNode.style.display = "inline-block";
       zoomNode.appendChild(zoomWidget.container || document.createElement("div"));
@@ -512,13 +488,11 @@ export default {
         view.ui.add(itemTypeOverlayNode, "top-right");
       }
 
-      // Dodanie .deviceStatus do prawego dolnego rogu mapy
       const deviceStatusNode = document.querySelector(".floor-selection-overlay");
       if (deviceStatusNode) {
         view.ui.add(deviceStatusNode, "bottom-right");
       }
 
-      // Obsługa wyszukiwania
       const searchWidget = new Search({
         view,
         allPlaceholder: "Szukaj pokoju",
@@ -544,9 +518,6 @@ export default {
 
       view.ui.add(searchWidget, "top-left");
 
-
-      // Obsługa zdarzenia wyszukiwania
-      // Obsługa zdarzenia wyszukiwania
       searchWidget.on("search-complete", (event) => {
         resetRoomSelection();
         view.graphics.removeAll();
@@ -557,7 +528,6 @@ export default {
             const roomKey = roomAttributes.nazwa_skrocona;
             const roomFloor = feature.feature.attributes.poziom;
 
-            // Znajdź odpowiadający label na podstawie poziomu (roomFloor)
             const floorMapping = floors.find((floor) =>
               Array.isArray(floor.value)
                 ? floor.value.includes(roomFloor)
@@ -644,7 +614,6 @@ export default {
               }
               highlightedRoomId.value = graphic.attributes.nazwa_skrocona;
 
-              // Wywołanie funkcji aktualizującej obrys
               updateOutline(graphic.geometry);
             } else {
               resetRoomSelection();
@@ -654,17 +623,15 @@ export default {
           }
         });
       });
-      // Aktualizacja renderera przy zmianie podświetlonego pokoju
       watch(highlightedRoomId, updateRenderer);
 
-      // Aktualizacja warstwy przy zmianie piętra
       watch(selectedFloor, (newFloor) => {
         if (!isAutoFloorChange.value) {
           resetRoomSelection();
           view.graphics.removeAll();
           isSearchHighlightActive.value = false;
         } else {
-          isAutoFloorChange.value = false; // Resetuj flagę
+          isAutoFloorChange.value = false;
         }
 
         const floorNumbers = newFloor.join(", ");
@@ -672,11 +639,9 @@ export default {
 
         console.log("Ustawiono definitionExpression:", featureLayer.definitionExpression);
 
-        // Wymuś odświeżenie warstwy
         featureLayer.refresh();
       });
 
-      // Aktualizacja warstwy przy zmianie typu i wersji urządzenia
       watch([selectedItemType, version], async () => {
         resetRoomSelection();
         await fetchRoomStatus();
@@ -695,13 +660,13 @@ export default {
     const selectItemType = (type) => {
       resetRoomSelection();
       selectedItemType.value = type;
-      fetchRoomStatus().then(() => updateRenderer()); // Aktualizuj status pokoi i renderer po wyborze typu urządzenia
+      fetchRoomStatus().then(() => updateRenderer());
     };
 
     const selectItemVersion = (ver) => {
       resetRoomSelection();
       version.value = ver;
-      fetchRoomStatus().then(() => updateRenderer()); // Aktualizuj status pokoi i renderer po wyborze wersji urządzenia
+      fetchRoomStatus().then(() => updateRenderer());
     };
 
     return {
@@ -726,22 +691,15 @@ export default {
 
 
 <style lang="scss" scoped>
-$primary-bg: black;
-$secondary-bg: #050608;
-$accent-color: #0083BB;
-$text-color: white;
-$avatar-bg: #494A4D;
-$border-radius-large: 30px;
-$button-height: 45px;
-$font-family: 'Open Sans', sans-serif;
+@import '../assets/style/variables.scss';
 
 html,
 body {
-  background: $primary-bg url('../assets/back.jpg') no-repeat top;
+  background: $background-color url('../assets/back.jpg') no-repeat top;
   background-size: 10920px 10080px;
   color: $text-color;
   margin: 0;
-  font-family: $font-family;
+  font-family: $font-main;
   text-align: center;
   height: 100vh;
   width: 100vw;
@@ -764,16 +722,12 @@ nav {
   display: flex;
   flex: 1;
   justify-content: center;
-  /* Utrzymuje mapę wyśrodkowaną */
 }
 
 .informations {
   width: 400px;
-  /* Ustaw stałą szerokość dla panelu bocznego */
   flex-shrink: 0;
-  /* Zapobiega zmniejszaniu panelu bocznego */
   overflow-y: auto;
-  /* Umożliwia przewijanie dłuższych treści */
   margin-right: 2%;
 }
 
@@ -781,7 +735,6 @@ nav {
   display: flex;
   flex-direction: row;
   pointer-events: auto;
-  /* Zapewnia, że kliknięcia są przekazywane */
   position: relative;
   gap: 15px;
   z-index: 10;
@@ -789,12 +742,10 @@ nav {
 
 .map-view {
   width: 95%;
-  /* Dopasuj szerokość mapy, zmniejszając ją o szerokość paneli bocznych */
   height: 80%;
   border-radius: 30px;
   overflow: hidden;
   position: relative;
-  /* Aby upewnić się, że elementy wewnętrzne są poprawnie pozycjonowane */
 }
 
 .esri-ui .esri-component,
@@ -821,7 +772,7 @@ button {
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color $transition-duration;
 }
 
 .itemsVersionsButtons,
@@ -830,7 +781,7 @@ button {
 }
 
 button:hover {
-  background-color: #0d1016;
+  background-color: $background-color;
 }
 
 .floor-button {
@@ -843,7 +794,7 @@ button:hover {
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color $transition-duration;
 }
 
 .floor-button:hover {
@@ -861,7 +812,7 @@ button:hover {
   display: inline-flex;
   align-items: center;
   justify-content: start;
-  color: #FFFFFF;
+  color: $text-color;
   background-color: transparent !important;
 }
 
@@ -899,7 +850,7 @@ button.reserve-version {
   height: 45%;
   overflow-y: auto;
   background-color: transparent;
-  color: #ffffff;
+  color: $text-color;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -959,10 +910,10 @@ button.reserve-version {
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: white;
-  font-family: 'Open Sans', sans-serif;
+  color: $text-color;
+  font-family: $font-main;
   font-size: 15px;
-  border: 1px solid #292323;
+  border: 1px solid $background-color;
   max-height: 230px;
   overflow-y: auto;
   padding: 10px;

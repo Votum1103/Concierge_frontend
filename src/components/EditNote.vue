@@ -44,12 +44,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$primary-color: #0083BB;
-$secondary-color: #FFFFFF;
-$placeholder-color: #edede9;
-$background-color: black;
-$font-primary: 'Open Sans', sans-serif;
-$font-secondary: 'Ubuntu', sans-serif;
+@import '../assets/style/variables.scss';
 
 @mixin button-style($bg-color, $text-color, $width, $height) {
     border: none;
@@ -72,22 +67,22 @@ $font-secondary: 'Ubuntu', sans-serif;
 body {
     background: $background-color url('../assets/back.jpg') top no-repeat;
     background-size: 1920px 1080px;
-    color: $secondary-color;
+    color: $text-color;
     text-align: center;
     margin: 0;
-    font-family: $font-primary;
+    font-family: $font-main;
 }
 
 h1,
 h2 {
-    font-family: $font-secondary;
+    font-family: $font-heading;
 }
 
 button,
 a,
 p,
 label {
-    font-family: $font-primary;
+    font-family: $font-main;
 }
 
 nav {
@@ -100,7 +95,7 @@ nav {
     margin: 15px;
     display: inline-flex;
     align-items: center;
-    color: $secondary-color;
+    color: $text-color;
     font-size: 15px;
     background-color: transparent;
 
@@ -160,7 +155,7 @@ textarea {
 }
 
 .primary-button {
-    @include button-style($primary-color, $secondary-color, 25%, 50px);
+    @include button-style($primary-color, $text-color, 25%, 50px);
 }
 
 @media (max-width: 1040px) {

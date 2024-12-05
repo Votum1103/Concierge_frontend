@@ -47,7 +47,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 import GoogleFonts from './googleFonts.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
 import BackButton from './BackButton.vue';
@@ -74,17 +73,12 @@ export default {
     methods: {
         async submitForm() {
             try {
-                const token = sessionStorage.getItem('access_token');
-                const headers = {
-                    Authorization: `Bearer ${token}`
-                };
-
-                const response = await axios.post('http://127.0.0.1:8000/unauthorized-users', {
+                const response = await api.post('/unauthorized-users', {
                     name: this.formData.name,
                     surname: this.formData.surname,
                     email: this.formData.email,
                     note: this.formData.note
-                }, { headers });
+            });
 
                 this.formData = {
                     name: '',
@@ -101,15 +95,11 @@ export default {
                 sessionStorage.setItem('username', response.data.name);
                 sessionStorage.setItem('surname', response.data.surname);
                 sessionStorage.setItem('sessionId', createSessionUA.data.id);
-
-                // Zapisz email w sessionStorage
                 sessionStorage.setItem('userEmail', this.formData.email);
 
                 this.$router.push({ name: 'MainProcess' });
             } catch (error) {
                 console.error('Błąd podczas tworzenia użytkownika:', error);
-                
-                // Sprawdzanie kodu błędu 409
                 if (error.response && error.response.status === 409) {
                     sessionStorage.setItem('userEmail', this.formData.email);
                     sessionStorage.setItem('username', this.formData.name);
@@ -124,21 +114,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$background-color: black;
-$text-color: white;
-$primary-color: #0083BB;
-$placeholder-color: #edede9;
-$font-family-main: 'Open Sans', sans-serif;
-$font-family-heading: 'Ubuntu';
-$button-width-large: 12.5em;
-$button-height-large: 3.125em;
-$button-height-medium: 3.125em;
-$button-height-small: 2.5em;
-$font-size-large: 1.75em;
-$font-size-medium: 1.125em;
-$font-size-small: 1em;
-$font-size-x-small: 0.875em;
-$transition-duration: 0.3s;
+@import '../assets/style/variables.scss';
 
 body {
     background: $background-color url('../assets/back.jpg') top no-repeat;
@@ -146,18 +122,18 @@ body {
     color: $text-color;
     text-align: center;
     margin: 0;
-    font-family: $font-family-main;
+    font-family: $font-main;
 }
 
 h1,
 h2 {
-    font-family: $font-family-heading;
+    font-family: $font-heading;
 }
 
 button,
 a,
 p {
-    font-family: $font-family-main;
+    font-family: $font-main;
 }
 
 nav {
@@ -268,8 +244,8 @@ label {
     font-size: 1.2em;
     border: none;
     background-color: $primary-color;
-    width: $button-width-large;
-    height: $button-height-large;
+    width: $button-width;
+    height: $button-height;
     border-radius: 1.5625em;
     transition: all $transition-duration ease;
 
@@ -302,7 +278,7 @@ input:-webkit-autofill:active {
 
 @media (max-width: 1040px) {
     .button-group button {
-        height: $button-height-medium;
+        height: $button-height;
         width: 13.5em;
         font-size: 0.9em;
     }
@@ -310,7 +286,7 @@ input:-webkit-autofill:active {
 
 @media (max-width: 768px) {
     .button-group button {
-        height: $button-height-small;
+        height: 1em;
     }
 
     header h1 {
@@ -318,7 +294,7 @@ input:-webkit-autofill:active {
     }
 
     header h2 {
-        font-size: $font-size-x-small;
+        font-size: 0.875em;
     }
 
     .form-group input,

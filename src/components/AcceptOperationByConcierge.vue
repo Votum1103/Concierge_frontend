@@ -78,17 +78,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$primary-color: #0083BB;
-$error-color: #ff4d4d;
-$text-color: #FFFFFF;
-$background-color: rgb(41, 38, 38);
-$font-main: 'Open Sans', sans-serif;
-$font-heading: 'Ubuntu', sans-serif;
-$font-size-large: 1.2em;
-$button-width: 12.5em;
-$button-height: 3.125em;
-$border-radius: 1.5625em;
-$transition-duration: 0.3s;
+@import '../assets/style/variables.scss';
 
 .main-content {
     background-color: $background-color;

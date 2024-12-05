@@ -76,24 +76,26 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../assets/style/variables.scss';
+
 body {
-    background: black url('../assets/back.jpg') top no-repeat;
+    background: $background-color url('../assets/back.jpg') top no-repeat;
     background-size: cover;
-    color: white;
+    color: $text-color;
     text-align: center;
     margin: 0;
-    font-family: 'Open Sans', sans-serif;
+    font-family: $font-main;
 }
 
 h1,
 h2 {
-    font-family: 'Ubuntu';
+    font-family: $font-heading;
 }
 
 button,
 a,
 p {
-    font-family: 'Open Sans', sans-serif;
+    font-family: $font-main;
 }
 
 nav {
@@ -112,7 +114,7 @@ nav {
     margin: 15px;
     display: inline-flex;
     align-items: center;
-    color: #FFFFFF;
+    color: $text-color;
     background-color: transparent;
 }
 
@@ -163,17 +165,17 @@ section {
 }
 
 .danger-alert {
-    border: 3px solid #661111;
+    border: 3px solid $danger-color;
     gap: 5px;
 }
 
 .success-alert {
-    border: 3px solid #397031;
+    border: 3px solid $success-color;
     gap: 5px;
 }
 
 .info-alert {
-    border: 3px solid #0083BB;
+    border: 3px solid $primary-color;
 }
 
 p {
@@ -181,7 +183,7 @@ p {
 }
 
 .loader {
-    color: #ffffff;
+    color: $text-color;
     font-size: 25px;
     overflow: hidden;
     width: 1em;
@@ -201,7 +203,7 @@ p {
 
 .primary-button,
 .secondary-button {
-    color: #FFFFFF;
+    color: $text-color;
     font-size: 1.2em;
     width: 200px;
     height: 50px;
@@ -211,11 +213,11 @@ p {
 
 .primary-button {
     border: none;
-    background-color: #0083BB;
+    background-color: $primary-color;
 }
 
 .secondary-button {
-    border: 3px solid #0083BB;
+    border: 3px solid $primary-color;
     background-color: transparent;
 }
 

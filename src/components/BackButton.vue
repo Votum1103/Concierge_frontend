@@ -31,13 +31,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../assets/style/variables.scss';
+
 button {
-    font-family: 'Open Sans', sans-serif;
+    font-family: $font-main;
 }
 
 .back-button-component {
-    color: #FFFFFF;
-    font-size: 1.2em;
+    color: $text-color;
+    font-size: $font-size-large;
     width: 150px;
     height: 50px;
     border-radius: 25px;

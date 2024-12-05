@@ -36,17 +36,19 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../assets/style/variables.scss';
+
 button {
-  font-family: 'Open Sans', sans-serif;
+  font-family: $font-main;
 }
 
 .primary-button {
-  color: #FFFFFF;
-  font-size: 1.2em;
+  color: $text-color;
+  font-size: $font-size-large;
   width: 250px;
   height: 50px;
   border-radius: 25px;
-  transition: all 0.3s;
+  transition: all $transition-duration;
   border: none;
 }
 

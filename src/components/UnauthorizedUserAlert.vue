@@ -12,7 +12,6 @@
                     <path
                         d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
                 </svg>
-                <!-- Wyświetlenie danych przedmiotu -->
                 <p>Użytkownik nie posiada uprawnień do pokoju {{ roomNumber }}</p>
             </div>
             <div class="button-group">
@@ -28,6 +27,8 @@
 import GoogleFonts from './googleFonts.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
 import api from '@/api';
+
+//#TODO jeszcze jakieś rezerwacje wyświetlić najbliższe dla tego pokoju
 
 export default {
     name: 'UnauthorizedUserAlert',
@@ -96,21 +97,7 @@ export default {
 
 
 <style lang="scss" scoped>
-$background-color: black;
-$text-color: white;
-$primary-color: #0083BB;
-$danger-color: #661111;
-$success-color: #397031;
-$info-color: #0083BB;
-$font-family-main: 'Open Sans', sans-serif;
-$font-family-heading: 'Ubuntu';
-$button-width: 12.5em;
-$button-height: 3.125em;
-$border-radius: 1.5625em;
-$font-size-large: 1.2em;
-$font-size-medium: 1.375em;
-$font-size-small: 0.9375em;
-$transition-duration: 0.3s;
+@import '../assets/style/variables.scss';
 
 body {
     background: $background-color url('../assets/back.jpg') top no-repeat;
@@ -118,18 +105,18 @@ body {
     color: $text-color;
     text-align: center;
     margin: 0;
-    font-family: $font-family-main;
+    font-family: $font-main;
 }
 
 h1,
 h2 {
-    font-family: $font-family-heading;
+    font-family: $font-heading;
 }
 
 button,
 a,
 p {
-    font-family: $font-family-main;
+    font-family: $font-main;
 }
 
 nav {
@@ -215,7 +202,7 @@ section {
 }
 
 .info-alert {
-    border: 0.1875em solid $info-color;
+    border: 0.1875em solid $primary-color;
 }
 
 p {

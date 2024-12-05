@@ -40,7 +40,7 @@
     import GoogleFonts from './googleFonts.vue';
     import RouteButton from './RouteButton.vue';
     import WUoT_Logo from './WUoT_Logo.vue';
-    import axios from 'axios';
+    import api from '../api';
 
     export default {
         name: 'UserLogin',
@@ -61,12 +61,10 @@
             async login() {
 
                 try {
-                    const token = sessionStorage.getItem("access_token");
-                    const headers = { Authorization: `Bearer ${token}` };
-                    const response = await axios.post('http://127.0.0.1:8000/start-session/login', new URLSearchParams({
+                    const response = await api.post('http://127.0.0.1:8000/start-session/login', new URLSearchParams({
                         username: this.username,
                         password: this.password
-                    }), { headers });
+                    }));
 
                     const username = response.data.user.name;
 
@@ -79,11 +77,9 @@
                     sessionStorage.setItem('sessionId', sessionId);
                     sessionStorage.setItem('userId', userId);
                     sessionStorage.setItem('username', username);
-
                     sessionStorage.setItem('surname', surname);
                     sessionStorage.setItem('faculty', faculty);
                     sessionStorage.setItem('role', role);
-
                     sessionStorage.setItem('lastPage', this.$route.name)
 
                     this.$router.push({ name: 'MainProcess' });
@@ -97,12 +93,7 @@
     </script>
 
     <style lang="scss" scoped>
-    $primary-color: #0083BB;
-    $error-color: #ff4d4d;
-    $text-color: #FFFFFF;
-    $background-color: rgb(41, 38, 38);
-    $font-main: 'Open Sans', sans-serif;
-    $font-heading: 'Ubuntu', sans-serif;
+@import '../assets/style/variables.scss';
 
     body {
         background-color: $background-color;
@@ -146,7 +137,7 @@
         margin: 15px;
         display: inline-flex;
         align-items: center;
-        color: #FFFFFF;
+        color: $text-color;
         background-color: transparent !important;
     }
 
@@ -171,7 +162,7 @@
         min-width: 21.875rem;
         max-width: 37.5rem;
         height: 70%;
-        background-color: rgb(0, 0, 0);
+        background-color: $background-color;
     }
 
     input {

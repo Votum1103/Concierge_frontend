@@ -61,39 +61,31 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-$background-image: url('../assets/back.jpg');
-$background-color: black;
-$text-color: white;
-$primary-color: #0083BB;
-$border-radius: 1.5625em;
-$header-height: 3.125em;
-$button-height: 3em;
-$button-group-gap: 0.9375em;
-$loader-size: 1.5625em;
+@import '../assets/style/variables.scss';
 
 body {
-    background: $background-color $background-image top no-repeat;
+    background: $background-color url('../assets/back.jpg') top no-repeat;
     background-size: cover;
     color: $text-color;
     text-align: center;
     margin: 0;
-    font-family: 'Open Sans', sans-serif;
+    font-family: $font-main;
 }
 
 h1,
 h2 {
-    font-family: 'Ubuntu';
+    font-family: $font-heading;
 }
 
 button,
 a,
 p {
-    font-family: 'Open Sans', sans-serif;
+    font-family: $font-main;
 }
 
 nav {
     text-align: left;
-    height: $header-height;
+    height: 50px;
 }
 
 .back-button {
@@ -153,7 +145,7 @@ section {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: $button-group-gap;
+    gap: 10px;
     padding: 1.875em 0.625em 0.625em;
     width: 60%;
     max-width: 37.5em;
@@ -167,7 +159,7 @@ p {
 
 .loader {
     color: $text-color;
-    font-size: $loader-size;
+    font-size: 1.9em;
     overflow: hidden;
     width: 1em;
     height: 1em;
@@ -236,7 +228,7 @@ p {
     margin-top: 2.5em;
     display: flex;
     flex-direction: column;
-    gap: $button-group-gap;
+    gap: 15px;
 }
 
 .primary-button,

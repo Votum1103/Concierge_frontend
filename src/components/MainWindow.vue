@@ -165,17 +165,13 @@
   </body>
 </template>
 
-
-
-
-
 <script>
 import GoogleFonts from './googleFonts.vue';
 import RouteButton from './RouteButton.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
 import AcceptanceIcon from './AcceptanceIcon.vue';
 import NegativeIcon from './NegativeIcon.vue';
-import api from '../api.js';  // Importuj skonfigurowany Axios
+import api from '../api.js';
 
 export default {
   name: 'MainWindow',
@@ -225,9 +221,7 @@ export default {
       await api.post('/logout', {
         refresh_token: sessionStorage.getItem('refresh_token'),
       });
-
       sessionStorage.clear();
-      console.log('Udalo się')
       this.$router.push(`/`);} catch(error) {
         console.log("Nie udało się wylogować", error);
       }
@@ -275,15 +269,7 @@ export default {
 </script>
 
 <style lang="scss">
-$primary-bg: black;
-$secondary-bg: #050608;
-$accent-color: #0083BB;
-$text-color: white;
-$avatar-bg: #494A4D;
-$border-radius-large: 30px;
-$button-height: 45px;
-$font-family-main: 'Open Sans', sans-serif;
-$background-color: black;
+@import '../assets/style/variables.scss';
 
 body {
   background: $background-color url('../assets/back.jpg') top no-repeat;
@@ -291,7 +277,7 @@ body {
   color: $text-color;
   text-align: center;
   margin: 0;
-  font-family: $font-family-main;
+  font-family: $font-main;
   overflow: hidden;
   height: 100vh;
 }
@@ -299,9 +285,9 @@ body {
 input:-webkit-autofill,
 textarea:-webkit-autofill,
 select:-webkit-autofill {
-  border-bottom: 3px solid $accent-color;
+  border-bottom: 3px solid $primary-color;
   -webkit-text-fill-color: $text-color;
-  -webkit-box-shadow: 0 0 0px 1000px $primary-bg inset;
+  -webkit-box-shadow: 0 0 0px 1000px $background-color inset;
   transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -336,7 +322,7 @@ button,
 
 .logOut {
   color: $text-color;
-  font-family: $font-family-main;
+  font-family: $font-main;
 }
 
 .avatars,
@@ -344,7 +330,7 @@ button,
 .itemTypesButtons,
 .itemsVersionsButtons {
   border-radius: $border-radius-large;
-  background-color: $secondary-bg;
+  background-color: $background-color;
 }
 
 .avatars {
@@ -399,8 +385,8 @@ button.reserve-version {
 }
 
 .selected {
-  transform: scale(1.7); // Powiększenie aktywnego przycisku
-  transition: transform 0.2s ease-in-out; // Płynna animacja powiększenia
+  transform: scale(1.7);
+  transition: transform 0.2s ease-in-out; 
 }
 
 .main-page {
@@ -454,7 +440,7 @@ button.reserve-version {
   display: grid;
   grid-template-rows: repeat(4, 1fr);
   align-items: center;
-  background-color: $secondary-bg;
+  background-color: $background-color;
   height: calc(8 * 80px);
   width: 100%;
   border-radius: $border-radius-large;
@@ -465,42 +451,29 @@ button.reserve-version {
 
 .itemsNumber {
   display: grid;
-  height: calc(8 * 75px); // Wysokość jednego wiersza * 8
+  height: calc(8 * 75px);
   overflow-y: auto;
   overflow-x: hidden;
-
-  /* Stylizacja przewijacza */
   scrollbar-width: thin;
-  /* Cieńszy przewijacz dla Firefox */
-  scrollbar-color: grey $secondary-bg;
-  /* Kolory przewijacza dla Firefox */
+  scrollbar-color: grey $background-color;
 }
 
-/* Stylizacja przewijacza dla Chrome, Safari i Edge */
 .itemsNumber::-webkit-scrollbar {
   width: 8px;
-  /* Szerokość przewijacza */
 }
 
 .itemsNumber::-webkit-scrollbar-track {
-  background: $secondary-bg;
-  /* Tło przewijacza */
+  background: $background-color;
   border-radius: 10px;
-  /* Zaokrąglenie */
 }
-
 .itemsNumber::-webkit-scrollbar-thumb {
   background-color: grey;
-  /* Kolor suwaka */
   border-radius: 10px;
-  /* Zaokrąglenie suwaka */
   border: 2px solid grey;
-  /* Obramowanie dla lepszego kontrastu */
 }
 
 .itemsNumber::-webkit-scrollbar-thumb:hover {
-  background-color: lighten($accent-color, 10%);
-  /* Jaśniejszy kolor na hover */
+  background-color: lighten($primary-color, 10%);
 }
 
 .table-row {

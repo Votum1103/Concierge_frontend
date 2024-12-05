@@ -44,11 +44,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$background-color: rgb(41, 38, 38);
-$text-color: #ffffff;
-$primary-color: #0083BB;
-$font-main: 'Open Sans', sans-serif;
-$font-heading: 'Ubuntu', sans-serif;
+@import '../assets/style/variables.scss';
 
 html,
 body {
@@ -58,16 +54,16 @@ body {
 }
 
 body {
-  background-color: $background-color;
-  color: $text-color;
+  display: flex;
+  flex-direction: column;
   text-align: center;
   font-family: $font-main;
+  color: $text-color;
+  background-color: $background-color;
   background-image: url('../assets/back.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  display: flex;
-  flex-direction: column;
 }
 
 h1,
@@ -98,24 +94,24 @@ nav {
 }
 
 main {
-  width: 100%;
-  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100vh;
 }
 
 .container {
-  border-radius: 2em;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  border-radius: 2em;
   width: 45%;
   min-width: 18.75rem;
   max-width: 37.5rem;
-  background-color: rgb(0, 0, 0);
+  background-color: $background-color;
   padding: 3.125rem 1.25rem;
   height: 40%;
   max-height: calc(100vh - 6.25rem);
@@ -182,14 +178,14 @@ h1 {
 
 .primary-button {
   color: $text-color;
-  font-size: 1.2rem;
+  font-size: $font-size-large;
   width: 25%;
   border: none;
   background-color: $primary-color;
   min-width: 12.5rem;
   height: 3.125rem;
   border-radius: 1.5625rem;
-  transition: transform 0.3s;
+  transition: transform $transition-duration;
 }
 
 button:hover {
@@ -198,12 +194,12 @@ button:hover {
 }
 
 .back-button {
-  text-decoration: none;
-  margin: 15px;
   display: inline-flex;
+  text-decoration: none;
   align-items: center;
-  color: #FFFFFF;
   background-color: transparent;
+  color: $text-color;
+  margin: 15px;
 }
 
 @media (max-width: 1040px) {

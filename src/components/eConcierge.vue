@@ -32,6 +32,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../assets/style/variables.scss';
+
 html,
 body {
   height: 100%;
@@ -40,10 +42,10 @@ body {
 }
 
 body {
-  background: rgb(41, 38, 38);
-  color: white;
+  background: $background-color;
+  color: $text-color;
   text-align: center;
-  font-family: 'Open Sans', sans-serif;
+  font-family: $font-main;
   background-image: url('../assets/back.jpg');
   background-size: cover;
   background-repeat: no-repeat;
@@ -55,14 +57,15 @@ body {
 
 h1,
 h2 {
-  font-family: 'Ubuntu';
+  font-family: $font-heading;
+  font-size: xx-large
 }
 
 button,
 a,
 p,
 label {
-  font-family: 'Open Sans', sans-serif;
+  font-family: $font-main;
 }
 
 nav {
@@ -94,19 +97,14 @@ main {
   width: 45%;
   min-width: 300px;
   max-width: 600px;
-  background: rgb(0, 0, 0);
+  background: $background-color;
   height: 500px;
   gap: 100px;
   overflow: auto;
 }
 
-h1 {
-  font-family: 'Ubuntu';
-  font-size: xx-large;
-}
-
 .loader {
-  color: #ffffff;
+  color: $text-color;
   font-size: 35px;
   overflow: hidden;
   width: 1em;
@@ -171,15 +169,15 @@ h1 {
 }
 
 .primary-button {
-  color: #FFFFFF;
-  font-size: 1.2em;
+  color: $text-color;
+  font-size: $font-size-large;
   width: 25%;
   border: none;
-  background-color: #0083BB;
+  background-color: $primary-color;
   min-width: 200px;
   height: 50px;
   border-radius: 25px;
-  transition: all 0.3s;
+  transition: all $transition-duration;
 }
 
 button:hover {

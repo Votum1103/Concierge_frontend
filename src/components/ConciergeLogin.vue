@@ -42,7 +42,7 @@ import BackButton from './BackButton.vue';
 import GoogleFonts from './googleFonts.vue';
 import RouteButton from './RouteButton.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
-import axios from 'axios';
+import api from '../api';
 
 export default {
     name: 'ConciergeLogin',
@@ -62,7 +62,7 @@ export default {
     methods: {
         async login() {
             try {
-                const response = await axios.post('http://127.0.0.1:8000/login', new URLSearchParams({
+                const response = await api.post('/login', new URLSearchParams({
                     username: this.username,
                     password: this.password
                 }));
@@ -72,7 +72,7 @@ export default {
 
                 sessionStorage.setItem('access_token', accessToken);
                 sessionStorage.setItem('refresh_token', refreshToken);
-                const userResponse = await axios.get('http://127.0.0.1:8000/concierge', {
+                const userResponse = await api.get('/concierge', {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`  
                     }
@@ -93,15 +93,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$primary-color: #0083BB;
-$error-color: #ff4d4d;
-$text-color: #FFFFFF;
-$background-color: rgb(41, 38, 38);
-$font-main: 'Open Sans', sans-serif;
-$font-heading: 'Ubuntu', sans-serif;
+@import '../assets/style/variables.scss';
 
 body {
-    background-color: $background-color;
+    background: $background-color;
     color: $text-color;
     text-align: center;
     margin: 0;

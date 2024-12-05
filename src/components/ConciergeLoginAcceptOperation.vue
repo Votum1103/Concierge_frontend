@@ -100,12 +100,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$primary-color: #0083BB;
-$error-color: #ff4d4d;
-$text-color: #FFFFFF;
-$background-color: rgb(41, 38, 38);
-$font-main: 'Open Sans', sans-serif;
-$font-heading: 'Ubuntu', sans-serif;
+@import '../assets/style/variables.scss';
 
 body {
     background-color: $background-color;

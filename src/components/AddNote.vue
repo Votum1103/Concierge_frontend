@@ -84,11 +84,7 @@ export default {
 
 
 <style lang="scss" scoped>
-$primary-color: #0083BB;
-$background-color: black;
-$text-color: white;
-$font-main: 'Open Sans', sans-serif;
-$font-heading: 'Ubuntu', sans-serif;
+@import '../assets/style/variables.scss';
 
 body {
     background: $background-color url('../assets/back.jpg') top no-repeat;

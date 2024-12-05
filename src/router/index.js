@@ -119,7 +119,7 @@ const routes = [
     component: ConciergeLoginAcceptOperation
   },
   {
-    path: '/conciergeaccept',
+    path: '/  ',
     name: 'AccpetRejectionOperation',
     component: AccpetRejectionOperation
   },

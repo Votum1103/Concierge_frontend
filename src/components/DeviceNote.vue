@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../api';
 import BackButton from './BackButton.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
 
@@ -84,9 +84,7 @@ export default {
     methods: {
         async fetchNotes(device_id) {
             try {
-                const accesToken = sessionStorage.getItem('access_token');
-                const headers = { Authorization: `Bearer ${accesToken}` };
-                const response = await axios.get(`http://127.0.0.1:8000/notes/devices/?device_id=${device_id}`, { headers });
+                const response = await api.get(`/notes/devices/?device_id=${device_id}`);
                 this.notes = response.data.map(noteObj => ({ "id": noteObj.id, "device": device_id, "note": noteObj.note }));
             } catch (error) {
                 if (error.status == "404") {
@@ -115,13 +113,14 @@ export default {
             this.selectedNote = null;
         },
         async saveNewNote() {
-            const accesToken = sessionStorage.getItem('access_token');
-            const headers = { Authorization: `Bearer ${accesToken}` };
             const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
             const device_id = selectedDevice.device_id;
 
             try {
-                await axios.post('http://127.0.0.1:8000/notes/devices/', { device_id: device_id, note: this.editedNote }, { headers });
+                await api.post('/notes/devices/', {
+                    device_id: device_id,
+                    note: this.editedNote
+                });
                 this.notes[this.editingIndex].note = this.editedNote;
                 this.editingIndex = null;
                 this.isAdding = false;
@@ -137,12 +136,10 @@ export default {
             this.isAdding = false;
         },
         async saveEditedNote() {
-            const accessToken = sessionStorage.getItem('access_token');
-            const headers = { Authorization: `Bearer ${accessToken}` };
             const noteId = this.notes[this.editingIndex].id;
 
             try {
-                await axios.put(`http://127.0.0.1:8000/notes/devices/${noteId}`, { note: this.editedNote }, { headers });
+                await api.put(`/notes/devices/${noteId}`, { note: this.editedNote },);
                 this.notes[this.editingIndex].note = this.editedNote;
                 this.editingIndex = null;
                 this.editedNote = '';
@@ -151,13 +148,11 @@ export default {
             }
         },
         async deleteNote() {
-            const accesToken = sessionStorage.getItem('access_token');
-            const headers = { Authorization: `Bearer ${accesToken}` };
             const noteId = this.notes[this.selectedNote].id;
             const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
 
             try {
-                await axios.delete(`http://127.0.0.1:8000/notes/devices/${noteId}`, { headers });
+                await api.delete(`/notes/devices/${noteId}`);
                 this.notes.pop();
                 this.editingIndex = null;
                 this.editedNote = '';
@@ -172,11 +167,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$primary-color: #0083BB;
-$text-color: #FFFFFF;
-$background-color: rgb(41, 38, 38);
-$font-main: 'Open Sans', sans-serif;
-$font-heading: 'Ubuntu', sans-serif;
+@import '../assets/style/variables.scss';
 
 body {
     background-color: $background-color;
@@ -195,7 +186,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: white;
+    color: $text-color;
     height: 100vh;
     padding: 20px;
 }
@@ -212,7 +203,7 @@ nav {
     margin: 15px;
     display: inline-flex;
     align-items: center;
-    color: #FFFFFF;
+    color: $text-color;
     background-color: transparent !important;
 }
 
@@ -247,56 +238,42 @@ nav {
     flex-direction: column;
     gap: 10px;
     max-height: 50vh;
-    /* Ograniczenie wysokości do połowy ekranu */
     overflow-y: auto;
-    /* Przewijanie pionowe */
     overflow-x: hidden;
-
-    /* Stylizacja przewijacza */
     scrollbar-width: thin;
-    /* Cieńszy przewijacz dla Firefox */
     scrollbar-color: grey $background-color;
-    /* Kolory przewijacza dla Firefox */
 }
 
-/* Stylizacja przewijacza dla Chrome, Safari i Edge */
 .notes-container::-webkit-scrollbar {
     width: 8px;
-    /* Szerokość przewijacza */
 }
 
 .notes-container::-webkit-scrollbar-track {
     background: $background-color;
-    /* Tło przewijacza */
     border-radius: 10px;
-    /* Zaokrąglenie */
 }
 
 .notes-container::-webkit-scrollbar-thumb {
     background-color: $primary-color;
-    /* Kolor suwaka */
     border-radius: 10px;
-    /* Zaokrąglenie suwaka */
     border: 2px solid $background-color;
-    /* Obramowanie dla lepszego kontrastu */
 }
 
 .notes-container::-webkit-scrollbar-thumb:hover {
     background-color: lighten($primary-color, 10%);
-    /* Jaśniejszy kolor na hover */
 }
 
 .note-box {
     padding: 15px;
-    border: 2px solid #0083BB;
+    border: 2px solid $primary-color;
     border-radius: 8px;
     font-size: 18px;
     background-color: transparent;
-    color: white;
+    color: $text-color;
     min-height: 50px;
     margin-bottom: 0.5em;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color $transition-duration ease;
     white-space: normal;
     word-wrap: break-word;
     max-height: 150px;
@@ -305,7 +282,7 @@ nav {
 }
 
 .selected-note {
-    background-color: #0083BB;
+    background-color: $primary-color;
 }
 
 textarea {
@@ -313,7 +290,7 @@ textarea {
     width: 100%;
     height: 100%;
     background-color: transparent;
-    color: white;
+    color: $text-color;
     font-size: 18px;
     border: none;
     outline: none;
@@ -323,7 +300,6 @@ textarea {
     overflow-y: auto;
 }
 
-/* Stylizacja przycisków */
 .button-container {
     display: flex;
     justify-content: center;
@@ -337,8 +313,8 @@ textarea {
 .save-button,
 .delete-button,
 .cancel-button {
-    background-color: #0083BB;
-    color: white;
+    background-color: $primary-color;
+    color: $text-color;
     border: none;
     border-radius: 25px;
     padding: 10px 20px;
@@ -351,6 +327,6 @@ textarea {
 .save-button:hover,
 .delete-button:hover,
 .cancel-button:hover {
-    background-color: #007ecc;
+    background-color: $primary-color;
 }
 </style>

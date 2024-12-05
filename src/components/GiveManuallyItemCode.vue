@@ -113,12 +113,14 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+@import '../assets/style/variables.scss';
+
 body {
-    background: rgb(41, 38, 38);
-    color: white;
+    background: $background-color;
+    color: $text-color;
     text-align: center;
     margin: 0;
-    font-family: 'Open Sans', sans-serif;
+    font-family: $font-main;
     background-image: url('../assets/back.jpg');
     background-size: cover;
     background-repeat: no-repeat;
@@ -127,14 +129,19 @@ body {
 
 h1,
 h2 {
-    font-family: 'Ubuntu';
+    font-family: $font-heading;
+}
+
+h1 {
+    font-size: xx-large;
+    margin-bottom: 100px;
 }
 
 button,
 a,
 p,
 label {
-    font-family: 'Open Sans', sans-serif;
+    font-family: $font-main;
 }
 
 nav {
@@ -147,7 +154,7 @@ nav {
     margin: 15px;
     display: inline-flex;
     align-items: center;
-    color: #FFFFFF;
+    color: $text-color;
     background-color: transparent !important;
 }
 
@@ -159,38 +166,38 @@ nav {
 }
 
 main {
-    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 100vh;
 }
 
 .main-group {
-    border-radius: 2em;
     display: flex;
     flex-direction: column;
-    justify-content: start;
     align-items: center;
-    width: 45%;
+    justify-content: start;
+    height: 450px;
+    border-radius: 2em;
     min-width: 300px;
     max-width: 600px;
-    background: rgb(0, 0, 0);
+    width: 45%;
+    background: $background-color;
     padding: 50px 0 50px 0;
     margin-top: 7%;
-    height: 450px;
 }
 
 .error-container {
-    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 20px;  /* Prevent shifting input */
+    height: 20px;
+    min-height: 20px;
 }
 
 .error-message {
     font-size: 16px;
-    color: #ff4d4d;
+    color: $error-color;
 }
 
 .error-container:not(:has(.error-message)) .error-message {
@@ -198,13 +205,7 @@ main {
 }
 
 .input-error {
-    border-bottom: 3px solid #ff4d4d; 
-}
-
-h1 {
-    font-family: 'Ubuntu';
-    font-size: xx-large;
-    margin-bottom: 100px;
+    border-bottom: 3px solid $error-color; 
 }
 
 .form-group {
@@ -222,7 +223,7 @@ input::placeholder {
     font-size: 18px;
     background-color: inherit;
     border: none;
-    border-bottom: 3px solid #0083BB;
+    border-bottom: 3px solid $primary-color;
     padding-bottom: 5px;
     width: 300px;
     box-sizing: border-box;
@@ -240,14 +241,14 @@ input:focus::placeholder {
 
 .primary-button {
     margin-top: 80px;
-    color: #FFFFFF;
-    font-size: 1.2em;
+    color: $text-color;
+    font-size: $font-size-large;
     border: none;
-    background-color: #0083BB;
+    background-color: $primary-color;
     width: 200px;
     height: 50px;
     border-radius: 25px;
-    transition: all 0.3s;
+    transition: all $transition-duration;
 }
 
 button:hover {
@@ -264,8 +265,8 @@ textarea:-webkit-autofill:focus,
 select:-webkit-autofill,
 select:-webkit-autofill:hover,
 select:-webkit-autofill:focus {
-    border-bottom: 3px solid #0083BB;
-    -webkit-text-fill-color: white;
+    border-bottom: 3px solid $primary-color;
+    -webkit-text-fill-color: $text-color;
     -webkit-box-shadow: 0 0 0px 1000px #000 inset;
     transition: background-color 5000s ease-in-out 0s;
 }

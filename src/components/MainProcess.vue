@@ -92,6 +92,8 @@ import RouteButton from './RouteButton.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
 import api from '../api';
 
+//#TODO Zrobić notatki
+
 export default {
     name: "MainProcess",
     components: {
@@ -249,12 +251,7 @@ export default {
 
 </script>
 <style lang="scss" scoped>
-$primary-color: #0083BB;
-$secondary-color: #4B4B4B;
-$text-color: #FFFFFF;
-$background-color: black;
-$font-main: 'Open Sans', sans-serif;
-$font-heading: 'Ubuntu', sans-serif;
+@import '../assets/style/variables.scss';
 
 body {
     background: $background-color url('../assets/back.jpg') top no-repeat;
@@ -359,7 +356,7 @@ h2 {
 .table-section {
     display: flex;
     flex-direction: row;
-    width: 90%; // Dopasowanie szerokości sekcji do okna
+    width: 90%;
     align-items: center;
     justify-content: space-evenly;
 }
@@ -370,7 +367,7 @@ h2 {
 .permissions-table {
     display: flex;
     align-items: flex-start;
-    background-color: $secondary-color;
+    background-color: #4D4D4D;
     border-radius: 15px;
     max-height: 200px;
     height: 200px;
@@ -418,7 +415,7 @@ h2 {
 }
 
 .items-table td:nth-child(1) {
-    width: 1.5fr; // Pierwsza kolumna ma szerokość 1.5x w stosunku do innych
+    width: 1.5fr;
 }
 
 .header-item-large {
@@ -433,8 +430,8 @@ h2 {
     max-width: 75%;
     min-width: 400px;
     gap: 5px;
-    overflow-x: auto; /* Dodanie scrolla w poziomie */
-    white-space: nowrap; /* Zapobiega zawijaniu tekstu */
+    overflow-x: auto;
+    white-space: nowrap;
 }
 
 .info-item {
@@ -466,11 +463,11 @@ h2 {
 }
 
 .text-white {
-    color: white;
+    color: $text-color;
 }
 
 .text-red {
-    color: #FF4D4D;
+    color: $error-color;
 }
 
 @keyframes mltShdSpin {
