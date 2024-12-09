@@ -16,3 +16,37 @@ $transition-duration: 0.3s;
 $danger-color: #661111;
 $success-color: #397031;
 $placeholder-color: #edede9;
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: $font-heading;
+}
+
+button,
+a,
+p,
+input,
+label,
+textarea {
+    font-family: $font-main;
+}
+
+.back-button {
+    text-decoration: none;
+    margin: 15px;
+    display: inline-flex;
+    align-items: center;
+    color: $text-color;
+    background-color: transparent;
+}
+
+.logo {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0.625rem;
+}
