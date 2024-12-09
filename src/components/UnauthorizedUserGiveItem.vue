@@ -1,6 +1,5 @@
 <template>
-
-    <body>
+    <div class="container">
         <GoogleFonts />
         <nav>
             <BackButton class="back-button" routeName="MainWindow" buttonText="Wróć">
@@ -14,7 +13,6 @@
             </BackButton>
             <WUoT_Logo />
         </nav>
-
         <main class="form-container">
             <header>
                 <h1>Wydaj/odbierz bez autoryzacji</h1>
@@ -34,16 +32,15 @@
                 </div>
                 <div class="form-group">
                     <label for="additional-info-textarea">Informacje dodatkowe</label>
-                    <textarea name="additional-info-textarea" id="additional-info-textarea"
-                        v-model="formData.note" cols="40" rows="5"
-                        placeholder="Informacje dodatkowe"></textarea>
+                    <textarea name="additional-info-textarea" id="additional-info-textarea" v-model="formData.note"
+                        cols="40" rows="5" placeholder="Informacje dodatkowe"></textarea>
                 </div>
                 <div class="button-group">
                     <button class="primary-button" type="submit">Wydaj</button>
                 </div>
             </form>
         </main>
-    </body>
+    </div>
 </template>
 
 <script>
@@ -78,7 +75,7 @@ export default {
                     surname: this.formData.surname,
                     email: this.formData.email,
                     note: this.formData.note
-            });
+                });
 
                 this.formData = {
                     name: '',
@@ -104,7 +101,7 @@ export default {
                     sessionStorage.setItem('userEmail', this.formData.email);
                     sessionStorage.setItem('username', this.formData.name);
                     sessionStorage.setItem('surname', this.formData.surname);
-                    
+
                     this.$router.push({ name: 'UpdateUACredentials' });
                 }
             }
@@ -116,24 +113,11 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
-body {
+.container {
+    text-align: center;
     background: $background-color url('../assets/back.jpg') top no-repeat;
     background-size: cover;
     color: $text-color;
-    text-align: center;
-    margin: 0;
-    font-family: $font-main;
-}
-
-h1,
-h2 {
-    font-family: $font-heading;
-}
-
-button,
-a,
-p {
-    font-family: $font-main;
 }
 
 nav {
@@ -141,13 +125,12 @@ nav {
     height: 7vh;
 }
 
-
 .back-button {
-    text-decoration: none;
-    margin: 0.9375em;
     display: inline-flex;
     align-items: center;
     color: $text-color;
+    text-decoration: none;
+    margin: 0.9375em;
     font-size: 0.9375em;
 
     &:hover {
@@ -158,17 +141,6 @@ nav {
 
 #left-arrow {
     margin-right: 0.3125em;
-}
-
-.logo {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 0.625em;
-}
-
-header h1 {
-    font-size: $font-size-large;
 }
 
 header h2 {
@@ -198,22 +170,21 @@ label {
 .form-group input,
 .form-group select,
 .form-group textarea {
-    color: inherit;
-    font-family: inherit;
+    text-align: center;
     font-size: 1.125em;
-    background-color: inherit;
+    color: inherit;
     border: none;
     border-bottom: 0.1875em solid $primary-color;
     padding-bottom: 0.3125em;
+    background-color: inherit;
     width: 25em;
     box-sizing: border-box;
-    text-align: center;
     padding-top: 0.5em;
 
     &::placeholder {
+        text-align: left;
         color: $placeholder-color;
         font-weight: 400;
-        text-align: left;
     }
 
     &:focus::placeholder {
@@ -239,14 +210,14 @@ label {
 }
 
 .primary-button {
-    margin-top: 2.5em;
+    background-color: $primary-color;
     color: $text-color;
     font-size: 1.2em;
-    border: none;
-    background-color: $primary-color;
     width: $button-width;
     height: $button-height;
+    border: none;
     border-radius: 1.5625em;
+    margin-top: 2.5em;
     transition: all $transition-duration ease;
 
     &:hover {

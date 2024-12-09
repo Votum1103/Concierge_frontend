@@ -1,18 +1,20 @@
 <template>
-  <GoogleFonts />
-  <nav>
-    <WUoT_Logo />
-  </nav>
+  <div class="container">
+    <GoogleFonts />
+    <nav>
+      <WUoT_Logo />
+    </nav>
 
-  <main>
-    <section class="main-window">
-      <h1>Zeskanuj kartę portiera</h1>
-      <span class="loader"></span>
-      <div class="button-group">
-        <RouteButton routeName="ConciergeLogin" buttonText="Zaloguj się" />
-      </div>
-    </section>
-  </main>
+    <main>
+      <section class="main-window">
+        <h1>Zeskanuj kartę portiera</h1>
+        <span class="loader"></span>
+        <div class="button-group">
+          <RouteButton routeName="ConciergeLogin" buttonText="Zaloguj się" />
+        </div>
+      </section>
+    </main>
+  </div>
 </template>
 
 <script>
@@ -34,14 +36,7 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
-html,
-body {
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
-}
-
-body {
+.container {
   background: $background-color;
   color: $text-color;
   text-align: center;
@@ -55,28 +50,12 @@ body {
   align-items: center;
 }
 
-h1,
-h2 {
-  font-family: $font-heading;
-  font-size: xx-large
-}
-
-button,
-a,
-p,
-label {
-  font-family: $font-main;
+h1 {
+  font-size: 32px;
 }
 
 nav {
   height: 50px;
-}
-
-.logo {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin: 10px;
 }
 
 main {

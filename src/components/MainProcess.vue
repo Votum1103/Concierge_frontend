@@ -1,7 +1,7 @@
 <template>
     <GoogleFonts />
 
-    <body>
+    <div class="container">
         <nav>
             <WUoT_Logo />
         </nav>
@@ -82,8 +82,7 @@
                 </div>
             </section>
         </main>
-    </body>
-
+    </div>
 </template>
 <script>
 //#TODO nie zapomnij o tym, ze jeszcze jakoś trzeba odwzrorwać działąnie skanera
@@ -253,7 +252,7 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
-body {
+.container {
     background: $background-color url('../assets/back.jpg') top no-repeat;
     background-size: cover;
     color: $text-color;
@@ -264,28 +263,13 @@ body {
     width: 100vw;
 }
 
-h1,
 h2 {
-    font-family: $font-heading;
-}
-
-button,
-a,
-p,
-label {
-    font-family: $font-main;
+    font-size: 1.125rem;
 }
 
 nav {
     text-align: left;
     height: 50px;
-}
-
-.logo {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 10px;
 }
 
 header {
@@ -305,25 +289,12 @@ header {
     font-size: 2.25rem;
 }
 
-h2 {
-    font-size: 1.125rem;
-}
-
 .header-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
 }
-
-.info-section {
-    display: flex;
-    width: 90%;
-    min-width: 400px;
-    justify-content: space-between;
-    margin-bottom: 10px;
-}
-
 
 .button-group {
     display: flex;
@@ -361,8 +332,6 @@ h2 {
     justify-content: space-evenly;
 }
 
-
-
 .items-table,
 .permissions-table {
     display: flex;
@@ -376,7 +345,6 @@ h2 {
     overflow-x: hidden;
 }
 
-
 .items-table {
     width: 60%;
 }
@@ -385,7 +353,6 @@ h2 {
     width: 18%;
 }
 
-
 #permissions-header {
     width: 18%;
     font-size: 20px;
@@ -393,7 +360,7 @@ h2 {
 
 .table-cell {
     text-align: center;
-    height: 30px;
+    height: 50px;
     width: 100%;
     font-size: 1.25rem;
     text-wrap: nowrap;

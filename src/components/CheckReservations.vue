@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class='conatiner'>
         <GoogleFonts />
         <nav>
             <BackButton class="back-button" routeName="MainWindow" buttonText="Wróć">
@@ -32,7 +32,7 @@
                     </div>
                 </form>
             </div>
-            <div class="container">
+            <div class="tableContent">
                 <div class="header-items">
                     <div class="header-item">Sala</div>
                     <div class="header-item">Data</div>
@@ -150,26 +150,32 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
-body {
+.conatiner {
     background: $background-color url('../assets/back.jpg') top no-repeat;
     background-size: cover;
     color: $text-color;
     text-align: center;
     margin: 0;
     font-family: $font-main;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
 }
-button,
-a,
-p,
-label,
-h1,
-h2 {
-    font-family: $font-heading;
-}
+
+
+
 
 nav {
     text-align: left;
     height: 50px;
+}
+
+header {
+    margin-bottom: 5%;
+}
+
+h1 {
+    font-size: 28px;
 }
 
 .back-button {
@@ -192,14 +198,6 @@ button:hover {
     top: 0;
     right: 0;
     margin: 10px;
-}
-
-header {
-    margin-bottom: 5%;
-}
-
-header h1 {
-    font-size: 28px;
 }
 
 main {
@@ -264,16 +262,9 @@ input:focus::placeholder {
 #start-date,
 #end-time {
     margin-bottom: 30px;
+    max-height: 33px;
 }
 
-.container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 1000px;
-    min-width: 380px;
-    width: 80%;
-}
 
 .header-items {
     display: flex;
@@ -295,6 +286,15 @@ input:focus::placeholder {
     text-align: center;
 }
 
+.tableContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 1000px;
+    min-width: 380px;
+    width: 80%;
+}
+
 .items-table {
     display: flex;
     align-items: flex-start;
@@ -309,11 +309,6 @@ input:focus::placeholder {
 table {
     width: 100%;
     table-layout: fixed;
-}
-
-.table-row {
-    display: flex;
-    justify-content: space-between;
 }
 
 .table-cell {

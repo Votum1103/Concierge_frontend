@@ -80,7 +80,10 @@ export default {
         BackButton
     }
 }
+
+//#TODO to jest do zaminay i to nie było ruszane i ogarnianie
 </script>
+
 
 
 <style lang="scss" scoped>

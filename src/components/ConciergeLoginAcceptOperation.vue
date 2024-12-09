@@ -1,39 +1,39 @@
 <template>
-    <GoogleFonts />
-    <nav>
-        <BackButton class="back-button" routeName="AcceptOperationByConcierge" buttonText="Wróć">
-            <template #icon>
-                <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                    class="bi bi-chevron-left" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd"
-                        d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
-                </svg>
-            </template>
-        </BackButton>
-        <WUoT_Logo />
-    </nav>
+    <div class="container">
+        <GoogleFonts />
+        <nav>
+            <BackButton class="back-button" routeName="AcceptOperationByConcierge" buttonText="Wróć">
+                <template #icon>
+                    <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-chevron-left" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
+                    </svg>
+                </template>
+            </BackButton>
+            <WUoT_Logo />
+        </nav>
 
-    <main>
-        <section class="container">
-            <h1>Podaj login i hasło</h1>
-            <form @submit.prevent="login">
-                <div>
-                    <input :class="{ 'error-border': loginError }" type="text" id="login" name="login"
-                        placeholder="Login" v-model="username" required>
-                </div>
-                <div>
-                    <input :class="{ 'error-border': loginError }" type="password" id="password" name="password"
-                        placeholder="Hasło" v-model="password" required>
-                </div>
-                <div class="error-placeholder">
-                    <span v-if="loginError" class="error-message">Niepoprawny login lub hasło</span>
-                </div>
-                <div class="login-button-group">
-                    <RouteButton buttonText="Zaloguj się" class="primary-button" />
-                </div>
-            </form>
-        </section>
-    </main>
+        <main>
+            <section class="mainContent">
+                <h1>Podaj login i hasło</h1>
+                <form @submit.prevent="login">
+                    <div>
+                        <input :class="{ 'error-border': loginError }" type="text" id="login" name="login"
+                            placeholder="Login" v-model="username" required>
+                    </div>
+                    <div>
+                        <input :class="{ 'error-border': loginError }" type="password" id="password" name="password"
+                            placeholder="Hasło" v-model="password" required>
+                    </div>
+                    <div class="error-placeholder">
+                        <span v-if="loginError" class="error-message">Niepoprawny login lub hasło</span>
+                    </div>
+                        <RouteButton buttonText="Zaloguj się" class="primary-button" />
+                </form>
+            </section>
+        </main>
+    </div>
 </template>
 
 <script>
@@ -102,7 +102,7 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
-body {
+.container {
     background-color: $background-color;
     color: $text-color;
     text-align: center;
@@ -113,11 +113,19 @@ body {
     background-repeat: no-repeat;
     background-position: center;
     overflow: hidden;
+    height: 100vh;
+    width: 100vw;
 }
 
 nav {
     text-align: left;
     height: 50px;
+}
+
+h1 {
+    font-size: 2rem;
+    padding: 0 3.125rem;
+    margin-bottom: 4.6875rem;
 }
 
 .primary-button {
@@ -156,29 +164,26 @@ main {
     align-items: center;
 }
 
-.container {
-    box-sizing: border-box;
-    border-radius: 2em;
-    padding-bottom: 6.25rem;
+.mainContent {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    box-sizing: border-box;
+    border-radius: 2em;
+    padding-bottom: 6.25rem;
     width: 45%;
     min-width: 21.875rem;
     max-width: 37.5rem;
     height: 70%;
-    background-color: rgb(0, 0, 0);
+    background-color: $background-color;
 }
 
 input {
-    color: inherit;
-    font-family: inherit;
     font-weight: 600;
     font-size: 1.25rem;
     background-color: inherit;
     border: none;
-    text-align: center;
     margin: 0.9375rem;
     width: 18.75rem;
     border-bottom: 3px solid $primary-color;
@@ -192,12 +197,10 @@ input::placeholder {
 
 .error-border {
     border-bottom: 3px solid $error-color;
-    /* Czerwony border przy błędzie */
 }
 
 .error-placeholder {
     height: 1.5rem;
-    /* Rezerwuje miejsce na komunikat o błędzie */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -206,26 +209,6 @@ input::placeholder {
 .error-message {
     color: $error-color;
     font-size: 1rem;
-}
-
-h1 {
-    font-family: $font-heading;
-    font-size: 2rem;
-    padding: 0 3.125rem;
-    margin-bottom: 4.6875rem;
-}
-
-.logo {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 0.625rem;
-}
-
-.login-button-group {
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 @media (max-width: 768px) {

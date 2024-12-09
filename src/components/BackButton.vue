@@ -33,9 +33,7 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
-button {
-    font-family: $font-main;
-}
+
 
 .back-button-component {
     color: $text-color;
@@ -43,7 +41,7 @@ button {
     width: 150px;
     height: 50px;
     border-radius: 25px;
-    transition: all 0.3s;
+    transition: all $transition-duration;
     white-space: nowrap;
     border: none;
     background-color: transparent;
@@ -58,7 +56,6 @@ button:hover {
 .button-content {
     display: flex;
     align-items: center;
-
 }
 
 .icon {

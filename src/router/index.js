@@ -4,13 +4,11 @@ import eConcierge from '../components/eConcierge.vue';
 import ConciergeLogin from "../components/ConciergeLogin.vue";
 import GiveManuallyItemCode from '@/components/GiveManuallyItemCode.vue';
 import ScanItem from '@/components/ScanItem.vue';
-import SubmitOperation from '@/components/SubmitOperation.vue';
 import AddedNote from '@/components/AddedNote.vue';
 import UnauthorizedUserAlert from '@/components/UnauthorizedUserAlert.vue';
 import UnauthorizedUserGiveItem from '@/components/UnauthorizedUserGiveItem.vue';
 import AddNote from '@/components/AddNote.vue';
 import CheckReservations from '@/components/CheckReservations.vue';
-import EditNote from '@/components/EditNote.vue';
 import ScanConciergeCard from '@/components/ScanUserCard.vue';
 import MainProcess from '@/components/MainProcess.vue';
 import DeviceNote from '@/components/DeviceNote.vue';
@@ -49,11 +47,6 @@ const routes = [
     component: ScanItem
   },
   {
-    path: '/submitoperation',
-    name: 'SubmitOperation',
-    component: SubmitOperation
-  },
-  {
     path: '/addednote',
     name: 'AddedNote',
     component: AddedNote
@@ -77,11 +70,6 @@ const routes = [
     path: '/checkreservations',
     name: 'CheckReservations',
     component: CheckReservations
-  },
-  {
-    path: '/editnote',
-    name: 'EditNote',
-    component: EditNote
   },
   {
     path: '/scanusercard',
@@ -119,7 +107,7 @@ const routes = [
     component: ConciergeLoginAcceptOperation
   },
   {
-    path: '/  ',
+    path: '/acceptrejectionoperation',
     name: 'AccpetRejectionOperation',
     component: AccpetRejectionOperation
   },

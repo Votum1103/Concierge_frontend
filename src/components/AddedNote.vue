@@ -1,13 +1,8 @@
 <template>
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>e-portiernia - uwaga</title>
-        <GoogleFonts />
-    </head>
 
-    <body>
+    <div class="container">
+        <GoogleFonts/>
         <nav>
             <BackButton class="back-button" routeName="MainProcess" buttonText="Wróć">
                 <template #icon>
@@ -55,7 +50,7 @@
                 </div>
             </section>
         </main>
-    </body>
+    </div>
 </template>
 
 <script>
@@ -78,24 +73,13 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
-body {
+.container {
     background: $background-color url('../assets/back.jpg') top no-repeat;
     background-size: cover;
     color: $text-color;
     text-align: center;
-    margin: 0;
-    font-family: $font-main;
-}
-
-h1,
-h2 {
-    font-family: $font-heading;
-}
-
-button,
-a,
-p {
-    font-family: $font-main;
+    height: 100vh;
+    width: 100vw;
 }
 
 nav {
@@ -103,21 +87,17 @@ nav {
     height: 50px;
 }
 
-
-.back-button:hover {
-    transform: scale(1.07);
-    cursor: pointer;
+header {
+    margin-bottom: 5%;
 }
 
-.back-button {
-    text-decoration: none;
-    margin: 15px;
-    display: inline-flex;
-    align-items: center;
-    color: $text-color;
-    background-color: transparent;
+h2 {
+    font-size: 18px;
 }
 
+p {
+    font-size: 22px;
+}
 
 .logo {
     position: absolute;
@@ -126,9 +106,6 @@ nav {
     margin: 10px;
 }
 
-header {
-    margin-bottom: 5%;
-}
 
 .employee-container {
     justify-content: center;
@@ -141,10 +118,6 @@ header {
     margin-left: 20px;
     display: inline;
     font-size: 28px;
-}
-
-h2 {
-    font-size: 18px;
 }
 
 section {
@@ -164,34 +137,23 @@ section {
     border-radius: 15px;
 }
 
-.danger-alert {
-    border: 3px solid $danger-color;
-    gap: 5px;
-}
-
 .success-alert {
     border: 3px solid $success-color;
     gap: 5px;
 }
 
-.info-alert {
-    border: 3px solid $primary-color;
-}
-
-p {
-    font-size: 22px;
-}
-
-.loader {
-    color: $text-color;
-    font-size: 25px;
-    overflow: hidden;
-    width: 1em;
-    height: 1em;
-    border-radius: 50%;
+.back-button {
+    text-decoration: none;
     margin: 15px;
-    transform: translateZ(0);
-    animation: mltShdSpin 1.7s infinite ease, round 1.7s infinite ease;
+    display: inline-flex;
+    align-items: center;
+    color: $text-color;
+    background-color: transparent;
+}
+
+.back-button:hover {
+    transform: scale(1.07);
+    cursor: pointer;
 }
 
 .button-group {

@@ -1,7 +1,7 @@
 <template>
     <GoogleFonts />
 
-    <body>
+    <div class="container">
         <nav>
             <BackButton class="back-button" routeName="MainProcess" buttonText="Wróć">
                 <template #icon>
@@ -34,7 +34,7 @@
                 </form>
             </section>
         </main>
-    </body>
+    </div>
 </template>
 
 <script>
@@ -115,7 +115,7 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
-body {
+.container {
     background: $background-color;
     color: $text-color;
     text-align: center;
@@ -127,42 +127,14 @@ body {
     background-position: center;
 }
 
-h1,
-h2 {
-    font-family: $font-heading;
-}
-
 h1 {
     font-size: xx-large;
     margin-bottom: 100px;
 }
 
-button,
-a,
-p,
-label {
-    font-family: $font-main;
-}
-
 nav {
     text-align: left;
     height: 50px;
-}
-
-.back-button {
-    text-decoration: none;
-    margin: 15px;
-    display: inline-flex;
-    align-items: center;
-    color: $text-color;
-    background-color: transparent !important;
-}
-
-.logo {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 10px;
 }
 
 main {
@@ -228,7 +200,7 @@ input::placeholder {
     width: 300px;
     box-sizing: border-box;
 }
-
+ 
 input:focus::placeholder {
     color: transparent;
 }

@@ -1,6 +1,6 @@
 <template>
 
-    <body>
+    <div class="container">
         <nav>
             <BackButton class="back-button" routeName="MainWindow" buttonText="Wróć">
                 <template #icon>
@@ -47,7 +47,7 @@
                     @click="deleteNote">Usuń</button>
             </div>
         </div>
-    </body>
+    </div>
 </template>
 
 <script>
@@ -169,7 +169,7 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
-body {
+.container {
     background-color: $background-color;
     color: $text-color;
     text-align: center;
@@ -196,15 +196,6 @@ nav {
     justify-content: left;
     text-align: left;
     height: 50px;
-}
-
-.back-button {
-    text-decoration: none;
-    margin: 15px;
-    display: inline-flex;
-    align-items: center;
-    color: $text-color;
-    background-color: transparent !important;
 }
 
 .note-header {

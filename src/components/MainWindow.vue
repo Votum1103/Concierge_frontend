@@ -1,6 +1,6 @@
 <template>
 
-  <body>
+  <div class="container">
     <GoogleFonts />
     <nav>
       <div class="main-nav">
@@ -146,23 +146,25 @@
             </table>
           </div>
         </div>
+        <div class="itemsStatus">
+          <div class="keysStatus" v-if="selectedItemType === 'klucz'">
+            <p>Dostępne: {{ availableDevicesCount }}</p>
+            <p>Pobrane: {{ takenDevicesCount }}</p>
+          </div>
+          <div class="microphonesStatus" v-if="selectedItemType === 'mikrofon'">
+            <p>Dostępne: {{ availableDevicesCount }}</p>
+            <p>Pobrane: {{ takenDevicesCount }}</p>
+          </div>
+          <div class="remoteControllersStatus" v-if="selectedItemType === 'pilot'">
+            <p>Dostępne: {{ availableDevicesCount }}</p>
+            <p> Pobrane: {{ takenDevicesCount }}</p>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="itemsStatus">
-      <div class="keysStatus" v-if="selectedItemType === 'klucz'">
-        <p>Dostępne: {{ availableDevicesCount }}</p>
-        <p>Pobrane: {{ takenDevicesCount }}</p>
-      </div>
-      <div class="microphonesStatus" v-if="selectedItemType === 'mikrofon'">
-        <p>Dostępne: {{ availableDevicesCount }}</p>
-        <p>Pobrane: {{ takenDevicesCount }}</p>
-      </div>
-      <div class="remoteControllersStatus" v-if="selectedItemType === 'pilot'">
-        <p>Dostępne: {{ availableDevicesCount }}</p>
-        <p> Pobrane: {{ takenDevicesCount }}</p>
-      </div>
-    </div>
-  </body>
+
+  </div>
+
 </template>
 
 <script>
@@ -218,11 +220,12 @@ export default {
   methods: {
     async logOut() {
       try {
-      await api.post('/logout', {
-        refresh_token: sessionStorage.getItem('refresh_token'),
-      });
-      sessionStorage.clear();
-      this.$router.push(`/`);} catch(error) {
+        await api.post('/logout', {
+          refresh_token: sessionStorage.getItem('refresh_token'),
+        });
+        sessionStorage.clear();
+        this.$router.push(`/`);
+      } catch (error) {
         console.log("Nie udało się wylogować", error);
       }
     },
@@ -268,39 +271,20 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
-body {
+.container {
   background: $background-color url('../assets/back.jpg') top no-repeat;
   background-size: cover;
   color: $text-color;
-  text-align: center;
-  margin: 0;
   font-family: $font-main;
   overflow: hidden;
   height: 100vh;
 }
 
-input:-webkit-autofill,
-textarea:-webkit-autofill,
-select:-webkit-autofill {
-  border-bottom: 3px solid $primary-color;
-  -webkit-text-fill-color: $text-color;
-  -webkit-box-shadow: 0 0 0px 1000px $background-color inset;
-  transition: background-color 5000s ease-in-out 0s;
-}
-
-
 *:focus {
   outline: none;
-}
-
-.logo {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin: 10px;
 }
 
 button,
@@ -317,12 +301,11 @@ button,
   cursor: pointer;
   border: none;
   background-color: transparent;
-  transition: all 0.3s;
+  transition: all $transition-duration;
 }
 
 .logOut {
   color: $text-color;
-  font-family: $font-main;
 }
 
 .avatars,
@@ -354,7 +337,7 @@ button,
 }
 
 .showMap {
-  width: 160px;
+  width: 250px;
   height: $button-height;
   font-size: 18px;
   margin-right: 100px;
@@ -386,7 +369,7 @@ button.reserve-version {
 
 .selected {
   transform: scale(1.7);
-  transition: transform 0.2s ease-in-out; 
+  transition: transform 0.2s ease-in-out;
 }
 
 .main-page {
@@ -405,27 +388,31 @@ button.reserve-version {
   height: 100%;
 
   ul {
-    position: fixed;
-    height: 700px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: space-around;
+    position: fixed;
+    height: 700px;
     list-style: none;
     margin-top: 4em;
   }
 }
 
+.option {
+  width: 250px
+}
+
 .giveItem,
 .giveItemWithoutAU,
 .checkReservations {
+  flex-direction: column;
   width: 70%;
   height: 125px;
   font-weight: 500;
   font-size: 16px;
   margin-left: 20px;
   padding: 10px 20px;
-  flex-direction: column;
   border-radius: 5px;
 }
 
@@ -438,8 +425,8 @@ button.reserve-version {
 
 .itemsTable {
   display: grid;
-  grid-template-rows: repeat(4, 1fr);
   align-items: center;
+  grid-template-rows: repeat(4, 1fr);
   background-color: $background-color;
   height: calc(8 * 80px);
   width: 100%;
@@ -466,6 +453,7 @@ button.reserve-version {
   background: $background-color;
   border-radius: 10px;
 }
+
 .itemsNumber::-webkit-scrollbar-thumb {
   background-color: grey;
   border-radius: 10px;
@@ -484,11 +472,11 @@ button.reserve-version {
 }
 
 .table-cell {
+  text-align: center;
   font-size: 32px;
   font-weight: 500;
   width: 4.5em;
   padding: 0.5em 1em;
-  text-align: center;
 }
 
 .cell-button {
@@ -496,16 +484,16 @@ button.reserve-version {
   border: none;
   width: 120%;
   height: 100%;
+  font-size: 35px;
   text-align: left;
   padding: 0;
-  color: white;
-  font: inherit;
+  color: $text-color;
   cursor: pointer;
 }
 
 
 .blue-text {
-  color: #0083BB;
+  color: $primary-color;
 }
 
 .itemsStatus {
@@ -527,13 +515,11 @@ td svg {
 .keysStatus,
 .microphonesStatus,
 .remoteControllersStatus {
+  display: flex;
   width: 100%;
   height: 100%;
-  display: flex;
   justify-content: space-evenly;
 }
-
-
 
 
 @media (max-width: 768px) {

@@ -1,5 +1,5 @@
 <template>
-    <div class="main-content">
+    <div class="container ">
         <GoogleFonts />
         <nav>
             <BackButton class="back-button" routeName="MainProcess" buttonText="Wróć">
@@ -80,11 +80,9 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
-.main-content {
+.container {
     background-color: $background-color;
     color: $text-color;
-    text-align: center;
-    margin: 0;
     font-family: $font-main;
     background-image: url('../assets/back.jpg');
     background-size: cover;
@@ -95,27 +93,28 @@ export default {
     width: 100vw;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    font-family: $font-heading;
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    font-size: 20px;
+    height: 300px;
+    margin-top: 5%;
+}
+
+h1 {
+    font-size: 34px;
+}
+
+h2 {
+    font-size: 1.125rem;
+    margin: 5px 0;
 }
 
 nav {
     text-align: left;
     height: 50px;
-}
-
-.back-button {
-    text-decoration: none;
-    margin: 15px;
-    display: inline-flex;
-    align-items: center;
-    color: #FFFFFF;
-    background-color: transparent !important;
 }
 
 .logo {
@@ -126,6 +125,9 @@ nav {
 }
 
 header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-top: 20px;
     margin-bottom: 20px;
 }
@@ -138,32 +140,25 @@ header {
 }
 
 #employee-data {
-    margin-left: 20px;
-    display: inline;
     font-size: 2.25rem;
+    margin-left: 20px;
 }
 
-h2 {
-    font-size: 1.125rem;
-    margin: 5px 0;
-}
-
-.mainContent {
-    font-size: 20px;
-    margin-top: 5%;
-    display: flex;
-    flex-direction: column;
+.back-button {
+    display: inline-flex;
     align-items: center;
-    height: 300px;
-    justify-content: space-around;
+    background-color: transparent !important;
+    color: $text-color;
+    margin: 15px;
+    text-decoration: none;
 }
 
 .button-group {
-    margin-top: 4rem;
     display: flex;
-    align-items: center;
     flex-direction: column;
-    gap: 0.9375em;
+    align-items: center;
+    margin-top: 4rem;
+    gap: 1em;
 }
 
 .primary-button,
@@ -177,8 +172,8 @@ h2 {
 }
 
 .primary-button {
-    border: none;
     background-color: $primary-color;
+    border: none;
 }
 
 .secondary-button {
@@ -187,15 +182,13 @@ h2 {
 }
 
 button:hover {
-    transform: scale(1.07);
+    transform: scale(1.1);
     cursor: pointer;
 }
-
 
 .loader {
     color: $text-color;
     font-size: 3rem;
-    overflow: hidden;
     width: 1em;
     height: 1em;
     border-radius: 50%;

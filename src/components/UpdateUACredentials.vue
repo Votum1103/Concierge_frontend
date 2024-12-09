@@ -12,7 +12,6 @@
                     <path
                         d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
                 </svg>
-                <!-- Wyświetlenie danych przedmiotu -->
                 <p>Użytkownik {{ email }} istnieje w bazie jako {{ name }} {{ surname }}. Czy chcesz zaktualizować dane
                     o użytkowniku?</p>
             </div>
@@ -85,7 +84,6 @@ export default {
             console.log('Potwierdzenie zmiany danych użytkownika.');
         },
         cancelOperation() {
-            // Logika anulowania
             console.log('Anulowano operację.');
             sessionStorage.removeItem('userEmail');
             this.isDataFetched = false;
@@ -93,7 +91,6 @@ export default {
         }
     },
     mounted() {
-        // Pobierz dane użytkownika zaraz po załadowaniu komponentu
         this.fetchUserData();
     }
 };
@@ -108,19 +105,6 @@ body {
     background-size: cover;
     color: $text-color;
     text-align: center;
-    margin: 0;
-    font-family: $font-main;
-}
-
-h1,
-h2 {
-    font-family: $font-heading;
-}
-
-button,
-a,
-p {
-    font-family: $font-main;
 }
 
 nav {
@@ -128,13 +112,17 @@ nav {
     height: 5vh;
 }
 
+h2 {
+    font-size: 1.125em;
+}
+
 .back-button {
-    text-decoration: none;
-    margin: 0.9375em;
     display: inline-flex;
     align-items: center;
+    text-decoration: none;
     color: $text-color;
     font-size: $font-size-small;
+    margin: 0.9375em;
     transition: transform $transition-duration ease;
 
     &:hover {
@@ -147,32 +135,21 @@ nav {
     margin-right: 0.3125em;
 }
 
-.logo {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 0.625em;
-}
-
 header {
     margin-bottom: 5%;
 }
 
 .employee-container {
-    justify-content: center;
     display: flex;
+    justify-content: center;
     align-items: center;
     height: 5em;
 }
 
 #employee-data {
-    margin-left: 1.25em;
     display: inline;
+    margin-left: 1.25em;
     font-size: 1.75em;
-}
-
-h2 {
-    font-size: 1.125em;
 }
 
 section {
@@ -216,13 +193,13 @@ p {
 .loader {
     color: $text-color;
     font-size: 1.5625em;
-    overflow: hidden;
     width: 1em;
     height: 1em;
     border-radius: 50%;
     margin: 0.9375em;
     transform: translateZ(0);
     animation: mltShdSpin 1.7s infinite ease, round 1.7s infinite ease;
+    overflow: hidden;
 }
 
 @keyframes mltShdSpin {
@@ -282,9 +259,9 @@ p {
 }
 
 .button-group {
-    margin-top: 2.5em;
     display: flex;
     flex-direction: column;
+    margin-top: 2.5em;
     gap: 0.9375em;
 }
 

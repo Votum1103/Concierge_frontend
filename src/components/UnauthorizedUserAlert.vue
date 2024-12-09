@@ -1,7 +1,7 @@
 <template>
-    <GoogleFonts />
+    <div class="container">
+        <GoogleFonts />
 
-    <body>
         <nav>
             <WUoT_Logo />
         </nav>
@@ -19,7 +19,7 @@
                 <button class="secondary-button" @click="cancelOperation">Anuluj</button>
             </div>
         </section>
-    </body>
+    </div>
 </template>
 
 
@@ -47,51 +47,47 @@ export default {
         this.fetchItemDetails()
     },
     methods: {
-            async fetchItemDetails() {
-                const selectedItemCode = sessionStorage.getItem('SelectedItemCode');
+        async fetchItemDetails() {
+            const selectedItemCode = sessionStorage.getItem('SelectedItemCode');
 
-                try {
-                    const response = await api.get(`/devices/code/${selectedItemCode}`);
-                    const itemDetails = response.data;
+            try {
+                const response = await api.get(`/devices/code/${selectedItemCode}`);
+                const itemDetails = response.data;
 
-                    // Zapisz numer pokoju
-                    this.roomNumber = itemDetails.room.number;
+                this.roomNumber = itemDetails.room.number;
 
-                    console.log(this.roomNumber);
-
-                    return itemDetails;
-                } catch (error) {
-                    console.error('Błąd podczas pobierania szczegółów przedmiotu:', error);
-                    this.error = 'Nie udało się pobrać szczegółów przedmiotu.';
-                    throw error; // Rzuć błąd, aby poinformować wywołującą funkcję
-                }
-            },
-            async changeItemStatus() {
-                try {
-                    const selectedItemCode = sessionStorage.getItem('SelectedItemCode');
-                    const changeStatusResponse = await api.post('/operations/change-status', {
-                        device_code: selectedItemCode,
-                        session_id: this.session_id,
-                        force: true
-                    });
-
-                    console.log('Status zmieniony:', changeStatusResponse.data);
-
-                    // Przekierowanie na widok MainProcess
-                    this.$router.push({ name: 'MainProcess' });
-                } catch (error) {
-                    console.error('Błąd podczas zmiany statusu:', error);
-                    this.error = 'Wystąpił błąd podczas operacji.';
-                }
-            },
-            cancelOperation() {
-                // Resetuj wszystkie dane oprócz session_id
-                this.roomNumber = '';
-                this.error = '';
-                // Przekierowanie do MainProcess
-                this.$router.push({ name: 'MainProcess' });
+                return itemDetails;
+            } catch (error) {
+                console.error('Błąd podczas pobierania szczegółów przedmiotu:', error);
+                this.error = 'Nie udało się pobrać szczegółów przedmiotu.';
+                throw error;
             }
+        },
+        async changeItemStatus() {
+            try {
+                const selectedItemCode = sessionStorage.getItem('SelectedItemCode');
+                const changeStatusResponse = await api.post('/operations/change-status', {
+                    device_code: selectedItemCode,
+                    session_id: this.session_id,
+                    force: true
+                });
+
+                console.log('Status zmieniony:', changeStatusResponse.data);
+
+                this.$router.push({ name: 'MainProcess' });
+            } catch (error) {
+                console.error('Błąd podczas zmiany statusu:', error);
+                this.error = 'Wystąpił błąd podczas operacji.';
+            }
+        },
+        cancelOperation() {
+            // Resetuj wszystkie dane oprócz session_id
+            this.roomNumber = '';
+            this.error = '';
+            // Przekierowanie do MainProcess
+            this.$router.push({ name: 'MainProcess' });
         }
+    }
 };
 </script>
 
@@ -99,24 +95,11 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
-body {
+.container {
     background: $background-color url('../assets/back.jpg') top no-repeat;
     background-size: cover;
     color: $text-color;
     text-align: center;
-    margin: 0;
-    font-family: $font-main;
-}
-
-h1,
-h2 {
-    font-family: $font-heading;
-}
-
-button,
-a,
-p {
-    font-family: $font-main;
 }
 
 nav {
@@ -124,13 +107,17 @@ nav {
     height: 5vh;
 }
 
+h2 {
+    font-size: 1.125em;
+}
+
 .back-button {
-    text-decoration: none;
-    margin: 0.9375em;
     display: inline-flex;
     align-items: center;
     color: $text-color;
     font-size: $font-size-small;
+    margin: 0.9375em;
+    text-decoration: none;
     transition: transform $transition-duration ease;
 
     &:hover {
@@ -143,32 +130,21 @@ nav {
     margin-right: 0.3125em;
 }
 
-.logo {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 0.625em;
-}
-
 header {
     margin-bottom: 5%;
 }
 
 .employee-container {
-    justify-content: center;
     display: flex;
     align-items: center;
+    justify-content: center;
     height: 5em;
 }
 
 #employee-data {
-    margin-left: 1.25em;
     display: inline;
     font-size: 1.75em;
-}
-
-h2 {
-    font-size: 1.125em;
+    margin-left: 1.25em;
 }
 
 section {
@@ -212,13 +188,13 @@ p {
 .loader {
     color: $text-color;
     font-size: 1.5625em;
-    overflow: hidden;
     width: 1em;
     height: 1em;
     border-radius: 50%;
     margin: 0.9375em;
     transform: translateZ(0);
     animation: mltShdSpin 1.7s infinite ease, round 1.7s infinite ease;
+    overflow: hidden;
 }
 
 @keyframes mltShdSpin {
@@ -278,9 +254,9 @@ p {
 }
 
 .button-group {
-    margin-top: 2.5em;
     display: flex;
     flex-direction: column;
+    margin-top: 2.5em;
     gap: 0.9375em;
 }
 

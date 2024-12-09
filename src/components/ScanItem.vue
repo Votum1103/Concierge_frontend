@@ -1,17 +1,10 @@
 <template>
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <GoogleFonts />
-        <title>e-portiernia - zeskanuj kartę</title>
-    </head>
-
-    <body>
+    <div class="container">
+    <GoogleFonts/>
         <nav>
-            <WUoT_Logo />
+            <WUoT_Logo/>
         </nav>
-
         <main>
             <section class="main-window">
                 <h1>Zeskanuj przedmiot</h1>
@@ -22,7 +15,7 @@
                 </div>
             </section>
         </main>
-    </body>
+    </div>
 </template>
 <script>
 import GoogleFonts from './googleFonts.vue';
@@ -41,23 +34,20 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
-body {
+.container {
     background: $background-color;
-    color: $text-color;
-    text-align: center;
-    margin: 0;
-    font-family: $font-main;
     background-image: url('../assets/back.jpg');
-    background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
+    background-size: cover;
+    color: $text-color;
+    text-align: center;
+    width: 100vw;
+    height: 100vh;
 }
 
-button,
-a,
-p,
-label {
-    font-family: $font-main;
+h1 {
+    font-size: xx-large;
 }
 
 nav {
@@ -86,10 +76,6 @@ main {
     gap: 100px;
 }
 
-h1 {
-    font-family: $font-heading;
-    font-size: xx-large;
-}
 
 .loader {
     color: $text-color;
@@ -157,13 +143,13 @@ h1 {
 }
 
 .primary-button {
+    background-color: $primary-color;
     color: $text-color;
     font-size: $font-size-large;
-    width: 25%;
-    border: none;
-    background-color: $primary-color;
-    min-width: 200px;
     height: 50px;
+    width: 25%;
+    min-width: 200px;
+    border: none;
     border-radius: 25px;
     transition: all $transition-duration;
 }

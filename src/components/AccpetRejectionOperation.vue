@@ -1,12 +1,12 @@
 <template>
     <GoogleFonts />
 
-    <body>
-        <nav>
-            <WUoT_Logo />
-        </nav>
+    <div class="container">
+    <nav>
+        <WUoT_Logo />
+    </nav>
         <section>
-            <div class="alert danger-alert">
+            <div class="alert">
                 <svg xmlns="http://www.w3.org/2000/svg" width="50px" fill=#661111 class="bi bi-x-circle-fill"
                     viewBox="0 0 16 16">
                     <path
@@ -17,10 +17,10 @@
             </div>
             <div class="button-group">
                 <button class="primary-button" @click="cancelOperation">Tak</button>
-                <button class="secondary-button" @click=" stopCancellingOpertaion">Nie</button>
+                <button class="secondary-button" @click="stopCancellingOpertaion">Nie</button>
             </div>
         </section>
-    </body>
+    </div>
 </template>
 
 
@@ -73,7 +73,7 @@ export default {
                 console.error('Błąd przy anulowaniu operacji:', error);
             }
         },
-        }
+    }
 };
 </script>
 
@@ -81,13 +81,16 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
-body {
-    background: $background-color url('../assets/back.jpg') top no-repeat;
-    background-size: cover;
+.container {
+    background-color: $background-color;
     color: $text-color;
-    text-align: center;
-    margin: 0;
-    font-family: $font-main;
+    background-image: url('../assets/back.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
 }
 
 h1,
@@ -101,56 +104,24 @@ p {
     font-family: $font-main;
 }
 
+p {
+    font-size: $font-size-medium;
+}
+
+h1 { 
+    font-size: 15px
+}
+
 nav {
     text-align: left;
-    height: 5vh;
-}
-
-.back-button {
-    text-decoration: none;
-    margin: 0.9375em;
-    display: inline-flex;
-    align-items: center;
-    color: $text-color;
-    font-size: $font-size-small;
-    transition: transform $transition-duration ease;
-
-    &:hover {
-        transform: scale(1.07);
-        cursor: pointer;
-    }
-}
-
-#left-arrow {
-    margin-right: 0.3125em;
+    height: 50px;
 }
 
 .logo {
     position: absolute;
     top: 0;
     right: 0;
-    margin: 0.625em;
-}
-
-header {
-    margin-bottom: 5%;
-}
-
-.employee-container {
-    justify-content: center;
-    display: flex;
-    align-items: center;
-    height: 5em;
-}
-
-#employee-data {
-    margin-left: 1.25em;
-    display: inline;
-    font-size: 1.75em;
-}
-
-h2 {
-    font-size: 1.125em;
+    margin: 10px;
 }
 
 section {
@@ -161,6 +132,7 @@ section {
     height: 95vh;
 }
 
+
 .alert {
     display: flex;
     flex-direction: column;
@@ -170,93 +142,9 @@ section {
     padding: 0.9375em 0.625em;
     width: 60%;
     max-width: 37.5em;
-    border-radius: 0.9375em;
-}
-
-.danger-alert {
+    border-radius: 1em;
     border: 0.1875em solid $danger-color;
     gap: 0.3125em;
-}
-
-.success-alert {
-    border: 0.1875em solid $success-color;
-    gap: 0.3125em;
-}
-
-.info-alert {
-    border: 0.1875em solid $primary-color;
-}
-
-p {
-    font-size: $font-size-medium;
-}
-
-.loader {
-    color: $text-color;
-    font-size: 1.5625em;
-    overflow: hidden;
-    width: 1em;
-    height: 1em;
-    border-radius: 50%;
-    margin: 0.9375em;
-    transform: translateZ(0);
-    animation: mltShdSpin 1.7s infinite ease, round 1.7s infinite ease;
-}
-
-@keyframes mltShdSpin {
-
-    0%,
-    5%,
-    95% {
-        box-shadow: 0 -0.83em 0 -0.4em,
-            0 -0.83em 0 -0.42em,
-            0 -0.83em 0 -0.44em,
-            0 -0.83em 0 -0.46em,
-            0 -0.83em 0 -0.477em;
-    }
-
-    10%,
-    59% {
-        box-shadow: 0 -0.83em 0 -0.4em,
-            -0.087em -0.825em 0 -0.42em,
-            -0.173em -0.812em 0 -0.44em,
-            -0.256em -0.789em 0 -0.46em,
-            -0.297em -0.775em 0 -0.477em;
-    }
-
-    20% {
-        box-shadow: 0 -0.83em 0 -0.4em,
-            -0.338em -0.758em 0 -0.42em,
-            -0.555em -0.617em 0 -0.44em,
-            -0.671em -0.488em 0 -0.46em,
-            -0.749em -0.34em 0 -0.477em;
-    }
-
-    38% {
-        box-shadow: 0 -0.83em 0 -0.4em,
-            -0.377em -0.74em 0 -0.42em,
-            -0.645em -0.522em 0 -0.44em,
-            -0.775em -0.297em 0 -0.46em,
-            -0.82em -0.09em 0 -0.477em;
-    }
-
-    100% {
-        box-shadow: 0 -0.83em 0 -0.4em,
-            0 -0.83em 0 -0.42em,
-            0 -0.83em 0 -0.44em,
-            0 -0.83em 0 -0.46em,
-            0 -0.83em 0 -0.477em;
-    }
-}
-
-@keyframes round {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
 }
 
 .button-group {
