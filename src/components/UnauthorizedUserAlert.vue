@@ -81,10 +81,8 @@ export default {
             }
         },
         cancelOperation() {
-            // Resetuj wszystkie dane oprócz session_id
             this.roomNumber = '';
             this.error = '';
-            // Przekierowanie do MainProcess
             this.$router.push({ name: 'MainProcess' });
         }
     }
@@ -286,11 +284,6 @@ button:hover {
 }
 
 @media (max-width: 1040px) {
-    .button-group button {
-        height: 2.8125em;
-        font-size: 0.9em;
-    }
-
     p {
         font-size: 1.125em;
     }
@@ -313,10 +306,6 @@ button:hover {
         font-size: 0.875em;
     }
 
-    .button-group button {
-        height: 2.5em;
-    }
-
     .bi {
         width: 1.875em;
     }
@@ -329,6 +318,11 @@ button:hover {
 
     .bi {
         width: 1.5625em;
+    }
+
+    .primary-button, .secondary-button {
+        height: 50px;
+        width: 200px;
     }
 
     img,

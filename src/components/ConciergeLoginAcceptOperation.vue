@@ -13,7 +13,6 @@
             </BackButton>
             <WUoT_Logo />
         </nav>
-
         <main>
             <section class="mainContent">
                 <h1>Podaj login i hasło</h1>
@@ -29,7 +28,7 @@
                     <div class="error-placeholder">
                         <span v-if="loginError" class="error-message">Niepoprawny login lub hasło</span>
                     </div>
-                        <RouteButton buttonText="Zaloguj się" class="primary-button" />
+                    <RouteButton buttonText="Zaloguj się" class="primary-button" />
                 </form>
             </section>
         </main>
@@ -67,14 +66,12 @@ export default {
                     password: this.password
                 }));
 
-                // Zapis tokenów w sessionStorage
                 const accessToken = loginResponse.data.access_token;
                 const refreshToken = loginResponse.data.refresh_token;
                 sessionStorage.setItem('access_token', accessToken);
                 sessionStorage.setItem('refresh_token', refreshToken);
 
-                // Akceptacja sesji
-                const sessionId = sessionStorage.getItem('sessionId'); // Pobierz session_id
+                const sessionId = sessionStorage.getItem('sessionId');
                 if (!sessionId) {
                     throw new Error("Brak session_id w pamięci sesji");
                 }
@@ -85,13 +82,11 @@ export default {
                     password: this.password
                 }));
 
-
                 console.log('Sesja zaakceptowana:', approveResponse.data);
 
-                // Przejście do głównego okna po akceptacji
                 this.$router.push({ name: 'MainWindow' });
             } catch (error) {
-                this.loginError = true; // Ustawienie flagi błędu logowania
+                this.loginError = true;
                 console.error('Błąd logowania lub akceptacji sesji:', error);
             }
         }
@@ -182,6 +177,7 @@ main {
 input {
     font-weight: 600;
     font-size: 1.25rem;
+    color: $text-color;
     background-color: inherit;
     border: none;
     margin: 0.9375rem;
@@ -227,6 +223,58 @@ input::placeholder {
     .primary-button {
         font-size: 1rem;
         padding: 0.625rem 2.5rem;
+    }
+
+
+}
+
+@media (max-width: 820px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+
+
+
+    input {
+        width: 90%;
+        font-size: 1rem;
+    }
+
+    .primary-button {
+        font-size: 1rem;
+        padding: 0.5rem 1.5rem;
+    }
+}
+
+@media (min-width: 820px) and (max-width: 1553px) {
+    .mainContent {
+        width: 50%;
+        padding: 2rem;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    .primary-button {
+        font-size: 1rem;
+        padding: 0.625rem 2rem;
+    }
+}
+
+@media (min-width: 1553px) {
+    .mainContent {
+        width: 35%;
+        padding: 3rem;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    .primary-button {
+        font-size: 1.25rem;
+        padding: 0.75rem 2.5rem;
     }
 }
 </style>

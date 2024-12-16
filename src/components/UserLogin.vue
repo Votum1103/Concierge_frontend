@@ -225,10 +225,28 @@ input::placeholder {
     input {
         width: 15.625rem;
     }
+}
+@media (max-width: 820px) {
+    h1 {
+        font-size: 1.5rem;
+    }   
 
-    .primary-button {
+    input {
+        width: 90%;
         font-size: 1rem;
-        padding: 0.625rem 2.5rem;
+    }
+}
+
+@media (min-width: 820px) and (max-width: 1024px) {
+    h1 {
+        font-size: 1.75rem;
+    }
+}
+
+@media (min-width: 1553px) {
+
+    h1 {
+        font-size: 32px;
     }
 }
 </style>

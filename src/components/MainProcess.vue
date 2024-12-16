@@ -26,7 +26,7 @@
                         <div class="header-item ">Przedmiot</div>
                         <div class="header-item">Wesja</div>
                     </div>
-                    <div id="permissions-header">Uprawnienia</div>
+                    <div v-show="!isSmallScreen" id="permissions-header">Uprawnienia</div>
                 </div>
 
                 <div class="table-section">
@@ -54,6 +54,9 @@
                         </table>
                     </div>
                 </div>
+                <div v-if="isSmallScreen" id="permissions-header-small-screen">
+                    <p>Uprawnienia</p>
+                </div>
 
                 <div class="info-section">
                     <aside class="info-item" v-if="issued && issued.length">Wydano: {{ issued }}</aside>
@@ -75,7 +78,7 @@
                         <template #icon>
                         </template>
                     </RouteButton>
-                    <RouteButton class="secondary-button" routeName="AddNote" buttonText="Dodaj notatkę">
+                    <RouteButton class="secondary-button" routeName="MainProcessNotes" buttonText="Dodaj notatkę">
                         <template #icon>
                         </template>
                     </RouteButton>
@@ -90,8 +93,6 @@ import GoogleFonts from './googleFonts.vue';
 import RouteButton from './RouteButton.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
 import api from '../api';
-
-//#TODO Zrobić notatki
 
 export default {
     name: "MainProcess",
@@ -113,16 +114,17 @@ export default {
             issued: [],
             received: [],
             lastPage: sessionStorage.getItem('lastPage') || '',
+            isSmallScreen: window.innerWidth <= 768,
         };
     },
     computed: {
         headerClass() {
             if (this.lastPage === 'UserLogin') {
-                return 'text-white'; // Kolor biały dla UserLogin
+                return 'text-white';
             } else if (this.lastPage === 'UnauthorizedUserGiveItem' || this.lastPage === 'UpdateUACredentials') {
-                return 'text-red'; // Kolor czerwony dla UnauthorizedUserGiveItem
+                return 'text-red';
             }
-            return ''; // Domyślnie brak klasy
+            return '';
         },
     },
     mounted() {
@@ -130,9 +132,17 @@ export default {
         this.fetchLoggedUser();
         this.fetchPermissions();
         this.fetchUnapprovedOperations();
+        window.addEventListener("resize", this.handleResize);
+        this.handleResize();
+    },
+    beforeUnmount() {
+        window.removeEventListener("resize", this.handleResize);
     },
     methods: {
 
+        handleResize() {
+            this.isSmallScreen = window.innerWidth <= 768;
+        },
         loadUserData() {
             this.username = sessionStorage.getItem('username') || 'Nieznane imię';
             this.userId = sessionStorage.getItem('userId');
@@ -143,15 +153,13 @@ export default {
         async fetchPermissions() {
             try {
                 const response = await api.get(`/permissions/active/?user_id=${this.userId}`);
-                // Pobranie tylko numerów pokoi
                 const roomNumbers = response.data.map(permission => permission.room.number);
 
-                // Grupowanie numerów pokoi w pary
                 this.permissions = [];
                 for (let i = 0; i < roomNumbers.length; i += 2) {
                     this.permissions.push({
                         col1: roomNumbers[i],
-                        col2: roomNumbers[i + 1] || '', // Jeśli brak drugiego numeru, zostaw puste
+                        col2: roomNumbers[i + 1] || '',
                     });
                 }
             } catch (error) {
@@ -213,7 +221,6 @@ export default {
                     }
                 }
 
-                // Łączenie list w stringi
                 this.issued = issuedList.join(', ');
                 this.received = receivedList.join(', ');
 
@@ -223,8 +230,8 @@ export default {
             }
         },
         formatTime(timestamp) {
-            const date = new Date(timestamp); // Tworzenie obiektu Date
-            return date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }); // Wyświetlanie godziny i minut
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
         },
         formatItems(operation) {
             const items = [];
@@ -534,31 +541,65 @@ button:hover {
     ::-webkit-scrollbar {
         width: 5px;
     }
+
+    #permissions-header {
+        display: block;
+    }
+
+    #permissions-header-small-screen {
+        display: none;
+    }
 }
 
 @media (max-width: 768px) {
-    .button-group button {
-        height: 40px;
+
+    .logo {
+        display: none;
     }
 
-    h1,
-    .scan-section h1 {
-        font-size: 1.75rem;
+    .container {
+        overflow: auto;
     }
 
-    .info-item {
-        font-size: 0.75rem;
+    .table-section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .header-tab {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #permissions-header {
+        display: none;
+    }
+
+    #permissions-header-small-screen {
+        display: block;
+        font-size: 20px;
+    }
+
+    .permissions-table {
+        margin-top: 10px;
+        height: 150px;
+        width: 35%;
+    }   
+
+    .header-items {
+        width: 100%;
+    }
+
+    .items-table {
+        margin-bottom: 10px;
+        width: 100%;
     }
 }
 
 @media (max-width: 560px) {
 
-    .permissions-table,
-    #permissions-header,
-    .info-section,
-    img,
-    nav {
-        display: none;
+    .container {
+        width: 560px;
     }
 
     .header-tab,

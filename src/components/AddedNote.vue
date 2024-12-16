@@ -2,7 +2,7 @@
 
 
     <div class="container">
-        <GoogleFonts/>
+        <GoogleFonts />
         <nav>
             <BackButton class="back-button" routeName="MainProcess" buttonText="Wróć">
                 <template #icon>
@@ -41,7 +41,7 @@
                 </div>
 
                 <div class="button-group">
-                    <RouteButton class="secondary-button" routeName="AddNote" buttonText="Dodaj następną">
+                    <RouteButton class="primary-button" routeName="AddNote" buttonText="Dodaj następną">
                         <template #icon></template>
                     </RouteButton>
                     <RouteButton class="secondary-button" routeName="MainProcess" buttonText="Zakończ">
@@ -222,9 +222,23 @@ button:hover {
         font-size: 14px;
     }
 
-    img,
-    .back-button {
+    .primary-button,
+    .secondary-button {
+        width: 170px;
+    }
+
+    .text {
+        font-size: 14px; 
+    }
+
+    img {
         display: none;
+    }
+}
+
+@media (max-width: 300px) {
+    .container {
+        width: 300px;
     }
 }
 </style>

@@ -7,7 +7,6 @@ import ScanItem from '@/components/ScanItem.vue';
 import AddedNote from '@/components/AddedNote.vue';
 import UnauthorizedUserAlert from '@/components/UnauthorizedUserAlert.vue';
 import UnauthorizedUserGiveItem from '@/components/UnauthorizedUserGiveItem.vue';
-import AddNote from '@/components/AddNote.vue';
 import CheckReservations from '@/components/CheckReservations.vue';
 import ScanConciergeCard from '@/components/ScanUserCard.vue';
 import MainProcess from '@/components/MainProcess.vue';
@@ -18,6 +17,7 @@ import AcceptOperationByConcierge from '@/components/AcceptOperationByConcierge.
 import ConciergeLoginAcceptOperation from '@/components/ConciergeLoginAcceptOperation.vue';
 import AccpetRejectionOperation from '@/components/AccpetRejectionOperation.vue';
 import UpdateUACredentials from '@/components/UpdateUACredentials.vue';
+import MainProcessNotes from '@/components/MainProcessNotes.vue';
 
 const routes = [
   {
@@ -60,11 +60,6 @@ const routes = [
     path: '/unauthorizedusergiveitem',
     name: 'UnauthorizedUserGiveItem',
     component: UnauthorizedUserGiveItem
-  },
-  {
-    path: '/addnote',
-    name: 'AddNote',
-    component: AddNote
   },
   {
     path: '/checkreservations',
@@ -116,6 +111,11 @@ const routes = [
     name: 'UpdateUACredentials',
     component: UpdateUACredentials
   },
+  {
+    path: '/mainprocessnotes',
+    name: 'MainProcessNotes',
+    component: MainProcessNotes
+  },
 ];
 
 const router = createRouter({
@@ -123,8 +123,8 @@ const router = createRouter({
   routes
 });
 
-// Blokowanie cofania na poziomie routera
-let isBackNavigationBlocked = true;  // Od razu blokujemy cofnienie
+
+let isBackNavigationBlocked = true;
 
 router.beforeEach((to, from, next) => {
   const isAuthenticated = !!sessionStorage.getItem('access_token');
@@ -137,16 +137,14 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach(() => {
-  // Zabezpieczamy przed powrotem w historii
   if (isBackNavigationBlocked) {
     window.history.pushState(null, null, window.location.href);
   }
 });
 
-// Przechwytywanie akcji 'cofania' przyciskiem wstecz
+
 window.addEventListener('popstate', () => {
-  window.history.pushState(null, null, window.location.href); // Zapobiegamy cofaniu
-  // Przechwytywanie cofnicia będzie działać zawsze
+  window.history.pushState(null, null, window.location.href);
 });
 
 export default router;

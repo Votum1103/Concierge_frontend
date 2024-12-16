@@ -67,7 +67,7 @@ main {
     align-items: center;
     border-radius: 2em;
     width: 45%;
-    min-width: 300px;
+    min-width: 350px;
     max-width: 600px;
     background: $background-color;
     padding: 50px 0 50px 0;
@@ -159,30 +159,19 @@ button:hover {
     cursor: pointer;
 }
 
-@media (max-width: 1040px) {
-    .button-group button {
-        height: 45px;
-        font-size: 0.9em;
-    }
-}
-
 @media (max-width: 768px) {
-    h1 {
-        font-size: x-large;
-    }
+  h1 {
+    font-size: x-large;
+  }
 
-    .button-group button {
-        height: 40px;
-    }
-
-    .loader {
-        font-size: 25px;
-    }
+  .loader {
+    font-size: 25px;
+  }
 }
 
 @media (max-width: 560px) {
-    img {
-        display: none;
-    }
+  img {
+    display: none;
+  }
 }
 </style>

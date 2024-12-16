@@ -21,7 +21,7 @@
                 <form @submit.prevent="fetchItemDetails">
                     <div class="form-group">
                         <input type="text" v-model="itemCode" id="code-input" name="code-input"
-                            placeholder="Kod przedmiotu" :class="{'input-error': permissionError}" required />
+                            placeholder="Kod przedmiotu" :class="{ 'input-error': permissionError }" required />
                     </div>
                     <div class="error-container">
                         <div v-if="permissionError" class="error-message">
@@ -58,6 +58,7 @@ export default {
             permissionError: null,
             statusChange: "",
             session_id: sessionStorage.getItem('sessionId'),
+            thisItem: "",
         };
     },
     methods: {
@@ -71,11 +72,8 @@ export default {
                 const response = await api.get(`/devices/code/${this.itemCode}`);
                 const item = response.data;
 
+                this.item = item;
                 this.itemCode = item.code;
-
-                console.log(this.session_id)
-
-                console.log(this.itemCode)
 
                 try {
                     const changeStatusResponse = await api.post('/operations/change-status', {
@@ -84,9 +82,11 @@ export default {
                         force: false
                     });
 
-                    
-
                     this.statusChange = changeStatusResponse.data;
+
+                    console.log('To jest statusChange: ', this.statusChange)
+
+                    sessionStorage.setItem('UnapprovedDevices', JSON.stringify([this.item]));
 
                     this.$router.push({ name: 'MainProcess' });
 
@@ -95,7 +95,7 @@ export default {
                     if (error.response && error.response.status === 403) {
                         sessionStorage.setItem('SelectedItemCode', this.itemCode)
                         console.log(this.itemCode)
-                        this.$router.push({ name: 'UnauthorizedUserAlert'});
+                        this.$router.push({ name: 'UnauthorizedUserAlert' });
                     } else {
                         this.error = "Wystąpił błąd podczas zmiany statusu urządzenia";
                     }
@@ -156,7 +156,7 @@ main {
     width: 45%;
     background: $background-color;
     padding: 50px 0 50px 0;
-    margin-top: 7%;
+    margin-top: 10vh;
 }
 
 .error-container {
@@ -177,7 +177,7 @@ main {
 }
 
 .input-error {
-    border-bottom: 3px solid $error-color; 
+    border-bottom: 3px solid $error-color;
 }
 
 .form-group {
@@ -200,7 +200,7 @@ input::placeholder {
     width: 300px;
     box-sizing: border-box;
 }
- 
+
 input:focus::placeholder {
     color: transparent;
 }
@@ -247,47 +247,55 @@ select:-webkit-autofill:focus {
     outline: none;
 }
 
-@media (max-width: 1040px) {
-    .button-group button {
-        height: 45px;
-        font-size: 0.9em;
+@media (max-width: 768px) {
+    h1 {
+        font-size: large;
     }
 
-    input::placeholder,
-    input {
-        font-size: 16px;
-        width: 230px;
+    input,
+    input::placeholder {
+        font-size: 14px;
+        width: 250px;
     }
+
 }
 
-@media (max-width: 768px) {
-
-    input::placeholder,
-    input {
-        font-size: 14px;
-        width: 210px;
-    }
-
+/* Tablety i małe laptopy (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
     h1 {
         font-size: x-large;
     }
 
-    .button-group button {
-        height: 40px;
+    input,
+    input::placeholder {
+        font-size: 16px;
+        width: 280px;
     }
 }
 
-@media (max-width: 560px) {
-
-    input::placeholder,
-    input {
-        font-size: 12px;
-        width: 190px;
+/* Laptopy (1025px - 1440px) */
+@media (min-width: 1025px) and (max-width: 1440px) {
+    h1 {
+        font-size: xx-large;
     }
 
-    img,
-    .back-button {
-        display: none;
+    input,
+    input::placeholder {
+        font-size: 18px;
+        width: 300px;
+    }
+}
+
+/* Ekrany 4K (powyżej 1440px) */
+@media (min-width: 1441px) {
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    input,
+    input::placeholder {
+        font-size: 20px;
+        width: 400px;
     }
 }
 </style>

@@ -386,5 +386,97 @@ select:-webkit-autofill:focus {
     text-align: center;
 }
 
+@media (max-width: 680px) {
+    .conatiner {
+        height: 100vh;
+        width: 680px;
+        padding: 20px;
+    }
+    h1 {
+        font-size: 20px;
+    }
+    form {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .form-group input {
+        width: 100%;
+        gap: 0px;
+    }
+    .header-items {
+        font-size: 0.65em;
+    }
+    .table-cell {
+        font-size: 0.9em;
+    }
+    .items-table {
+        max-height: 200px;
+    }
+
+    main {
+        gap: 40px;
+    }
+}
+
+@media (min-width: 681px) and (max-width: 1024px) {
+    .form-container {
+        gap: 15px;
+    }
+    .form-group input {
+        width: 80%;
+    }
+    form {
+        gap: 1em;
+    }
+    h1 {
+        font-size: 24px;
+    }
+    .header-item {
+        font-size: 14px;
+    }
+    .table-cell {
+        font-size: 1em;
+    }
+}
+
+@media (min-width: 1025px) and (max-width: 1166px) {
+    .form-container {
+        gap: 15px;
+    }
+    .form-group input {
+        width: 80%;
+    }
+    h1 {
+        font-size: 24px;
+    }
+    .header-item {
+        font-size: 14px;
+    }   
+    .table-cell {
+        font-size: 1.1em;
+    }
+}
+
+@media (min-width: 1167px) and (max-width: 1440px) {
+    .form-container {
+        gap: 30px;
+    }
+    .form-group input {
+        width: 250px;
+    }
+}
+
+@media (min-width: 1441px) {
+    .form-container {
+        gap: 50px;
+    }
+    .form-group input {
+        width: 400px;
+    }
+    .tableContent {
+        max-width: 1200px;
+    }
+}
 
 </style>

@@ -43,7 +43,7 @@ button {
 }
 
 .primary-button {
-  width: 250px;
+  width: 200px;
   height: 50px;
   color: $text-color;
   font-size: $font-size-large;
@@ -59,9 +59,5 @@ button:hover {
 
 .icon {
   margin-bottom: 2px;
-}
-
-.text {
-  font-size: 18px;
 }
 </style>

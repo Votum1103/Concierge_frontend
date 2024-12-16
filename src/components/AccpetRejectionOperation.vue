@@ -230,4 +230,9 @@ button:hover {
         display: none;
     }
 }
+@media (max-width: 426px) {
+    .container {
+        width: 426px;
+    }
+}
 </style>

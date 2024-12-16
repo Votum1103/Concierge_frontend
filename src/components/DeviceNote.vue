@@ -213,7 +213,7 @@ nav {
 }
 
 .notes-section {
-    width: 100%;
+    width: 50%;
     max-width: 600px;
     margin-bottom: 2em;
 }
@@ -228,7 +228,7 @@ nav {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-height: 50vh;
+    max-height: 40vh;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: thin;
@@ -256,7 +256,7 @@ nav {
 
 .note-box {
     padding: 15px;
-    border: 2px solid $primary-color;
+    border: 3px solid $primary-color;
     border-radius: 8px;
     font-size: 18px;
     background-color: transparent;
@@ -319,5 +319,105 @@ textarea {
 .delete-button:hover,
 .cancel-button:hover {
     background-color: $primary-color;
+}
+
+@media (max-width: 768px) {
+    .note-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .note-header p {
+        font-size: 1.25rem;
+    }
+
+    .notes-section h2 {
+        font-size: 1.5rem;
+    }
+
+    .note-box {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+}
+
+/* Tablety (769px–1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .note-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .note-header p {
+        font-size: 1.5rem;
+    }
+
+    .notes-section h2 {
+        font-size: 1.625rem;
+    }
+
+    .note-box {
+        font-size: 0.95rem;
+        padding: 10px;
+    }
+
+}
+
+/* Laptopy (1025px–1440px) */
+@media (min-width: 1025px) and (max-width: 1440px) {
+    .note-header h1 {
+        font-size: 2rem;
+    }
+
+    .note-header p {
+        font-size: 1.5rem;
+    }
+
+    .notes-section h2 {
+        font-size: 1.75rem;
+    }
+
+    .note-box {
+        font-size: 1.125rem;
+        padding: 12px;
+    }
+
+    .add-button,
+    .edit-button,
+    .save-button,
+    .delete-button,
+    .cancel-button {
+        font-size: 1rem;
+        padding: 12px 25px;
+    }
+}
+
+/* 4K (powyżej 1440px) */
+@media (min-width: 1441px) {
+    .note-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .note-header p {
+        font-size: 2rem;
+    }
+
+    .notes-section h2 {
+        font-size: 2rem;
+        margin-bottom: 1em;
+    }
+
+    .note-box {
+        font-size: 1.25rem;
+        padding: 15px;
+    }
+
+    .add-button,
+    .edit-button,
+    .save-button,
+    .delete-button,
+    .cancel-button {
+        font-size: 1.125rem;
+        padding: 15px 30px;
+        margin-top: 1.5em;
+    }
 }
 </style>

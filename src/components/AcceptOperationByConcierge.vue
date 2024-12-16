@@ -13,25 +13,27 @@
             </BackButton>
             <WUoT_Logo />
         </nav>
-        <header>
-            <div class="employee-container">
-                <svg xmlns="http://www.w3.org/2000/svg" width="60px" fill="currentColor" class="bi bi-file-person-fill"
-                    viewBox="0 0 16 16">
-                    <path
-                        d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m-1 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0m-3 4c2.623 0 4.146.826 5 1.755V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-1.245C3.854 11.825 5.377 11 8 11" />
-                </svg>
-                <h1 id="employee-data">{{ username }} {{ surname }}</h1>
+        <div class="content">
+            <header>
+                <div class="employee-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="60px" fill="currentColor"
+                        class="bi bi-file-person-fill" viewBox="0 0 16 16">
+                        <path
+                            d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m-1 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0m-3 4c2.623 0 4.146.826 5 1.755V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-1.245C3.854 11.825 5.377 11 8 11" />
+                    </svg>
+                    <h1 id="employee-data">{{ username }} {{ surname }}</h1>
+                </div>
+                <h2>{{ role }}</h2>
+                <h2>Wydział {{ faculty }}</h2>
+            </header>
+            <div class="mainContent">
+                <h1>W celu potwierdzenia zeskanuj kartę portiera</h1>
+                <div class="loader"></div>
             </div>
-            <h2>{{ role }}</h2>
-            <h2>Wydział {{ faculty }}</h2>
-        </header>
-        <div class="mainContent">
-            <h1>W celu potwierdzenia zeskanuj kartę portiera</h1>
-            <div class="loader"></div>
-        </div>
-        <div class="button-group">
-            <button class="primary-button" @click="moveToAcceptanceOperationByLogin">Podaj login i hasło</button>
-            <button class="secondary-button" @click="cancelAcceptanceOperation">Odrzuć operacje</button>
+            <div class="button-group">
+                <button class="primary-button" @click="moveToAcceptanceOperationByLogin">Podaj login i hasło</button>
+                <button class="secondary-button" @click="cancelAcceptanceOperation">Odrzuć operacje</button>
+            </div>
         </div>
     </div>
 </template>
@@ -103,6 +105,11 @@ export default {
     margin-top: 5%;
 }
 
+.content {
+    height: 100%;
+    width: 100%;
+}
+
 h1 {
     font-size: 34px;
 }
@@ -115,13 +122,6 @@ h2 {
 nav {
     text-align: left;
     height: 50px;
-}
-
-.logo {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 10px;
 }
 
 header {
@@ -231,4 +231,73 @@ button:hover {
         transform: rotate(360deg)
     }
 }
+
+/* Responsywność */
+@media (min-width: 2000px) {
+    h1,
+    #employee-data {
+        font-size: 4rem;
+    }
+
+    h2 {
+        font-size: 2.3em;
+    }
+
+    .loader {
+        font-size: 4rem;
+    }
+
+    .primary-button,
+    .secondary-button {
+        font-size: 2em;
+    }
+    .mainContent {
+        height: 600px;
+    }
+
+}
+
+@media (max-width: 790px) {
+
+    h1,
+    #employee-data {
+        font-size: 1.6rem;
+    }
+
+    .loader {
+        font-size: 2.25rem;
+    }
+
+    .primary-button,
+    .secondary-button {
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 700px) {
+
+    h1,
+    #employee-data {
+        font-size: 1.4rem;
+    }
+
+    .loader {
+        font-size: 2rem;
+    }
+
+    .container {
+        width: 700px;
+        overflow-x: auto;
+    }
+}
+
+@media (max-height: 600px) {
+    .container {
+        overflow-y: auto;
+    }
+    .logo {
+        display: none;
+    }
+}
+    
 </style>

@@ -291,11 +291,6 @@ button:hover {
 }
 
 @media (max-width: 1040px) {
-    .button-group button {
-        height: 2.8125em;
-        font-size: 0.9em;
-    }
-
     p {
         font-size: 1.125em;
     }
@@ -306,10 +301,6 @@ button:hover {
 }
 
 @media (max-width: 768px) {
-    p {
-        font-size: 1em;
-    }
-
     h1 {
         font-size: x-large;
     }
@@ -318,27 +309,8 @@ button:hover {
         font-size: 0.875em;
     }
 
-    .button-group button {
-        height: 2.5em;
-    }
-
     .bi {
         width: 1.875em;
-    }
-}
-
-@media (max-width: 560px) {
-    p {
-        font-size: 0.875em;
-    }
-
-    .bi {
-        width: 1.5625em;
-    }
-
-    img,
-    .back-button {
-        display: none;
     }
 }
 </style>

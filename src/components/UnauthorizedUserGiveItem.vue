@@ -118,6 +118,7 @@ export default {
     background: $background-color url('../assets/back.jpg') top no-repeat;
     background-size: cover;
     color: $text-color;
+    min-width: 550px;
 }
 
 nav {
@@ -247,18 +248,7 @@ input:-webkit-autofill:active {
     -webkit-text-fill-color: $text-color;
 }
 
-@media (max-width: 1040px) {
-    .button-group button {
-        height: $button-height;
-        width: 13.5em;
-        font-size: 0.9em;
-    }
-}
-
 @media (max-width: 768px) {
-    .button-group button {
-        height: 1em;
-    }
 
     header h1 {
         font-size: x-large;
@@ -273,21 +263,6 @@ input:-webkit-autofill:active {
     .form-group textarea {
         font-size: 1em;
         width: 18.75em;
-    }
-}
-
-@media (max-width: 560px) {
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        font-size: 0.875em;
-        width: 12.5em;
-    }
-
-    img,
-    .back-button {
-        display: none;
     }
 }
 </style>

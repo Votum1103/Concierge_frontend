@@ -13,7 +13,6 @@
             </BackButton>
             <WUoT_Logo />
         </nav>
-
         <main>
             <section class="mainContent">
                 <h1>Podaj login i hasło</h1>
@@ -26,7 +25,6 @@
                         <input :class="{ 'error-border': loginError }" type="password" id="password" name="password"
                             placeholder="Hasło" v-model="password" required>
                     </div>
-                    <!-- Stałe miejsce na komunikat o błędzie -->
                     <div class="error-placeholder">
                         <span v-if="loginError" class="error-message">Niepoprawny login lub hasło</span>
                     </div>
@@ -35,7 +33,7 @@
                     </div>
                 </form>
             </section>
-        </main>
+        </main> 
     </div>
 </template>
 
@@ -143,7 +141,7 @@ main {
     min-width: 21.875rem;
     max-width: 37.5rem;
     height: 70%;
-    background-color: rgb(0, 0, 0);
+    background-color: $background-color;
 }
 
 input {
@@ -181,27 +179,13 @@ input::placeholder {
     font-size: 1rem;
 }
 
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-textarea:-webkit-autofill,
-textarea:-webkit-autofill:hover,
-textarea:-webkit-autofill:focus,
-select:-webkit-autofill,
-select:-webkit-autofill:hover,
-select:-webkit-autofill:focus {
-    border-bottom: 3px solid $primary-color;
-    -webkit-text-fill-color: $text-color;
-    -webkit-box-shadow: 0 0 0px 1000px #000 inset;
-    transition: background-color 5000s ease-in-out 0s;
-}
-
 .primary-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-top: 6.25rem;
     border: none;
-    font-family: $font-heading;
-    font-weight: 500;
-    font-size: 1.125rem;
+    font-size: 1.2rem;
     background-color: $primary-color;
     color: $text-color;
     padding: 0.625rem 5rem;
@@ -221,6 +205,7 @@ select:-webkit-autofill:focus {
     align-items: center;
 }
 
+
 @media (max-width: 768px) {
     h1 {
         font-size: 1.75rem;
@@ -233,10 +218,28 @@ select:-webkit-autofill:focus {
     input {
         width: 15.625rem;
     }
+}
+@media (max-width: 820px) {
+    h1 {
+        font-size: 1.5rem;
+    }   
 
-    .primary-button {
+    input {
+        width: 90%;
         font-size: 1rem;
-        padding: 0.625rem 2.5rem;
+    }
+}
+
+@media (min-width: 820px) and (max-width: 1024px) {
+    h1 {
+        font-size: 1.75rem;
+    }
+}
+
+@media (min-width: 1553px) {
+
+    h1 {
+        font-size: 32px;
     }
 }
 </style>

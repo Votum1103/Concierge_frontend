@@ -73,7 +73,7 @@
           </li>
         </ul>
       </div>
-      <div class="">
+      <div class="mainContent">
         <div class="navigtionButtons">
           <RouteButton class="showMap" routeName="MapWindow" buttonText="Mapa">
             <template #icon>
@@ -101,14 +101,12 @@
 
             <button @click="selectItemType('pilot')" :class="{ selected: selectedItemType === 'pilot' }"
               class="remote-controllers">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-file-spreadsheet"
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-phone-fill"
                 viewBox="0 0 16 16">
                 <path
-                  d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v4h10V2a1 1 0 0 0-1-1zm9 6h-3v2h3zm0 3h-3v2h3zm0 3h-3v2h2a1 1 0 0 0 1-1zm-4 2v-2H6v2zm-4 0v-2H3v1a1 1 0 0 0 1 1zm-2-3h2v-2H3zm0-3h2V7H3zm3-2v2h3V7zm3 3H6v2h3z" />
+                  d="M3 2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm6 11a1 1 0 1 0-2 0 1 1 0 0 0 2 0" />
               </svg>
             </button>
-
-
           </div>
           <div class="itemsVersionsButtons">
             <button @click="selectItemVersion('podstawowa')" :class="{ selected: selectedItemVersion === 'podstawowa' }"
@@ -190,16 +188,15 @@ export default {
       currentView: 'keys',
       selectedItemType: 'klucz',
       selectedItemVersion: 'podstawowa',
-      userInitials: sessionStorage.getItem('userInitials') || ''
+      userInitials: sessionStorage.getItem('userInitials') || '',
+      chunkSize: this.getChunkSize(),
     };
   },
   computed: {
     chunkedItems() {
-      const chunkSize = 5;
       const result = [];
-
-      for (let i = 0; i < this.items.length; i += chunkSize) {
-        result.push(this.items.slice(i, i + chunkSize));
+      for (let i = 0; i < this.items.length; i += this.chunkSize) {
+        result.push(this.items.slice(i, i + this.chunkSize));
       }
       return result;
     },
@@ -216,8 +213,20 @@ export default {
     } else {
       this.fetchDevices(this.selectedItemType, this.selectedItemVersion);
     }
+    window.addEventListener("resize", this.handleResize);
+  },
+  beforeUnmount() {
+    window.removeEventListener("resize", this.handleResize);
   },
   methods: {
+    handleResize() {
+      this.chunkSize = this.getChunkSize(); // Ustawienie nowej wartości na podstawie rozmiaru ekranu
+    },
+    getChunkSize() {
+      if (window.innerWidth <= 730) return 3;
+      if (window.innerWidth <= 1300) return 4;
+      return 5; // Domyślny chunkSize dla szerokości powyżej 1024px
+    },
     async logOut() {
       try {
         await api.post('/logout', {
@@ -382,20 +391,21 @@ button.reserve-version {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-right: 2em;
+  align-items: center;
   width: 21%;
-  height: 100%;
+  height: 700px;
+  margin-top: 50px;
 
   ul {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center; // Wyśrodkowanie wewnątrz kontenera
     justify-content: space-around;
-    position: fixed;
-    height: 700px;
     list-style: none;
-    margin-top: 4em;
+    margin: 0;
+    padding: 0;
+    width: 100%; // Upewnij się, że zajmuje całą szerokość rodzica
+    height: 100%; // Dopasowanie wysokości do rodzica
   }
 }
 
@@ -438,7 +448,7 @@ button.reserve-version {
 
 .itemsNumber {
   display: grid;
-  height: calc(8 * 75px);
+  height: calc(8 * 77px);
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
@@ -522,46 +532,113 @@ td svg {
 }
 
 
-@media (max-width: 768px) {
+@media (max-width: 1300px) {
+  .table-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+}
+
+@media (max-width: 1024px) {
+
   .main-page {
     flex-direction: column;
   }
 
-  .left-sidebar {
-    width: 100%;
+  .mainContent {
+    width: 50%;
+  }
+
+  .left-action-buttons {
     order: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 150px;
+    margin-bottom: 20px;
+
+    ul {
+      flex-direction: row;
+      margin-left: 30px;
+    }
+  }
+
+  .mainContent {
+    order: 2;
+    width: 100%;
+  }
+
+  .itemsNumber {
+    height: 460px;
   }
 
   .itemsTable {
-    order: 2;
+    grid-template-rows: unset;
+    display: block;
+    width: 90%;
+    margin: 0 auto;
+    height: 460px;
 
-    .navigtionButtons {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    .itemTypesButtons,
-    .itemsVersionsButtons {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-around;
+    td {
+      width: 100%;
+      display: block;
+      text-align: center;
+      font-size: 20px;
     }
   }
 
-  @media (max-width: 480px) {
-    .navigtionButtons {
+  .showMap {
+    width: 200px;
+    height: 50px;
+  }
+
+  .navigtionButtons {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+
+    button {
+      margin: 5px 10px;
+    }
+  }
+
+  @media (max-width: 730px) {
+    .main-page {
       flex-direction: column;
     }
 
-    .itemTypesButtons,
-    .itemsVersionsButtons {
-      width: 100%;
+    .table-row {
+      grid-template-columns: repeat(3, 1fr);
     }
 
-    .table-cell {
-      font-size: 12px;
+    .left-sidebar {
+      width: 100%;
+      order: 1;
+    }
+
+    .itemsTable {
+      order: 2;
+
+      .navigtionButtons {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .itemTypesButtons,
+      .itemsVersionsButtons {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+      }
+    }
+  }
+  @media (max-width: 670px) {
+    .container {
+      width: 670px;
     }
   }
 }

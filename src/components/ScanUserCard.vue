@@ -82,19 +82,17 @@ main {
 }
 
 .mainContent {
+  border-radius: 2em;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: $background-color;
-  height: 40%;
   width: 45%;
-  min-width: 18.75rem;
-  max-width: 37.5rem;
-  max-height: calc(100vh - 6.25rem);
-  border-radius: 2em;
-  padding: 3.125rem 1.25rem;
-  gap: 3.125rem;
+  min-width: 300px;
+  max-width: 600px;
+  background: $background-color;
+  height: 500px;
+  gap: 100px;
   overflow: auto;
 }
 
@@ -178,24 +176,13 @@ button:hover {
   margin: 15px;
 }
 
-@media (max-width: 1040px) {
-  .primary-button {
-    height: 2.8125rem;
-    font-size: 0.9rem;
-  }
-}
-
 @media (max-width: 768px) {
   h1 {
-    font-size: 1.5rem;
-  }
-
-  .primary-button {
-    height: 2.5rem;
+    font-size: x-large;
   }
 
   .loader {
-    font-size: 1.5625rem;
+    font-size: 25px;
   }
 }
 

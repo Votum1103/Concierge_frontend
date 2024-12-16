@@ -164,20 +164,9 @@ button:hover {
   cursor: pointer;
 }
 
-@media (max-width: 1040px) {
-  .button-group button {
-    height: 45px;
-    font-size: 0.9em;
-  }
-}
-
 @media (max-width: 768px) {
   h1 {
     font-size: x-large;
-  }
-
-  .button-group button {
-    height: 40px;
   }
 
   .loader {
