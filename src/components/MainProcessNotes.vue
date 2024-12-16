@@ -62,8 +62,6 @@ import GoogleFonts from './googleFonts.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
 import api from '../api';
 
-//#TODO jakieś gówno jest dookoła inputów
-//#TODO dodać też na początek listy te przedmioty co dopiero mają być zaakceptowane bo muszę być te i te
 export default {
     name: 'MainProcessNotes',
     components: {
@@ -88,7 +86,6 @@ export default {
             editedNote: "",
         }
     },
-    //  #TODO zrobić te notatki unapproved 
     mounted() {
         this.loadUserData()
         this.fetchLoggedUser()

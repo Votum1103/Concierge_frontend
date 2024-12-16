@@ -905,6 +905,7 @@ nav {
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: 80%;
   width: 400px;
   flex-shrink: 0;
   overflow-y: auto;
@@ -915,7 +916,8 @@ nav {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+  height: 38%;
 }
 
 .item-type-overlay {
@@ -1055,7 +1057,7 @@ button.reserve-version {
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  height: 49%;
+  height: 62%;
   overflow-y: auto;
   background-color: transparent;
   color: $text-color;
@@ -1071,7 +1073,7 @@ button.reserve-version {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 50px;
+  margin-top: 25px;
   gap: 20px;
 }
 

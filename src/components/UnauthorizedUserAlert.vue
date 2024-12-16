@@ -28,8 +28,6 @@ import GoogleFonts from './googleFonts.vue';
 import WUoT_Logo from './WUoT_Logo.vue';
 import api from '@/api';
 
-//#TODO jeszcze jakieś rezerwacje wyświetlić najbliższe dla tego pokoju
-
 export default {
     name: 'UnauthorizedUserAlert',
     components: {
@@ -320,7 +318,8 @@ button:hover {
         width: 1.5625em;
     }
 
-    .primary-button, .secondary-button {
+    .primary-button,
+    .secondary-button {
         height: 50px;
         width: 200px;
     }

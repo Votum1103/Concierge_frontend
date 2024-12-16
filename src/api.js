@@ -26,7 +26,6 @@ api.interceptors.response.use(
                 const response = await axios.post('http://127.0.0.1:8000/refresh', {
                     refresh_token: refreshToken,
                 });
-                //#TODO tutaj znowu refresh token bo jak robie ten u gory refresh to z getItem biorę stary a nie już zaktualizowany
                 const newAccessToken = response.data.access_token;
                 sessionStorage.setItem('access_token', newAccessToken);
 
