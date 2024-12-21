@@ -39,9 +39,9 @@
 </template>
 
 <script>
-import BackButton from './BackButton.vue';
-import GoogleFonts from './googleFonts.vue';
-import WUoT_Logo from './WUoT_Logo.vue';
+import BackButton from '../components/BackButton.vue';
+import GoogleFonts from '../components/googleFonts.vue';
+import WUoT_Logo from '../components/WUoT_Logo.vue';
 
 export default {
     name: 'AcceptOperationByConcierge',

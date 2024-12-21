@@ -153,6 +153,9 @@
 </template>
 
 <script>
+import BackButton from '../components/BackButton.vue';
+import GoogleFonts from '../components/googleFonts.vue';
+import WUoT_Logo from '../components/WUoT_Logo.vue';
 import { shallowRef, ref, onMounted, watch } from "vue";
 import api from "../api";
 import Map from "@arcgis/core/Map";
@@ -161,9 +164,6 @@ import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer";
 import Search from "@arcgis/core/widgets/Search";
 import Home from "@arcgis/core/widgets/Home";
-import BackButton from "./BackButton.vue";
-import GoogleFonts from "./googleFonts.vue";
-import WUoT_Logo from "./WUoT_Logo.vue";
 import Graphic from "@arcgis/core/Graphic";
 import Zoom from "@arcgis/core/widgets/Zoom";
 import ScaleBar from "@arcgis/core/widgets/ScaleBar";

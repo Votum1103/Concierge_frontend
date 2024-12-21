@@ -35,8 +35,8 @@ api.interceptors.response.use(
                 return api(originalRequest);
             } catch (refreshError) {
                 console.error('Błąd przy odświeżaniu tokenu:', refreshError);
-                sessionStorage.clear();  // Wylogowanie, jeśli odświeżenie się nie powiodło
-                window.location = '/';  // Przekierowanie do strony logowania
+                sessionStorage.clear();
+                window.location = '/';
                 return Promise.reject(refreshError);
             }
         }

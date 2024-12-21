@@ -166,11 +166,11 @@
 </template>
 
 <script>
-import GoogleFonts from './googleFonts.vue';
-import RouteButton from './RouteButton.vue';
-import WUoT_Logo from './WUoT_Logo.vue';
-import AcceptanceIcon from './AcceptanceIcon.vue';
-import NegativeIcon from './NegativeIcon.vue';
+import GoogleFonts from '../components/googleFonts.vue';
+import WUoT_Logo from '../components/WUoT_Logo.vue';
+import RouteButton from '../components/RouteButton.vue';
+import AcceptanceIcon from '../components/AcceptanceIcon.vue';
+import NegativeIcon from '../components/NegativeIcon.vue'
 import api from '../api.js';
 
 export default {
@@ -220,12 +220,12 @@ export default {
   },
   methods: {
     handleResize() {
-      this.chunkSize = this.getChunkSize(); // Ustawienie nowej wartości na podstawie rozmiaru ekranu
+      this.chunkSize = this.getChunkSize();
     },
     getChunkSize() {
       if (window.innerWidth <= 730) return 3;
       if (window.innerWidth <= 1300) return 4;
-      return 5; // Domyślny chunkSize dla szerokości powyżej 1024px
+      return 5; 
     },
     async logOut() {
       try {

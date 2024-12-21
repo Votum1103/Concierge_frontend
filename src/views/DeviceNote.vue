@@ -51,8 +51,9 @@
 
 <script>
 import api from '../api';
-import BackButton from './BackButton.vue';
-import WUoT_Logo from './WUoT_Logo.vue';
+import BackButton from '../components/BackButton.vue';
+import WUoT_Logo from '../components/WUoT_Logo.vue';
+
 
 export default {
     components: {

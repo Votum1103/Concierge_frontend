@@ -89,9 +89,9 @@
 </template>
 <script>
 //#TODO nie zapomnij o tym, ze jeszcze jakoś trzeba odwzrorwać działąnie skanera
-import GoogleFonts from './googleFonts.vue';
-import RouteButton from './RouteButton.vue';
-import WUoT_Logo from './WUoT_Logo.vue';
+import GoogleFonts from '../components/googleFonts.vue';
+import WUoT_Logo from '../components/WUoT_Logo.vue';
+import RouteButton from '../components/RouteButton.vue';
 import api from '../api';
 
 export default {
@@ -528,6 +528,9 @@ button:hover {
 }
 
 @media (max-width: 1040px) {
+    .container {
+        overflow: auto;
+    }
     .button-group {
         gap: 10px;
         flex-direction: column;
@@ -555,10 +558,6 @@ button:hover {
 
     .logo {
         display: none;
-    }
-
-    .container {
-        overflow: auto;
     }
 
     .table-section {

@@ -24,8 +24,8 @@
 </template>
 
 <script>
-import GoogleFonts from './googleFonts.vue';
-import WUoT_Logo from './WUoT_Logo.vue';
+import GoogleFonts from '../components/googleFonts.vue';
+import WUoT_Logo from '../components/WUoT_Logo.vue';
 import api from '../api'
 
 export default {
