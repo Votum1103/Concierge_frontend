@@ -224,20 +224,19 @@ export default {
           const initials = `${roomInfo.owner_name[0]}${roomInfo.owner_surname[0]}`.toUpperCase();
 
           const issueTime = new Date(roomInfo.issue_time);
-          const timeDiffInHours = (currentTime - issueTime) / (1000 * 60 * 60); // Różnica w godzinach
+          const timeDiffInHours = (currentTime - issueTime) / (1000 * 60 * 60); 
 
-          // Ustalanie koloru tła w zależności od czasu
           let backgroundColor;
           if (timeDiffInHours <= 1) {
-            backgroundColor = [46, 219, 130, 1]; // Zielony
+            backgroundColor = [46, 219, 130, 1]; 
           } else if (timeDiffInHours > 1 && timeDiffInHours <= 2) {
-            backgroundColor = [255, 239, 174, 1]; // Żółty
+            backgroundColor = [255, 239, 174, 1]; 
           } else if (timeDiffInHours > 2 && timeDiffInHours <= 3) {
-            backgroundColor = [255, 154, 59, 1]; // Pomarańczowy
+            backgroundColor = [255, 154, 59, 1]; 
           } else if (timeDiffInHours > 3 && timeDiffInHours <= 10) {
-            backgroundColor = [204, 52, 52, 1]; // Czerwony
+            backgroundColor = [204, 52, 52, 1];
           } else {
-            backgroundColor = [139, 0, 0, 1]; // Bordowy
+            backgroundColor = [139, 0, 0, 1];
           }
 
           const geometry = feature.geometry;
@@ -783,7 +782,7 @@ export default {
                 isAutoFloorChange.value = true;
                 selectedFloor.value = secondFloor.value;
               }
-              return; // Pomijamy dalsze przetwarzanie dla tego wyniku
+              return;
             }
 
             const roomKey = roomAttributes.nazwa_skrocona;

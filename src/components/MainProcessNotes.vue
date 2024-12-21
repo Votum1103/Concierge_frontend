@@ -134,7 +134,6 @@ export default {
                     unapprovedDevices = [];
                 }
 
-                // Filtracja unapprovedDevices - usuwamy przedmioty, które już istnieją w serverItems
                 const serverItemIds = new Set(serverItems.map(item => item.id));
                 const filteredUnapprovedDevices = unapprovedDevices.filter(
                     device => !serverItemIds.has(device.id)
@@ -190,7 +189,7 @@ export default {
 
         cancelEditingOrAdding() {
             if (this.isAdding) {
-                this.notes.pop(); // Usuń pustą notatkę, jeśli jest dodawana
+                this.notes.pop();
                 this.isAdding = false;
             }
             this.editingIndex = null;
@@ -206,7 +205,7 @@ export default {
 
             try {
                 const newNote = {
-                    device_id: this.currentItem.id,  // Używamy currentItem.id zamiast this.items[0].id
+                    device_id: this.currentItem.id, 
                     note: this.editedNote
                 };
 

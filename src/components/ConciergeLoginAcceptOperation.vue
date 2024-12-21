@@ -60,7 +60,6 @@ export default {
     methods: {
         async login() {
             try {
-                // Logowanie użytkownika
                 const loginResponse = await api.post('/login', new URLSearchParams({
                     username: this.username,
                     password: this.password

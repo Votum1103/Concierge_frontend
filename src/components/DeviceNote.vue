@@ -29,7 +29,6 @@
                 </div>
             </div>
 
-            <!-- Kontener na przyciski -->
             <div class="button-container">
                 <button class="add-button" v-if="!isAdding && editingIndex === null" @click="addNote">Dodaj
                     notatkę</button>
@@ -105,7 +104,7 @@ export default {
         },
         cancelEditingOrAdding() {
             if (this.isAdding) {
-                this.notes.pop(); // Usuń pustą notatkę, jeśli jest dodawana
+                this.notes.pop();
                 this.isAdding = false;
             }
             this.editingIndex = null;
@@ -340,7 +339,6 @@ textarea {
     }
 }
 
-/* Tablety (769px–1024px) */
 @media (min-width: 769px) and (max-width: 1024px) {
     .note-header h1 {
         font-size: 1.75rem;
@@ -390,7 +388,6 @@ textarea {
     }
 }
 
-/* 4K (powyżej 1440px) */
 @media (min-width: 1441px) {
     .note-header h1 {
         font-size: 2.5rem;

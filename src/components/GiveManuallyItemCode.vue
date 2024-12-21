@@ -260,7 +260,6 @@ select:-webkit-autofill:focus {
 
 }
 
-/* Tablety i małe laptopy (769px - 1024px) */
 @media (min-width: 769px) and (max-width: 1024px) {
     h1 {
         font-size: x-large;
@@ -273,7 +272,6 @@ select:-webkit-autofill:focus {
     }
 }
 
-/* Laptopy (1025px - 1440px) */
 @media (min-width: 1025px) and (max-width: 1440px) {
     h1 {
         font-size: xx-large;
@@ -286,7 +284,6 @@ select:-webkit-autofill:focus {
     }
 }
 
-/* Ekrany 4K (powyżej 1440px) */
 @media (min-width: 1441px) {
     h1 {
         font-size: 2.5rem;

@@ -232,7 +232,6 @@ button:hover {
     }
 }
 
-/* Responsywność */
 @media (min-width: 2000px) {
     h1,
     #employee-data {

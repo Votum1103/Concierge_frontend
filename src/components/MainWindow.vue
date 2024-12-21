@@ -399,13 +399,13 @@ button.reserve-version {
   ul {
     display: flex;
     flex-direction: column;
-    align-items: center; // Wyśrodkowanie wewnątrz kontenera
+    align-items: center;
     justify-content: space-around;
     list-style: none;
     margin: 0;
     padding: 0;
-    width: 100%; // Upewnij się, że zajmuje całą szerokość rodzica
-    height: 100%; // Dopasowanie wysokości do rodzica
+    width: 100%; 
+    height: 100%;
   }
 }
 
