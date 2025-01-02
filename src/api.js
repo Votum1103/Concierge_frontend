@@ -17,28 +17,8 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-
         if (error.response.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
-
-            try {
-                const refreshToken = sessionStorage.getItem('refresh_token');
-                const response = await axios.post('http://127.0.0.1:8000/refresh', {
-                    refresh_token: refreshToken,
-                });
-                const newAccessToken = response.data.access_token;
-                sessionStorage.setItem('access_token', newAccessToken);
-
-                api.defaults.headers['Authorization'] = `Bearer ${newAccessToken}`;
-                originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-
-                return api(originalRequest);
-            } catch (refreshError) {
-                console.error('Błąd przy odświeżaniu tokenu:', refreshError);
-                sessionStorage.clear();
                 window.location = '/';
-                return Promise.reject(refreshError);
-            }
         }
         return Promise.reject(error);
     }

@@ -163,15 +163,13 @@ export default {
                     });
                 }
             } catch (error) {
-                console.error('Błąd przy pobieraniu uprawnień:', error);
+                console.warn('Błąd przy pobieraniu uprawnień:', error);
             }
         },
         async fetchLoggedUser() {
             try {
                 const response = await api.get(`/operations/users/${this.userId}`);
                 const operations = response.data;
-
-                console.log("Fetched operations:", operations);
 
                 this.items = operations.map(op => ({
                     userIds: [op.session.user_id],
@@ -180,7 +178,7 @@ export default {
                     items: this.formatItems(op),
                 }));
             } catch (error) {
-                console.error('Błąd przy pobieraniu informacji o zalogowanym użytkowniku:', error);
+                console.warn('Błąd przy pobieraniu informacji o użytkowniku:', error);
             }
         },
 
@@ -202,8 +200,6 @@ export default {
                 });
 
                 const operations = response.data;
-
-                console.log('tutaj operacje', operations);
 
                 const issuedList = [];
                 const receivedList = [];
@@ -531,6 +527,7 @@ button:hover {
     .container {
         overflow: auto;
     }
+
     .button-group {
         gap: 10px;
         flex-direction: column;
@@ -583,7 +580,7 @@ button:hover {
         margin-top: 10px;
         height: 150px;
         width: 35%;
-    }   
+    }
 
     .header-items {
         width: 100%;

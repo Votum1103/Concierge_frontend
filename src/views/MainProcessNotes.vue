@@ -92,6 +92,7 @@ export default {
     },
 
     methods: {
+        //#TODO W przypadku jak jestem na ua user to jak pobiorę przedmiot to nie mogę mu nadać notatki.
         loadUserData() {
             this.userId = sessionStorage.getItem('userId');
         },
@@ -161,7 +162,6 @@ export default {
                     device: item.id,
                     note: noteObj.note
                 }));
-                console.log(this.notes)
             } catch (error) {
                 if (error.status === "404") {
                     this.notes = [];

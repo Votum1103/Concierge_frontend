@@ -75,13 +75,11 @@ export default {
                     throw new Error("Brak session_id w pamięci sesji");
                 }
 
-                const approveResponse = await api.post(`/approve/login/session/${sessionId}`, new URLSearchParams({
+                await api.post(`/approve/login/session/${sessionId}`, new URLSearchParams({
                     grant_type: 'password',
                     username: this.username,
                     password: this.password
                 }));
-
-                console.log('Sesja zaakceptowana:', approveResponse.data);
 
                 this.$router.push({ name: 'MainWindow' });
             } catch (error) {

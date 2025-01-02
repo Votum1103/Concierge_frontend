@@ -78,7 +78,6 @@ export default {
         this.roomNumber = selectedDevice.room_number;
         this.devType = selectedDevice.dev_type;
         this.devVersion = selectedDevice.dev_version;
-        console.log(this.devType, this.devVersion);
         this.fetchNotes(selectedDevice.device_id);
     },
     methods: {

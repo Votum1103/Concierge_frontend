@@ -24,7 +24,7 @@
         </div>
       </div>
       <div class="informations">
-        <div v-if="areOverlaysVisible && loading" class="item-type-overlay">
+        <div v-if="loading" class="item-type-overlay">
           <div class="itemTypesButtons">
             <button @click="selectItemType('klucz')" :class="{ selectedButton: selectedItemType === 'klucz' }"
               class="keys">
@@ -145,6 +145,21 @@
             <p class="status business"><span class="rect"></span>Biznes lub handel</p>
             <p class="status conference"><span class="rect"></span>Konferencyjny</p>
             <p class="status food"><span class="rect"></span>Dostarczanie żywności</p>
+            <p class="status green">
+              <span class="circle green"><span class="text">AB</span></span>Pobrany 0–1 godziny temu
+            </p>
+            <p class="status yellow">
+              <span class="circle yellow"><span class="text">AB</span></span>Pobrany 1–2 godziny temu
+            </p>
+            <p class="status orange">
+              <span class="circle orange"><span class="text">AB</span></span>Pobrany 2–3 godziny temu
+            </p>
+            <p class="status red">
+              <span class="circle red"><span class="text">AB</span></span>Pobrany 3–10 godzin temu
+            </p>
+            <p class="status maroon">
+              <span class="circle maroon"><span class="text">AB</span></span>Pobrany 10+ godzin temu
+            </p>
           </div>
         </div>
       </div>
@@ -195,10 +210,7 @@ export default {
 
     const addOwnerInitialsGraphics = async (featureLayer) => {
       if (!view || !roomStatus.value || !selectedFloor.value) return;
-      if (isFilterApplied.value) {
-        ownerGraphicsLayer.removeAll();
-        return;
-      }
+      
       ownerGraphicsLayer.removeAll();
 
       const floorCondition = Array.isArray(selectedFloor.value)
@@ -377,8 +389,6 @@ export default {
         const floorNumbers = newFloor.join(", ");
         featureLayer.definitionExpression = `budynek_nazwa = 'Gmach Główny' AND poziom IN (${floorNumbers})`;
 
-        console.log("Ustawiono definitionExpression:", featureLayer.definitionExpression);
-
         featureLayer.refresh();
         await addOwnerInitialsGraphics(featureLayer);
       });
@@ -547,10 +557,10 @@ export default {
           type: "simple-fill",
           color:
             roomStatus.value[roomNumber].is_taken === "brak"
-              ? [224, 182, 90, 1]
+              ? [246, 222, 184, 1]
               : roomStatus.value[roomNumber].is_taken
-                ? [223, 128, 128, 1]
-                : [167, 203, 188, 1],
+                ? [165, 0, 36, 1]
+                : [31, 115, 75, 1],
           outline: {
             color: highlightedRoomId.value = [0, 0, 0, 0.5],
             width: highlightedRoomId.value = 1,
@@ -580,7 +590,7 @@ export default {
         },
       });
     };
-    const ownerGraphicsLayer = new GraphicsLayer({ minScale: 500, });
+    const ownerGraphicsLayer = new GraphicsLayer({ minScale: 2000, });
     const initializeMap = async () => {
       const map = new Map({ basemap: "topo-vector" });
       view = new MapView({
@@ -775,7 +785,6 @@ export default {
             const roomAttributes = feature.feature.attributes;
 
             if (roomAttributes.nazwa_skrocona === "242") {
-              console.warn("Pokój 242 jest zablokowany dla wyszukiwania.");
               searchWidget.clear();
               const secondFloor = floors.find((floor) => floor.label === 2);
               if (secondFloor) {
@@ -1143,15 +1152,15 @@ button.reserve-version {
 }
 
 .available .rect {
-  background-color: rgba(167, 203, 188, 1);
+  background-color: rgba(31, 115, 75, 1);
 }
 
 .unavailable .rect {
-  background-color: rgba(223, 128, 128, 1);
+  background-color: rgba(165, 0, 36, 1);
 }
 
 .nonexistent .rect {
-  background-color: rgba(224, 182, 90, 1);
+  background-color: rgba(246, 222, 184, 1);
 }
 
 .functionStatus,
@@ -1164,27 +1173,25 @@ button.reserve-version {
   border: 1px solid #4d4d4d;
   max-height: 230px;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 10px;
   width: 100%;
   box-sizing: border-box;
 }
 
-
-.functionStatus::-webkit-scrollbar {
-  width: 10px;
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.functionStatus::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.5);
+::-webkit-scrollbar-track {
+  background: $background-color;
   border-radius: 10px;
 }
 
-.functionStatus::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.7);
-}
-
-.functionStatus::-webkit-scrollbar-track {
-  background-color: rgba(0, 0, 0, 0.1);
+::-webkit-scrollbar-thumb {
+  background-color: grey;
+  border-radius: 10px;
+  border: 2px solid grey;
 }
 
 .functionStatus p {
@@ -1237,28 +1244,6 @@ button.reserve-version {
 
 .food .rect {
   background-color: rgba(176, 178, 217, 1);
-}
-
-.no-room-info {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  min-height: 200px;
-}
-
-::-webkit-scrollbar {
-  width: 7px;
-}
-
-::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: rgb(185, 182, 182);
-  border-radius: 10px;
 }
 
 @media (max-width: 1100px) {

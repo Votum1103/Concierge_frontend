@@ -20,7 +20,7 @@
                 <h1>Podaj kod przedmiotu</h1>
                 <form @submit.prevent="fetchItemDetails">
                     <div class="form-group">
-                        <input type="text" v-model="itemCode" id="code-input" name="code-input"
+                        <input type="text" autocomplete="off" v-model="itemCode" id="code-input" name="code-input"
                             placeholder="Kod przedmiotu" :class="{ 'input-error': permissionError }" required />
                     </div>
                     <div class="error-container">
@@ -70,11 +70,17 @@ export default {
 
             try {
                 const response = await api.get(`/devices/code/${this.itemCode}`);
+                if (!response.data) {
+                    this.itemCode = '';
+                    this.permissionError = "Niepoprawny kod przedmiotu"
+                    return;
+                }
                 const item = response.data;
 
                 this.item = item;
                 this.itemCode = item.code;
 
+                console.log(this.thisCode)
                 try {
                     const changeStatusResponse = await api.post('/operations/change-status', {
                         device_code: this.itemCode,
@@ -84,34 +90,29 @@ export default {
 
                     this.statusChange = changeStatusResponse.data;
 
-                    console.log('To jest statusChange: ', this.statusChange)
 
                     sessionStorage.setItem('UnapprovedDevices', JSON.stringify([this.item]));
 
                     this.$router.push({ name: 'MainProcess' });
-
-                    console.log(this.statusChange);
                 } catch (error) {
                     if (error.response && error.response.status === 403) {
                         sessionStorage.setItem('SelectedItemCode', this.itemCode)
-                        console.log(this.itemCode)
                         this.$router.push({ name: 'UnauthorizedUserAlert' });
                     } else {
                         this.error = "Wystąpił błąd podczas zmiany statusu urządzenia";
                     }
+
                 }
             } catch (error) {
-                if (error.response && error.response.status === 404) {
-                    this.permissionError = "Niepoprawny kod przedmiotu"
-                } else {
-                    this.error = "Wystąpił błąd podczas pobierania danych urządzenia";
-                }
+                this.error = "Wystąpił błąd podczas pobierania danych urządzenia";
             }
             this.itemCode = "";
+
         }
     }
 };
 </script>
+
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
@@ -188,17 +189,22 @@ main {
     height: 100px;
 }
 
-input,
-input::placeholder {
+input {
+    text-align: center;
     color: inherit;
-    font-family: inherit;
-    font-size: 18px;
+    font-weight: 600;
+    font-size: 1.25rem;
     background-color: inherit;
     border: none;
+    margin: 0.9375rem;
+    width: 18.75rem;
     border-bottom: 3px solid $primary-color;
-    padding-bottom: 5px;
-    width: 300px;
-    box-sizing: border-box;
+}
+
+input::placeholder {
+    text-align: left;
+    color: #edede9;
+    font-size: 1rem;
 }
 
 input:focus::placeholder {

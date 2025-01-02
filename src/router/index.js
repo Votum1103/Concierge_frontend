@@ -34,87 +34,104 @@ const routes = [
   {
     path: '/concierge-login',
     name: 'ConciergeLogin',
-    component: ConciergeLogin
+    component: ConciergeLogin,
+    meta: { requiresAuth: true }
   },
   {
     path: '/giveitemmanually',
     name: 'GiveManuallyItemCode',
-    component: GiveManuallyItemCode
+    component: GiveManuallyItemCode,
+    meta: { requiresAuth: true }
   },
   {
     path: '/scanitem',
     name: 'ScanItem',
-    component: ScanItem
+    component: ScanItem,
+    meta: { requiresAuth: true }
   },
   {
     path: '/addednote',
     name: 'AddedNote',
-    component: AddedNote
+    component: AddedNote,
+    meta: { requiresAuth: true }
   },
   {
     path: '/unauthorizeduseralert',
     name: 'UnauthorizedUserAlert',
-    component: UnauthorizedUserAlert
+    component: UnauthorizedUserAlert,
+    meta: { requiresAuth: true }
   },
   {
     path: '/unauthorizedusergiveitem',
     name: 'UnauthorizedUserGiveItem',
-    component: UnauthorizedUserGiveItem
+    component: UnauthorizedUserGiveItem,
+    meta: { requiresAuth: true }
   },
   {
     path: '/checkreservations',
     name: 'CheckReservations',
-    component: CheckReservations
+    component: CheckReservations,
+    meta: { requiresAuth: true }
   },
   {
     path: '/scanusercard',
     name: 'ScanUserCard',
-    component: ScanConciergeCard
+    component: ScanConciergeCard,
+    meta: { requiresAuth: true }
   },
   {
     path: '/mainprocess',
     name: 'MainProcess',
-    component: MainProcess
+    component: MainProcess,
+    meta: { requiresAuth: true }
   },
   {
     path: '/devicenote/:room_number',
     name: 'DeviceNote',
-    component: DeviceNote
+    component: DeviceNote,
+    meta: { requiresAuth: true }
   },
   {
     path: '/mapwindow',
     name: 'MapWindow',
-    component: MapWindow
+    component: MapWindow,
+    meta: { requiresAuth: true }
   },
   {
     path: '/userlogin',
     name: 'UserLogin',
-    component: UserLogin
+    component: UserLogin,
+    meta: { requiresAuth: true }
   },
   {
     path: '/conciergeaccept',
     name: 'AcceptOperationByConcierge',
-    component: AcceptOperationByConcierge
+    component: AcceptOperationByConcierge,
+    meta: { requiresAuth: true }
   },
   {
     path: '/conciergeacceptlogin',
     name: 'ConciergeLoginAcceptOperation',
-    component: ConciergeLoginAcceptOperation
+    component: ConciergeLoginAcceptOperation,
+    meta: { requiresAuth: true }
   },
   {
     path: '/acceptrejectionoperation',
     name: 'AccpetRejectionOperation',
-    component: AccpetRejectionOperation
+    component: AccpetRejectionOperation,
+    meta: { requiresAuth: true }
   },
   {
     path: '/upadateuacredentials',
     name: 'UpdateUACredentials',
-    component: UpdateUACredentials
+    component: UpdateUACredentials,
+    meta: { requiresAuth: true }
   },
   {
     path: '/mainprocessnotes',
     name: 'MainProcessNotes',
-    component: MainProcessNotes
+    component: MainProcessNotes,
+    meta: { requiresAuth: true }
   },
 ];
 

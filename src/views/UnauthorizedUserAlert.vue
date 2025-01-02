@@ -64,13 +64,11 @@ export default {
         async changeItemStatus() {
             try {
                 const selectedItemCode = sessionStorage.getItem('SelectedItemCode');
-                const changeStatusResponse = await api.post('/operations/change-status', {
+                await api.post('/operations/change-status', {
                     device_code: selectedItemCode,
                     session_id: this.session_id,
                     force: true
                 });
-
-                console.log('Status zmieniony:', changeStatusResponse.data);
 
                 this.$router.push({ name: 'MainProcess' });
             } catch (error) {

@@ -132,7 +132,7 @@
           <div class="itemsNumber">
             <table>
               <tbody>
-                <tr v-for="(chunk, chunkIndex) in chunkedItems" :key="chunkIndex" class="table-row">
+                <tr v-for="(chunk, chunkIndex) in chunkedFilteredItems" :key="chunkIndex" class="table-row">
                   <td v-for="(item, index) in chunk" :key="index" class="table-cell">
                     <button @click="handleClick(item)" :class="{ 'blue-text': item.has_note }" class="cell-button">
                       {{ item.room_number }}
@@ -155,8 +155,14 @@
           </div>
           <div class="remoteControllersStatus" v-if="selectedItemType === 'pilot'">
             <p>Dostępne: {{ availableDevicesCount }}</p>
-            <p> Pobrane: {{ takenDevicesCount }}</p>
+            <p>Pobrane: {{ takenDevicesCount }}</p>
           </div>
+        </div>
+      </div>
+      <div class="rightContent">
+        <div class="filterRoomBox">
+          <p>Wybierz numer pokoju</p>
+          <input class="filterInput" placeholder="Podaj numer" v-model="filterQuery" @input="filterItems" />
         </div>
       </div>
     </div>
@@ -184,8 +190,9 @@ export default {
   },
   data() {
     return {
-      items: [],
-      currentView: 'keys',
+      items: [], // Wszystkie urządzenia
+      filteredItems: [], // Przefiltrowane urządzenia
+      filterQuery: "", // Aktualny tekst z inputa
       selectedItemType: 'klucz',
       selectedItemVersion: 'podstawowa',
       userInitials: sessionStorage.getItem('userInitials') || '',
@@ -193,19 +200,19 @@ export default {
     };
   },
   computed: {
-    chunkedItems() {
+    chunkedFilteredItems() {
       const result = [];
-      for (let i = 0; i < this.items.length; i += this.chunkSize) {
-        result.push(this.items.slice(i, i + this.chunkSize));
+      for (let i = 0; i < this.filteredItems.length; i += this.chunkSize) {
+        result.push(this.filteredItems.slice(i, i + this.chunkSize));
       }
       return result;
     },
     takenDevicesCount() {
-      return this.items.filter(device => device.is_taken).length;
+      return this.filteredItems.filter(device => device.is_taken).length;
     },
     availableDevicesCount() {
-      return this.items.filter(device => !device.is_taken).length;
-    }
+      return this.filteredItems.filter(device => !device.is_taken).length;
+    },
   },
   mounted() {
     if (!sessionStorage.getItem('access_token')) {
@@ -224,8 +231,9 @@ export default {
     },
     getChunkSize() {
       if (window.innerWidth <= 730) return 3;
-      if (window.innerWidth <= 1300) return 4;
-      return 5; 
+      if (window.innerWidth <= 1024) return 4;
+      if (window.innerWidth <= 1410) return 3;
+      return 4;
     },
     async logOut() {
       try {
@@ -235,7 +243,7 @@ export default {
         sessionStorage.clear();
         this.$router.push(`/`);
       } catch (error) {
-        console.log("Nie udało się wylogować", error);
+        console.warn("Nie udało się wylogować");
       }
     },
 
@@ -260,20 +268,39 @@ export default {
     selectItemType(type) {
       this.selectedItemType = type;
       this.currentView = type;
+      this.clearFilter();
       this.fetchDevices(this.selectedItemType, this.selectedItemVersion);
     },
 
     selectItemVersion(version) {
       this.selectedItemVersion = version;
+      this.clearFilter();
       this.fetchDevices(this.selectedItemType, this.selectedItemVersion);
+    },
+
+    clearFilter() {
+      this.filterQuery = "";
+      this.filteredItems = this.items;
     },
 
     async fetchDevices(deviceType, version) {
       try {
         const response = await api.get(`/devices/?dev_type=${deviceType}&dev_version=${version}`);
         this.items = response.data;
+        this.filteredItems = this.items; // Domyślnie ustaw wszystkie urządzenia jako przefiltrowane
       } catch (error) {
-        console.error(`Błąd pobierania urządzeń ${deviceType}:`, error);
+        console.warn(`Błąd pobierania urządzeń ${deviceType}:`, error);
+      }
+    },
+
+    filterItems() {
+      const query = this.filterQuery.trim().toLowerCase();
+      if (query === "") {
+        this.filteredItems = this.items; // Reset do pełnej listy
+      } else {
+        this.filteredItems = this.items.filter(item =>
+          item.room_number && item.room_number.toLowerCase().includes(query)
+        );
       }
     }
   }
@@ -387,13 +414,17 @@ button.reserve-version {
   height: 730px;
 }
 
+.mainContent {
+  width: 58%;
+}
+
 .left-action-buttons {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
   width: 21%;
-  height: 700px;
+  height: 650px;
   margin-top: 50px;
 
   ul {
@@ -404,10 +435,55 @@ button.reserve-version {
     list-style: none;
     margin: 0;
     padding: 0;
-    width: 100%; 
+    width: 100%;
     height: 100%;
   }
 }
+
+.rightContent {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  height: 100%;
+  width: 21%;
+  margin-top: 90px;
+}
+
+.filterRoomBox {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-direction: column;
+  height: 150px;
+  width: 80%;
+  background-color: $background-color;
+  border-radius: 10%;
+  font-size: 20px;
+
+  p {
+    margin-top: 35px;
+  }
+
+  input {
+    text-align: center;
+    font-size: 20px;
+    width: 90%;
+    color: $text-color;
+    margin-top: 10px;
+    border: none;
+    background-color: $background-color;
+    border-bottom: 3px solid $primary-color;
+  }
+
+  input::placeholder {
+    font-size: 18px;
+  }
+
+  input:focus::placeholder {
+    color: transparent;
+  }
+}
+
 
 .option {
   width: 250px
@@ -438,7 +514,7 @@ button.reserve-version {
   align-items: center;
   grid-template-rows: repeat(4, 1fr);
   background-color: $background-color;
-  height: calc(8 * 80px);
+  height: calc(7* 80px);
   width: 100%;
   border-radius: $border-radius-large;
   margin: 20px 10% 0 0;
@@ -448,7 +524,7 @@ button.reserve-version {
 
 .itemsNumber {
   display: grid;
-  height: calc(8 * 77px);
+  height: calc(7 * 77px);
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
@@ -476,7 +552,7 @@ button.reserve-version {
 
 .table-row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   align-items: center;
   justify-items: center;
 }
@@ -511,7 +587,7 @@ button.reserve-version {
   align-items: center;
   justify-content: space-around;
   width: 100%;
-  height: 100%;
+  height: 100px;
   border-radius: 15px;
   font-size: 1.3em;
 }
@@ -531,15 +607,30 @@ td svg {
   justify-content: space-evenly;
 }
 
+.keysStatus p {
+  height: 50px;
+}
 
-@media (max-width: 1300px) {
+
+@media (max-width: 1410px) {
   .table-row {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .filterRoomBox p {
+    font-size: 16px;
   }
 
 }
 
 @media (max-width: 1024px) {
+
+  .container {
+    overflow-y: auto;
+  }
+
+  .logo {
+    display: none;
+  }
 
   .main-page {
     flex-direction: column;
@@ -565,8 +656,26 @@ td svg {
     }
   }
 
-  .mainContent {
+  .rightContent {
     order: 2;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+
+    p {
+      font-size: 20px;
+    }
+  }
+
+  .filterRoomBox {
+    width: 90%;
+  
+  }
+
+  .mainContent {
+    order: 3;
     width: 100%;
   }
 
@@ -603,6 +712,9 @@ td svg {
       margin: 5px 10px;
     }
   }
+  .table-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
 
   @media (max-width: 730px) {
     .main-page {
@@ -636,6 +748,7 @@ td svg {
       }
     }
   }
+
   @media (max-width: 670px) {
     .container {
       width: 670px;

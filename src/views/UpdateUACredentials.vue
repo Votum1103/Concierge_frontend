@@ -81,10 +81,8 @@ export default {
             sessionStorage.removeItem('userEmail');
             sessionStorage.setItem('lastPage', this.$route.name);
             this.$router.push({ name: 'MainProcess' });
-            console.log('Potwierdzenie zmiany danych użytkownika.');
         },
         cancelOperation() {
-            console.log('Anulowano operację.');
             sessionStorage.removeItem('userEmail');
             this.isDataFetched = false;
             this.$router.push({ name: 'UnauthorizedUserGiveItem' });

@@ -57,7 +57,6 @@ export default {
             try {
 
                 await api.post(`/reject/session/${sessionId}`);
-                console.log(`Operacje dla sesji ${sessionId} zostały anulowane.`);
 
                 sessionStorage.removeItem('sessionId');
                 sessionStorage.removeItem('username');

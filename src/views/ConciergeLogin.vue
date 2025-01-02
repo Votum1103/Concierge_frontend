@@ -145,13 +145,12 @@ main {
 }
 
 input {
+    text-align: center;
     color: inherit;
-    font-family: inherit;
     font-weight: 600;
     font-size: 1.25rem;
     background-color: inherit;
     border: none;
-    text-align: center;
     margin: 0.9375rem;
     width: 18.75rem;
     border-bottom: 3px solid $primary-color;
