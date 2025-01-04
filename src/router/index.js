@@ -35,7 +35,6 @@ const routes = [
     path: '/concierge-login',
     name: 'ConciergeLogin',
     component: ConciergeLogin,
-    meta: { requiresAuth: true }
   },
   {
     path: '/giveitemmanually',

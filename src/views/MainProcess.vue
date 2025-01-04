@@ -65,7 +65,7 @@
             </div>
 
             <section class="scan-section">
-                <h1>Zeskanuj kod przedmiotu</h1>
+                <h1>Zeskanuj kod klucza, mikrofonu lub pilota</h1>
                 <div class="loader"></div>
 
                 <div class="button-group">

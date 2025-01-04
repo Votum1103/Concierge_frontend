@@ -13,7 +13,6 @@
                 </BackButton>
                 <WUoT_Logo />
             </nav>
-
             <main>
                 <section class="mainContent">
                     <h1>Podaj login i hasło</h1>

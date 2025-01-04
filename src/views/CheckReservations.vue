@@ -30,6 +30,9 @@
                         <input type="text" id="end-time" v-model="endTime" placeholder="Godzina rezerwacji"
                             onfocus="(this.type='time')" onblur="if(this.value==''){this.type='text'}">
                     </div>
+                    <div class="form-group">
+                        <input type="text" id="end-time" v-model="userFilter" placeholder="Nazwisko uprawnionego">
+                    </div>
                 </form>
             </div>
             <div class="tableContent">
@@ -85,6 +88,7 @@ export default {
             roomNumber: '',
             startDate: '',
             endTime: '',
+            userFilter: '',
             reservations: [],
             errorMessage: '' 
         };
@@ -124,6 +128,10 @@ export default {
 
                 if (this.endTime) {
                     queryParams.append('start_time', this.endTime);
+                }
+
+                if (this.userFilter) {
+                    queryParams.append('surname', this.userFilter);
                 }
 
                 const reservationsResponse = await api.get(`/permissions/?${queryParams.toString()}` );
@@ -472,7 +480,7 @@ select:-webkit-autofill:focus {
         gap: 50px;
     }
     .form-group input {
-        width: 400px;
+        width: 300px;
     }
     .tableContent {
         max-width: 1200px;

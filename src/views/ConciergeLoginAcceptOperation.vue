@@ -28,7 +28,9 @@
                     <div class="error-placeholder">
                         <span v-if="loginError" class="error-message">Niepoprawny login lub hasło</span>
                     </div>
-                    <RouteButton buttonText="Zaloguj się" class="primary-button" />
+                    <div class="login-button-group">
+                            <RouteButton buttonText="Zaloguj się" class="primary-button" />
+                        </div>
                 </form>
             </section>
         </main>
@@ -121,18 +123,17 @@ h1 {
 }
 
 .primary-button {
-    margin-top: 6.25rem;
-    border: none;
-    font-family: $font-heading;
     font-weight: 500;
     font-size: 1.125rem;
     background-color: $primary-color;
     color: $text-color;
+    border: none;
     padding: 0.625rem 5rem;
+    margin-top: 6.25rem;
     border-radius: 1.5625rem;
     transition: transform 0.3s, background-color 0.3s;
+    white-space: nowrap;
 }
-
 .primary-button:hover {
     transform: scale(1.07);
     cursor: pointer;
@@ -144,7 +145,7 @@ h1 {
     margin: 15px;
     display: inline-flex;
     align-items: center;
-    color: #FFFFFF;
+    color: $text-color;
     background-color: transparent !important;
 }
 
@@ -172,9 +173,10 @@ main {
 }
 
 input {
+    text-align: center;
+    color: inherit;
     font-weight: 600;
     font-size: 1.25rem;
-    color: $text-color;
     background-color: inherit;
     border: none;
     margin: 0.9375rem;
@@ -188,15 +190,21 @@ input::placeholder {
     font-size: 1rem;
 }
 
+.login-button-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .error-border {
     border-bottom: 3px solid $error-color;
 }
 
 .error-placeholder {
-    height: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 1.5rem;
 }
 
 .error-message {

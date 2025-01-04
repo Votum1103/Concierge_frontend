@@ -77,6 +77,7 @@ export default {
                         'Authorization': `Bearer ${accessToken}`
                     }
                 });
+
                 const name = userResponse.data.name
                 const surname = userResponse.data.surname
                 const initials = (name[0] || '') + (surname[0] || '');

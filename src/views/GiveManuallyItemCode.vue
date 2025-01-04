@@ -66,7 +66,7 @@ export default {
             this.error = null;
             this.permissionError = null;
             this.itemDetails = null;
-
+            
 
             try {
                 const response = await api.get(`/devices/code/${this.itemCode}`);
@@ -79,16 +79,18 @@ export default {
 
                 this.item = item;
                 this.itemCode = item.code;
+                console.log(this.session_id)
 
-                console.log(this.thisCode)
                 try {
                     const changeStatusResponse = await api.post('/operations/change-status', {
                         device_code: this.itemCode,
                         session_id: this.session_id,
                         force: false
                     });
-
+                    
                     this.statusChange = changeStatusResponse.data;
+
+                    
 
 
                     sessionStorage.setItem('UnapprovedDevices', JSON.stringify([this.item]));

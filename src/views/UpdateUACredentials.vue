@@ -72,12 +72,15 @@ export default {
         },
         async changeUAUserCredentials() {
 
-            await api.post(`/unauthorized-users/${this.userId}`, {
+            const response = await api.post(`/unauthorized-users/${this.userId}`, {
                     name: sessionStorage.getItem('username'),
                     surname: sessionStorage.getItem('surname'),
                     email: this.email,
             })
 
+            const createSessionUA = await api.post(`/start-session/unauthorized/${response.data.id}`);
+
+            sessionStorage.setItem('sessionId', createSessionUA.data.id);
             sessionStorage.removeItem('userEmail');
             sessionStorage.setItem('lastPage', this.$route.name);
             this.$router.push({ name: 'MainProcess' });

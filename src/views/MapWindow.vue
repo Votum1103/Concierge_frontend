@@ -90,7 +90,7 @@
             <p><b>Piętro:</b> {{ selectedRoom.pietro }}</p>
             <p v-if="areOverlaysVisible">
               <b>Pobrany:</b>
-              {{ selectedRoom.is_taken == null || selectedRoom.is_taken == "brak" ? "brak urządzenia" :
+              {{ selectedRoom.is_taken == null || selectedRoom.is_taken == "brak" ? "brak przedmiotu" :
                 selectedRoom.is_taken ? "tak" : "nie" }}
             </p>
             <p v-if="selectedRoom.owner_name && selectedRoom.owner_surname && areOverlaysVisible">
