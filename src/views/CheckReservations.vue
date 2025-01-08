@@ -27,11 +27,11 @@
                             onfocus="(this.type='date')" onblur="if(this.value==''){this.type='text'}">
                     </div>
                     <div class="form-group">
-                        <input type="text" id="end-time" v-model="endTime" placeholder="Godzina rezerwacji"
+                        <input type="text" id="time" v-model="endTime" placeholder="Godzina rezerwacji"
                             onfocus="(this.type='time')" onblur="if(this.value==''){this.type='text'}">
                     </div>
                     <div class="form-group">
-                        <input type="text" id="end-time" v-model="userFilter" placeholder="Nazwisko uprawnionego">
+                        <input type="text" id="user" v-model="userFilter" placeholder="Nazwisko uprawnionego">
                     </div>
                 </form>
             </div>
@@ -41,7 +41,7 @@
                     <div class="header-item">Data</div>
                     <div class="header-item">Godzina<br>rozpoczęcia</div>
                     <div class="header-item">Godzina<br>zakończenia</div>
-                    <div class="header-item header-item-large">Rezerwujący</div>
+                    <div class="header-item header-item-large">Uprawniony</div>
                 </div>
                 <div class="items-table">
                     <div v-if="errorMessage" class="error-message">
@@ -268,7 +268,8 @@ input:focus::placeholder {
 
 #room-number,
 #start-date,
-#end-time {
+#time,
+#user {
     margin-bottom: 30px;
     max-height: 33px;
 }
@@ -310,6 +311,7 @@ input:focus::placeholder {
     border-radius: 15px;
     max-height: 250px;
     overflow-y: auto;
+    overflow-x: hidden;
     width: 100%;
     margin-top: 10px;
 }
@@ -484,6 +486,21 @@ select:-webkit-autofill:focus {
     }
     .tableContent {
         max-width: 1200px;
+    }
+}
+@media (max-height: 800px) {
+    main {
+    gap: 85px;
+}
+}
+
+@media (max-height: 800px) and (max-width: 680px) {
+    main {
+        gap: 50px;
+    }
+
+    .form-container #time {
+        display: none;
     }
 }
 

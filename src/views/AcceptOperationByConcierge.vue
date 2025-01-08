@@ -298,5 +298,11 @@ button:hover {
         display: none;
     }
 }
+
+@media (max-height: 800px) {
+  .button-group {
+    margin-top: 20px;
+  }
+}
     
 </style>

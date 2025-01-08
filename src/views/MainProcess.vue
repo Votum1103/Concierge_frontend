@@ -603,4 +603,10 @@ button:hover {
         justify-content: center;
     }
 }
+
+@media (max-height: 800px) {
+    .button-group {
+        margin-top: 0px;
+    }
+}
 </style>

@@ -190,9 +190,9 @@ export default {
   },
   data() {
     return {
-      items: [], // Wszystkie urządzenia
-      filteredItems: [], // Przefiltrowane urządzenia
-      filterQuery: "", // Aktualny tekst z inputa
+      items: [],
+      filteredItems: [],
+      filterQuery: "",
       selectedItemType: 'klucz',
       selectedItemVersion: 'podstawowa',
       userInitials: sessionStorage.getItem('userInitials') || '',
@@ -283,24 +283,41 @@ export default {
       this.filteredItems = this.items;
     },
 
-    async fetchDevices(deviceType, version) {
+    async fetchDevices(deviceType, version, roomNumber = "") {
       try {
-        const response = await api.get(`/devices/?dev_type=${deviceType}&dev_version=${version}`);
+        const response = await api.get(`/devices/`, {
+          params: {
+            dev_type: deviceType,
+            dev_version: version,
+            ...(roomNumber && { room_number: roomNumber }),
+          },
+        });
         this.items = response.data;
-        this.filteredItems = this.items; // Domyślnie ustaw wszystkie urządzenia jako przefiltrowane
+        this.filteredItems = this.items;
       } catch (error) {
         console.warn(`Błąd pobierania urządzeń ${deviceType}:`, error);
       }
     },
 
     filterItems() {
-      const query = this.filterQuery.trim().toLowerCase();
+      const query = this.filterQuery.trim();
       if (query === "") {
-        this.filteredItems = this.items; // Reset do pełnej listy
+        this.fetchDevices(this.selectedItemType, this.selectedItemVersion);
       } else {
-        this.filteredItems = this.items.filter(item =>
-          item.room_number && item.room_number.toLowerCase().includes(query)
-        );
+        api
+          .get(`/devices/`, {
+            params: {
+              dev_type: this.selectedItemType,
+              dev_version: this.selectedItemVersion,
+              room_number: query,
+            },
+          })
+          .then((response) => {
+            this.filteredItems = response.data;
+          })
+          .catch((error) => {
+            console.warn("Błąd filtrowania urządzeń:", error);
+          });
       }
     }
   }
@@ -616,6 +633,7 @@ td svg {
   .table-row {
     grid-template-columns: repeat(3, 1fr);
   }
+
   .filterRoomBox p {
     font-size: 16px;
   }
@@ -671,7 +689,7 @@ td svg {
 
   .filterRoomBox {
     width: 90%;
-  
+
   }
 
   .mainContent {
@@ -712,6 +730,7 @@ td svg {
       margin: 5px 10px;
     }
   }
+
   .table-row {
     grid-template-columns: repeat(4, 1fr);
   }
@@ -752,6 +771,12 @@ td svg {
   @media (max-width: 670px) {
     .container {
       width: 670px;
+    }
+  }
+
+  @media (max-height: 800px) {
+    .main-page {
+      margin-top: 0px;
     }
   }
 }

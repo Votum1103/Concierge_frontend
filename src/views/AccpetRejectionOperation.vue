@@ -55,7 +55,6 @@ export default {
             }
 
             try {
-
                 await api.post(`/reject/session/${sessionId}`);
 
                 sessionStorage.removeItem('sessionId');

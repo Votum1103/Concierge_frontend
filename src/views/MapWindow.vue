@@ -971,6 +971,7 @@ button {
   font-weight: bold;
   cursor: pointer;
   transition: background-color $transition-duration;
+  outline: none;
 }
 
 .itemsVersionsButtons,
