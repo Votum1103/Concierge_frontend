@@ -1,411 +1,1067 @@
 <template>
-
-  <div class="container">
+  <div class="main-container">
     <GoogleFonts />
     <nav>
-      <div class="main-nav">
-        <WUoT_Logo />
-        <button @click="logOut" class="logOut">
-          <span class="userbutton">
-            <span class="avatars">
-              <span class="userinitials">{{ userInitials }}</span>
-            </span>
-          </span> Wyloguj</button>
-      </div>
+      <BackButton class="back-button" routeName="MainWindow" buttonText="Wróć">
+        <template #icon>
+          <svg id="left-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+            class="bi bi-chevron-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd"
+              d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
+          </svg>
+        </template>
+      </BackButton>
+      <WUoT_Logo />
     </nav>
-
-    <div class="main-page">
-      <div class="left-action-buttons">
-        <ul class="sidebar">
-          <li class="option">
-            <RouteButton routeName="ScanUserCard" class="giveItem" buttonText="Wydaj/Odbierz">
-              <template #icon>
-                <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"
-                  xmlns:xlink="http://www.w3.org/1999/xlink">
-                  <rect width="60" height="60" fill="url(#pattern0_352_1443)" />
-                  <defs>
-                    <pattern id="pattern0_352_1443" patternContentUnits="objectBoundingBox" width="1" height="1">
-                      <use xlink:href="#image0_352_1443" transform="scale(0.01)" />
-                    </pattern>
-                    <image id="image0_352_1443" width="100" height="100"
-                      xlink:href="data:image/png;base64,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" />
-                  </defs>
-                </svg>
-              </template>
-            </RouteButton>
-          </li>
-          <li class="option">
-            <RouteButton routeName="UnauthorizedUserGiveItem" class="giveItemWithoutAU"
-              buttonText="Wydaj/Odbierz bez autoryzacji">
-              <template #icon>
-                <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"
-                  xmlns:xlink="http://www.w3.org/1999/xlink">
-                  <rect width="60" height="60" fill="url(#pattern0_324_781)" />
-                  <defs>
-                    <pattern id="pattern0_324_781" patternContentUnits="objectBoundingBox" width="1" height="1">
-                      <use xlink:href="#image0_324_781" transform="scale(0.01)" />
-                    </pattern>
-                    <image id="image0_324_781" width="100" height="100"
-                      xlink:href="data:image/png;base64,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" />
-                  </defs>
-                </svg>
-              </template>
-            </RouteButton>
-          </li>
-          <li class="option">
-            <RouteButton class="checkReservations" routeName="CheckReservations"
-              buttonText="Wydaj/Odbierz bez autoryzacji">
-              <template #icon>
-                <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"
-                  xmlns:xlink="http://www.w3.org/1999/xlink">
-                  <rect width="60" height="60" fill="url(#pattern0_323_37)" />
-                  <defs>
-                    <pattern id="pattern0_323_37" patternContentUnits="objectBoundingBox" width="1" height="1">
-                      <use xlink:href="#image0_323_37" transform="scale(0.01)" />
-                    </pattern>
-                    <image id="image0_323_37" width="100" height="100"
-                      xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAACXBIWXMAAAsTAAALEwEAmpwYAAAES0lEQVR4nO2dy6tWVRTAd3ojjbhhovawUYNIMge+cuIfYDqsMCsaNLEmkiHp5Ipv0AxBlFJnQqRUk4xwVNOiQV0bdUfdfKBmXrr54tZPNh0h5Hznnn0ee6+99/rBgQsX1j5r/djft8/a55zPGEVRFEVRFEVRFEVRMgGYCawCtgGfA78A14A7xWH/Plf8byvwIjAj9HknB/A0sA/4HXfGgb3AwtB5RA8wD/gYuE17bgNHgLmh84oS4DXgD7rnKvBq6PyiAXgQOEb/HAWGQucrGuBh4Gv88ZUdM3TekmdGExljwJniGGsoZSh0/uJo8DH1BfB8SZzFwJeOsY6EyVoowAbHAr5XI+Zmx5iv+Mk2jqWty2rqkEPsww5xrwCPmdwprjPqYsUNO8R+tLh6r8vhiljPEJapojPxVmfFL0lyoeNF3ycNxjjhEP8W8FRFrB+RQT9SinaICxsbjPGO4xh7KmLZ/pgEzrUu/oBGoWtvakODcV53HOO3QQ1J4AVkMNWJhPuSs11bV95vMM6WBuOsGBBrCLiJADqRcF9ytoXuyjcNxjnbYJwPKuJ9jwBaCyhJzO5ZNFlpLHYYYwnwT4NxTlfEfBc45ekY9ynEbiQ14Qdgdo34s1usin42AiikeBPSprX+LTC/IvYC4LsW8a+YDIW03XS6DuwElgKPFMcyYBcw0TL2LZOhEBGrlQH8bTIUch65jJsMhYwil59MhkI+RS4nTYZCXPcrfLLJZChkJXJZbnITUgz4K/IYAx4wmQrZjTx2GCGEEPKEXfMjh5vAkyZXIcWgB5HDASOIUELmAhcJz8Wq+37tzRUIojchRbJrQycIvFRxfo8DN8hFSJH0RwHzOzjNuX2IMHwImWE3hgLkdqrqoR77JQ9MIou/ehdSJD/Ls5TTwEM97Gz2zVkvQv43Uw54SGr/dI+7AeuRx7Wye5p7x37J9tSiPw+sqTlbj3vcP5/usM3Ykaob+XoHmNODkDnBEkqBrm0YRYUkhc4QYagQYaiQTIXw32s4Qi9tp1v2bg/+RgqPQl4mDv50ub+5c7rOxsQvxG/rpKRQXTKRiBA/zcUBheqKCfs9kYiQcBe4PmRYVEhNfMiwqJCa+JAhlSA3OdQ4qSxlpCYkehmpCTlmEoCEhFj2mchJTUj0UlIUErWUVIVEKyVlIVFKSV1IdFJyEDJiIiJ1ISMmMlIWMmIiJFUh22uMsQj4TMC+ebjXM9XFg4zngEtEhp/qlxest48p4FngAhHip/rlReuluQgMC3m2UcZLMOvS8y7hRuBf4mPUT/XLi9aUSWB1jfhvN3wvY0je8FP98oK1YcK+jjaRmTJVvKfyTT+VH1ystkzWmSmKPyEWldIVdMekzpSe2wcNON7FOWUPsK7lBdxleyNc9oXs4Ylclx9/uYedYfNURvjZcllnhZzZorNCyGzRWSHkV97u7R/od4WiKIqiKIqiKIqiKEYudwGadC7LL4Gb5gAAAABJRU5ErkJggg==" />
-                  </defs>
-                </svg>
-              </template>
-              Sprawdź rezerwacje
-            </RouteButton>
-          </li>
-        </ul>
+    <div id="app">
+      <div class="content-wrapper">
+        <div ref="mapViewDiv" class="map-view"></div>
+        <div v-if="loading" class="floor-selection-overlay">
+          <button v-for="floor in floors" :key="floor.label" @click="updateFloor(floor.value)"
+            :class="['floor-button', { selected: isSelectedFloor(floor.value) }]">
+            {{ floor.label }}
+          </button>
+        </div>
       </div>
-      <div class="mainContent">
-        <div class="navigtionButtons">
-          <RouteButton class="showMap" routeName="MapWindow" buttonText="Mapa">
-            <template #icon>
-            </template>
-          </RouteButton>
-
+      <div class="informations">
+        <div v-if="loading" class="item-type-overlay">
           <div class="itemTypesButtons">
-            <button @click="selectItemType('klucz')" :class="{ selected: selectedItemType === 'klucz' }" class="keys">
-              <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-key-fill"
+            <button @click="selectItemType('klucz')" :class="{ selectedButton: selectedItemType === 'klucz' }"
+              class="keys">
+              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-key"
                 viewBox="0 0 16 16">
                 <path
-                  d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2M2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2" />
+                  d="M0 8a4 4 0 0 1 7.465-2H14a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0L13 9.207l-.646.647a.5.5 0 0 1-.708 0L11 9.207l-.646.647a.5.5 0 0 1-.708 0L9 9.207l-.646.647A.5.5 0 0 1 8 10h-.535A4 4 0 0 1 0 8m4-3a3 3 0 1 0 2.712 4.285A.5.5 0 0 1 7.163 9h.63l.853-.854a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.793-.793-1-1h-6.63a.5.5 0 0 1-.451-.285A3 3 0 0 0 4 5" />
+                <path d="M4 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
               </svg>
             </button>
-
-            <button @click="selectItemType('mikrofon')" :class="{ selected: selectedItemType === 'mikrofon' }"
+            <button @click="selectItemType('mikrofon')" :class="{ selectedButton: selectedItemType === 'mikrofon' }"
               class="microphones">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-mic-fill"
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-mic"
                 viewBox="0 0 16 16">
-                <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0z" />
                 <path
                   d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5" />
+                <path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3" />
               </svg>
             </button>
-
-            <button @click="selectItemType('pilot')" :class="{ selected: selectedItemType === 'pilot' }"
+            <button @click="selectItemType('pilot')" :class="{ selectedButton: selectedItemType === 'pilot' }"
               class="remote-controllers">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-phone-fill"
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-phone"
                 viewBox="0 0 16 16">
                 <path
-                  d="M3 2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm6 11a1 1 0 1 0-2 0 1 1 0 0 0 2 0" />
+                  d="M11 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
+                <path d="M8 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2" />
               </svg>
             </button>
           </div>
           <div class="itemsVersionsButtons">
-            <button @click="selectItemVersion('podstawowa')" :class="{ selected: selectedItemVersion === 'podstawowa' }"
+            <button @click="selectItemVersion('podstawowa')" :class="{ selectedButton: version === 'podstawowa' }"
               class="primary-version">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" class="bi bi-1-circle-fill"
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-1-circle"
                 viewBox="0 0 16 16">
                 <path
-                  d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M9.283 4.002H7.971L6.072 5.385v1.271l1.834-1.318h.065V12h1.312z" />
+                  d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0M9.283 4.002V12H7.971V5.338h-.065L6.072 6.656V5.385l1.899-1.383z" />
               </svg>
             </button>
-
-            <button @click="selectItemVersion('zapasowa')" :class="{ selected: selectedItemVersion === 'zapasowa' }"
+            <button @click="selectItemVersion('zapasowa')" :class="{ selectedButton: version === 'zapasowa' }"
               class="reserve-version">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" class="bi bi-2-circle-fill"
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-2-circle"
                 viewBox="0 0 16 16">
                 <path
-                  d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M6.646 6.24c0-.691.493-1.306 1.336-1.306.756 0 1.313.492 1.313 1.236 0 .697-.469 1.23-.902 1.705l-2.971 3.293V12h5.344v-1.107H7.268v-.077l1.974-2.22.096-.107c.688-.763 1.287-1.428 1.287-2.43 0-1.266-1.031-2.215-2.613-2.215-1.758 0-2.637 1.19-2.637 2.402v.065h1.271v-.07Z" />
+                  d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0M6.646 6.24v.07H5.375v-.064c0-1.213.879-2.402 2.637-2.402 1.582 0 2.613.949 2.613 2.215 0 1.002-.6 1.667-1.287 2.43l-.096.107-1.974 2.22v.077h3.498V12H5.422v-.832l2.97-3.293c.434-.475.903-1.008.903-1.705 0-.744-.557-1.236-1.313-1.236-.843 0-1.336.615-1.336 1.306" />
               </svg>
             </button>
           </div>
         </div>
-        <div class="itemsTable">
-          <div class="itemsNumber">
-            <table>
-              <tbody>
-                <tr v-for="(chunk, chunkIndex) in chunkedFilteredItems" :key="chunkIndex" class="table-row">
-                  <td v-for="(item, index) in chunk" :key="index" class="table-cell">
-                    <button @click="handleClick(item)" :class="{ 'blue-text': item.has_note }" class="cell-button">
-                      {{ item.room_number }}
-                      <component :is="item.is_taken ? 'NegativeIcon' : 'AcceptanceIcon'" />
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        <div class="room-info">
+          <h2>Informacje o pomieszczeniu</h2>
+          <div class="room-info-content"
+            v-if="selectedRoom && (selectedRoom.nazwa_skrocona !== 'nr nieznany' || selectedRoom.nazwa_pelna !== null)">
+            <h3>
+              <template v-if="selectedRoom.nazwa_skrocona !== 'nr nieznany'">
+                {{ selectedRoom.nazwa_pelna
+                  ? `${selectedRoom.nazwa_skrocona} - ${selectedRoom.nazwa_pelna}`
+                  : selectedRoom.nazwa_skrocona }}
+              </template>
+              <template v-else>
+                {{ selectedRoom.nazwa_pelna }}
+              </template>
+            </h3>
+            <p><b>Piętro:</b> {{ selectedRoom.pietro }}</p>
+            <p v-if="areOverlaysVisible">
+              <b>Pobrany:</b>
+              {{ selectedRoom.is_taken == null || selectedRoom.is_taken == "brak" ? "brak przedmiotu" :
+                selectedRoom.is_taken ? "tak" : "nie" }}
+            </p>
+            <p v-if="selectedRoom.owner_name && selectedRoom.owner_surname && areOverlaysVisible">
+              <b>Pobierający:</b> {{ selectedRoom.owner_name }} {{ selectedRoom.owner_surname }}
+            </p>
+            <p v-if="selectedRoom.issue_time !== null && selectedRoom.owner_name && areOverlaysVisible">
+              <b>Dzień pobrania: </b>
+              {{ new Date(selectedRoom.issue_time).toLocaleDateString([], {
+                year: 'numeric', month: '2-digit', day:
+                  '2-digit'
+              }) }}
+            </p>
+            <p v-if="selectedRoom.issue_time !== null && selectedRoom.owner_name && areOverlaysVisible">
+              <b>Godzina pobrania: </b>
+              {{ new Date(selectedRoom.issue_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+            </p>
+            <p v-if="!areOverlaysVisible && selectedRoom.funkcja"><b>Funkcja:</b> {{ selectedRoom.funkcja }}</p>
+            <p v-if="!areOverlaysVisible"><b>Klasa:</b> {{ selectedRoom.klasa }}</p>
           </div>
         </div>
-        <div class="itemsStatus">
-          <div class="keysStatus" v-if="selectedItemType === 'klucz'">
-            <p>Dostępne: {{ availableDevicesCount }}</p>
-            <p>Pobrane: {{ takenDevicesCount }}</p>
+        <div class="legend">
+          <h2>Legenda</h2>
+          <div v-if="areOverlaysVisible" class="deviceStatus">
+            <p class="status available"><span class="rect"></span>{{ selectedItemType }} dostępny</p>
+            <p class="status unavailable"><span class="rect"></span>{{ selectedItemType }} niedostępny</p>
+            <p class="status nonexistent"><span class="rect"></span>{{ selectedItemType }} nie istnieje</p>
+            <hr class="separator" />
+            <p class="status green">
+              <span class="circle green"><span class="text">AB</span></span>Pobrany 0–1 godziny temu
+            </p>
+            <p class="status yellow">
+              <span class="circle yellow"><span class="text">AB</span></span>Pobrany 1–2 godziny temu
+            </p>
+            <p class="status orange">
+              <span class="circle orange"><span class="text">AB</span></span>Pobrany 2–3 godziny temu
+            </p>
+            <p class="status red">
+              <span class="circle red"><span class="text">AB</span></span>Pobrany 3–10 godzin temu
+            </p>
+            <p class="status maroon">
+              <span class="circle maroon"><span class="text">AB</span></span>Pobrany 10+ godzin temu
+            </p>
+
           </div>
-          <div class="microphonesStatus" v-if="selectedItemType === 'mikrofon'">
-            <p>Dostępne: {{ availableDevicesCount }}</p>
-            <p>Pobrane: {{ takenDevicesCount }}</p>
+          <div v-else class="functionStatus">
+            <p class="status admin"><span class="rect"></span>Administracyjny</p>
+            <p class="status education"><span class="rect"></span>Działalność edukacyjna lub badawcza</p>
+            <p class="status storage"><span class="rect"></span>Przechowywanie</p>
+            <p class="status recreational"><span class="rect"></span>Rekreacyjny</p>
+            <p class="status sanitary"><span class="rect"></span>Sanitarne</p>
+            <p class="status communication"><span class="rect"></span>Komunikacja</p>
+            <p class="status functional"><span class="rect"></span>Funkcyjny</p>
+            <p class="status business"><span class="rect"></span>Biznes lub handel</p>
+            <p class="status conference"><span class="rect"></span>Konferencyjny</p>
+            <p class="status food"><span class="rect"></span>Dostarczanie żywności</p>
+
+            <hr class="separator" />
+
+            <p class="status green">
+              <span class="circle green"><span class="text">AB</span></span>Pobrany 0–1 godziny temu
+            </p>
+            <p class="status yellow">
+              <span class="circle yellow"><span class="text">AB</span></span>Pobrany 1–2 godziny temu
+            </p>
+            <p class="status orange">
+              <span class="circle orange"><span class="text">AB</span></span>Pobrany 2–3 godziny temu
+            </p>
+            <p class="status red">
+              <span class="circle red"><span class="text">AB</span></span>Pobrany 3–10 godzin temu
+            </p>
+            <p class="status maroon">
+              <span class="circle maroon"><span class="text">AB</span></span>Pobrany 10+ godzin temu
+            </p>
           </div>
-          <div class="remoteControllersStatus" v-if="selectedItemType === 'pilot'">
-            <p>Dostępne: {{ availableDevicesCount }}</p>
-            <p>Pobrane: {{ takenDevicesCount }}</p>
-          </div>
-        </div>
-      </div>
-      <div class="rightContent">
-        <div class="filterRoomBox">
-          <p>Wybierz numer pokoju</p>
-          <input class="filterInput" placeholder="Podaj numer" v-model="filterQuery" @input="filterItems" />
         </div>
       </div>
     </div>
-
   </div>
-
 </template>
 
 <script>
+import BackButton from '../components/BackButton.vue';
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
-import RouteButton from '../components/RouteButton.vue';
-import AcceptanceIcon from '../components/AcceptanceIcon.vue';
-import NegativeIcon from '../components/NegativeIcon.vue'
-import api from '../api.js';
+import { shallowRef, ref, onMounted, watch } from "vue";
+import api from "../api";
+import Map from "@arcgis/core/Map";
+import MapView from "@arcgis/core/views/MapView";
+import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
+import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer";
+import Search from "@arcgis/core/widgets/Search";
+import Home from "@arcgis/core/widgets/Home";
+import Graphic from "@arcgis/core/Graphic";
+import Zoom from "@arcgis/core/widgets/Zoom";
+import ScaleBar from "@arcgis/core/widgets/ScaleBar";
+import Circle from "@arcgis/core/geometry/Circle";
+import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 
 export default {
-  name: 'MainWindow',
+  name: "MapWindow",
   components: {
-    WUoT_Logo,
     GoogleFonts,
-    RouteButton,
-    AcceptanceIcon,
-    NegativeIcon
+    WUoT_Logo,
+    BackButton,
   },
-  data() {
-    return {
-      items: [],
-      filteredItems: [],
-      filterQuery: "",
-      selectedItemType: 'klucz',
-      selectedItemVersion: 'podstawowa',
-      userInitials: sessionStorage.getItem('userInitials') || '',
-      chunkSize: this.getChunkSize(),
-    };
-  },
-  computed: {
-    chunkedFilteredItems() {
-      const result = [];
-      for (let i = 0; i < this.filteredItems.length; i += this.chunkSize) {
-        result.push(this.filteredItems.slice(i, i + this.chunkSize));
-      }
-      return result;
-    },
-    takenDevicesCount() {
-      return this.filteredItems.filter(device => device.is_taken).length;
-    },
-    availableDevicesCount() {
-      return this.filteredItems.filter(device => !device.is_taken).length;
-    },
-  },
-  mounted() {
-    if (!sessionStorage.getItem('access_token')) {
-      this.$router.push({ name: 'eConcierge' });
-    } else {
-      this.fetchDevices(this.selectedItemType, this.selectedItemVersion);
-    }
-    window.addEventListener("resize", this.handleResize);
-  },
-  beforeUnmount() {
-    window.removeEventListener("resize", this.handleResize);
-  },
-  methods: {
-    handleResize() {
-      this.chunkSize = this.getChunkSize();
-    },
-    getChunkSize() {
-      if (window.innerWidth <= 730) return 3;
-      if (window.innerWidth <= 1024) return 4;
-      if (window.innerWidth <= 1410) return 3;
-      return 4;
-    },
-    async logOut() {
-      try {
-        await api.post('/logout', {
-          refresh_token: sessionStorage.getItem('refresh_token'),
-        });
-        sessionStorage.clear();
-        this.$router.push(`/`);
-      } catch (error) {
-        console.warn("Nie udało się wylogować");
-      }
-    },
+  setup() {
+    const filterButtonText = ref("Klasy pomieszczeń");
+    const isAutoFloorChange = ref(false);
+    const mapViewDiv = shallowRef(null);
+    const selectedRoom = ref(null);
+    const roomStatus = ref({});
+    const highlightedRoomId = ref(null);
+    const selectedFloor = ref([9, 1]);
+    const selectedItemType = ref("klucz");
+    const version = ref("podstawowa");
+    const isSearchHighlightActive = ref(false);
+    let view = null;
+    const isFilterApplied = ref(false);
+    const areOverlaysVisible = ref(true);
+    const loading = ref(true)
 
-    handleClick(item) {
-      if (!item || !item.room_number || !item.id || !item.dev_type) {
-        console.error('Błąd: Brak jednej z właściwości w item:', item);
+    const addOwnerInitialsGraphics = async (featureLayer) => {
+      if (!view || !roomStatus.value || !selectedFloor.value) return;
+      
+      ownerGraphicsLayer.removeAll();
+
+      const floorCondition = Array.isArray(selectedFloor.value)
+        ? `poziom IN (${selectedFloor.value.join(", ")})`
+        : `poziom = ${selectedFloor.value}`;
+
+      const buildingCondition = `budynek_nazwa = 'Gmach Główny'`;
+      const whereCondition = `${buildingCondition} AND ${floorCondition}`;
+
+      const features = await featureLayer.queryFeatures({
+        where: whereCondition,
+        outFields: ["nazwa_skrocona", "poziom"],
+        returnGeometry: true,
+      });
+
+      const currentTime = new Date();
+
+      features.features.forEach((feature) => {
+        const roomKey = feature.attributes.nazwa_skrocona;
+        const roomInfo = roomStatus.value[roomKey];
+
+        if (roomInfo?.is_taken !== "brak" && roomInfo?.owner_name && roomInfo?.owner_surname) {
+          const initials = `${roomInfo.owner_name[0]}${roomInfo.owner_surname[0]}`.toUpperCase();
+
+          const issueTime = new Date(roomInfo.issue_time);
+          const timeDiffInHours = (currentTime - issueTime) / (1000 * 60 * 60); 
+
+          let backgroundColor;
+          if (timeDiffInHours <= 1) {
+            backgroundColor = [46, 219, 130, 1]; 
+          } else if (timeDiffInHours > 1 && timeDiffInHours <= 2) {
+            backgroundColor = [255, 239, 174, 1]; 
+          } else if (timeDiffInHours > 2 && timeDiffInHours <= 3) {
+            backgroundColor = [255, 154, 59, 1]; 
+          } else if (timeDiffInHours > 3 && timeDiffInHours <= 10) {
+            backgroundColor = [204, 52, 52, 1];
+          } else {
+            backgroundColor = [139, 0, 0, 1];
+          }
+
+          const geometry = feature.geometry;
+          let insidePoint;
+
+          let areaInSquareMeters = 0;
+
+          if (geometry.type === "polygon") {
+            areaInSquareMeters = geometry.extent.width * geometry.extent.height;
+          }
+
+          const isSmallRoom = areaInSquareMeters > 0 && areaInSquareMeters < 5;
+          if (!isSmallRoom) {
+            if (geometry.type === "polygon") {
+              const rings = geometry.rings[0];
+              const centroid = geometry.centroid;
+
+              const [x1, y1] = rings[0];
+              insidePoint = {
+                type: "point",
+                spatialReference: geometry.spatialReference,
+                x: x1 + (centroid.x - x1) * 0.5,
+                y: y1 + (centroid.y - y1) * 0.5,
+              };
+            } else if (geometry.type === "extent") {
+              insidePoint = {
+                type: "point",
+                spatialReference: geometry.spatialReference,
+                x: geometry.xmin + (geometry.xmax - geometry.xmin) * 0.4,
+                y: geometry.ymin + (geometry.ymax - geometry.ymin) * 0.4,
+              };
+            } else {
+              insidePoint = geometry;
+            }
+
+            const circleGraphic = new Graphic({
+              geometry: insidePoint,
+              symbol: {
+                type: "simple-marker",
+                style: "circle",
+                color: backgroundColor,
+                size: 16,
+                outline: {
+                  color: [0, 0, 0, 0.5],
+                  width: 2,
+                },
+              },
+            });
+
+            const textGraphic = new Graphic({
+              geometry: insidePoint,
+              symbol: {
+                type: "text",
+                text: initials,
+                color: "black",
+                font: {
+                  size: 8,
+                  weight: "bold",
+                  family: "Arial",
+                },
+                horizontalAlignment: "center",
+                verticalAlignment: "middle",
+              },
+            });
+
+            ownerGraphicsLayer.add(circleGraphic);
+            ownerGraphicsLayer.add(textGraphic);
+          }
+        }
+      });
+    };
+
+    onMounted(async () => {
+      if (!checkConnection()) {
+        loading.value = false;
+        return;
+      }
+      await fetchRooms();
+      await fetchRoomStatus();
+
+      let map = await initializeMap();
+      let featureLayer = await addFeatureLayer(map)
+      map.add(ownerGraphicsLayer);
+
+      addCustomButton();
+      createWidgetContainer();
+      await addOwnerInitialsGraphics(featureLayer);
+      await searchRooms();
+
+      const itemTypeOverlayNode = document.querySelector(".item-type-overlay");
+      if (itemTypeOverlayNode) {
+        view.ui.add(itemTypeOverlayNode, "top-right");
+      }
+
+      const deviceStatusNode = document.querySelector(".floor-selection-overlay");
+      if (deviceStatusNode) {
+        view.ui.add(deviceStatusNode, "bottom-right");
+      }
+
+      view.on("click", (event) => {
+        resetRoomSelection();
+        view.graphics.removeAll();
+        view.hitTest(event).then((response) => {
+          const results = response.results;
+          if (results.length > 0) {
+            const graphic = results.filter((result) => result.graphic.layer === featureLayer)[0]?.graphic;
+            if (graphic) {
+              selectedRoom.value = graphic.attributes;
+              const roomInfo = roomStatus.value[selectedRoom.value.nazwa_skrocona];
+              if (roomInfo) {
+                selectedRoom.value.is_taken = roomInfo.is_taken;
+                selectedRoom.value.owner_name = roomInfo.owner_name;
+                selectedRoom.value.owner_surname = roomInfo.owner_surname;
+                selectedRoom.value.issue_time = roomInfo.issue_time;
+              }
+              highlightedRoomId.value = graphic.attributes.nazwa_skrocona;
+
+              updateOutline(graphic.geometry);
+            } else {
+              resetRoomSelection();
+            }
+          } else {
+            resetRoomSelection();
+          }
+        });
+      });
+      watch(highlightedRoomId, updateRenderer);
+
+      watch(selectedFloor, async (newFloor) => {
+        if (!isAutoFloorChange.value) {
+          resetRoomSelection();
+          view.graphics.removeAll();
+          isSearchHighlightActive.value = false;
+        } else {
+          isAutoFloorChange.value = false;
+        }
+
+        const floorNumbers = newFloor.join(", ");
+        featureLayer.definitionExpression = `budynek_nazwa = 'Gmach Główny' AND poziom IN (${floorNumbers})`;
+
+        featureLayer.refresh();
+        await addOwnerInitialsGraphics(featureLayer);
+      });
+
+      watch([selectedItemType, version], async () => {
+        resetRoomSelection();
+        await fetchRoomStatus();
+        updateRenderer();
+        await addOwnerInitialsGraphics(featureLayer);
+      });
+    });
+
+    const checkConnection = () => {
+      return navigator.onLine;
+    };
+
+    const floors = [
+      { label: 0, value: [9, 1] },
+      { label: 1, value: [2] },
+      { label: 2, value: [3, 6] },
+      { label: 3, value: [4, 8] },
+      { label: 4, value: [5] },
+    ];
+
+    const fetchRooms = async () => {
+      try {
+        const response = await api.get(`/rooms/`);
+        roomStatus.value = {};
+        response.data.forEach((room) => {
+          roomStatus.value[room.number] = { is_taken: "brak", owner_name: null, owner_surname: null, issue_time: null };
+        });
+      } catch (error) {
+        console.error("Error fetching rooms:", error);
+      }
+    };
+
+    const fetchRoomStatus = async () => {
+      try {
+        const response = await api.get(`/devices/?dev_type=${selectedItemType.value}&dev_version=${version.value}`);
+
+        Object.keys(roomStatus.value).forEach((roomNumber) => {
+          roomStatus.value[roomNumber].is_taken = "brak";
+          roomStatus.value[roomNumber].owner_name = null;
+          roomStatus.value[roomNumber].owner_surname = null;
+          roomStatus.value[roomNumber].issue_time = null;
+        });
+        response.data.forEach((device) => {
+          if (roomStatus.value[device.room_number]) {
+            roomStatus.value[device.room_number].is_taken = device.is_taken;
+            roomStatus.value[device.room_number].owner_name = device.owner_name;
+            roomStatus.value[device.room_number].owner_surname = device.owner_surname;
+            roomStatus.value[device.room_number].issue_time = device.issue_time;
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching room status:", error);
+      }
+    };
+
+    const applyClassFilter = () => {
+      isFilterApplied.value = !isFilterApplied.value;
+      areOverlaysVisible.value = !isFilterApplied.value;
+
+      if (isFilterApplied.value) {
+        filterButtonText.value = "Dostępność urządzeń";
+
+        const classColorMapping = {
+          "administracyjny": [101, 166, 185, 1],
+          "działalności edukacyjnej lub badawczej": [167, 203, 188, 1],
+          "przechowywania": [161, 167, 166, 1],
+          "rekreacyjny": [204, 146, 114, 1],
+          "sanitarne": [230, 209, 90, 1],
+          "funkcyjny": [161, 167, 166, 1],
+          "biznesu lub handlu": [224, 182, 90, 1],
+          "konferencyjny": [204, 146, 114, 1],
+          "komunikacji": [202, 205, 207, 1],
+          "dostarczanie żywności": [176, 178, 217, 1],
+        };
+
+        const uniqueValueInfos = Object.entries(classColorMapping).map(([key, color]) => ({
+          value: key,
+          symbol: {
+            type: "simple-fill",
+            color,
+            outline: {
+              color: [0, 0, 0, 0.5],
+              width: 1,
+            },
+          },
+        }));
+
+
+        const renderer = new UniqueValueRenderer({
+          field: "klasa",
+          uniqueValueInfos
+        });
+
+        if (view && view.map && view.map.layers.items.length > 0) {
+          const featureLayer = view.map.layers.items[0];
+          featureLayer.renderer = renderer;
+        }
+      } else {
+        filterButtonText.value = "Klasy pomieszczeń";
+        updateRenderer();
+      }
+      const featureLayer = view.map.layers.items[0];
+      addOwnerInitialsGraphics(featureLayer);
+    };
+
+    const isSelectedFloor = (floorValue) => {
+      if (Array.isArray(selectedFloor.value)) {
+        return selectedFloor.value.some(val => Array.isArray(floorValue) ? floorValue.includes(val) : val === floorValue);
+      }
+      return Array.isArray(floorValue) ? floorValue.includes(selectedFloor.value) : selectedFloor.value === floorValue;
+    };
+
+    const updateOutline = (geometry) => {
+      view.graphics.removeAll();
+
+      if (
+        selectedRoom.value &&
+        selectedRoom.value.nazwa_skrocona === "nr nieznany" &&
+        selectedRoom.value.nazwa_pelna === null
+      ) {
         return;
       }
 
-      const selectedDevice = {
-        room_number: item.room_number,
-        device_id: item.id,
-        dev_type: item.dev_type,
-        dev_version: item.dev_version
-      };
-
-      sessionStorage.setItem('selectedDevice', JSON.stringify(selectedDevice));
-      const encodeRoomNumber = encodeURIComponent(item.room_number);
-      this.$router.push(`/DeviceNote/${encodeRoomNumber}`);
-    },
-
-    selectItemType(type) {
-      this.selectedItemType = type;
-      this.currentView = type;
-      this.clearFilter();
-      this.fetchDevices(this.selectedItemType, this.selectedItemVersion);
-    },
-
-    selectItemVersion(version) {
-      this.selectedItemVersion = version;
-      this.clearFilter();
-      this.fetchDevices(this.selectedItemType, this.selectedItemVersion);
-    },
-
-    clearFilter() {
-      this.filterQuery = "";
-      this.filteredItems = this.items;
-    },
-
-    async fetchDevices(deviceType, version, roomNumber = "") {
-      try {
-        const response = await api.get(`/devices/`, {
-          params: {
-            dev_type: deviceType,
-            dev_version: version,
-            ...(roomNumber && { room_number: roomNumber }),
+      if (geometry) {
+        const highlightGraphic = new Graphic({
+          geometry,
+          symbol: {
+            type: "simple-fill",
+            color: [0, 0, 0, 0],
+            outline: {
+              color: [0, 0, 0, 1],
+              width: 3,
+            },
           },
         });
-        this.items = response.data;
-        this.filteredItems = this.items;
-      } catch (error) {
-        console.warn(`Błąd pobierania urządzeń ${deviceType}:`, error);
-      }
-    },
 
-    filterItems() {
-      const query = this.filterQuery.trim();
-      if (query === "") {
-        this.fetchDevices(this.selectedItemType, this.selectedItemVersion);
-      } else {
-        api
-          .get(`/devices/`, {
-            params: {
-              dev_type: this.selectedItemType,
-              dev_version: this.selectedItemVersion,
-              room_number: query,
-            },
-          })
-          .then((response) => {
-            this.filteredItems = response.data;
-          })
-          .catch((error) => {
-            console.warn("Błąd filtrowania urządzeń:", error);
-          });
+        view.graphics.add(highlightGraphic);
       }
+    };
+
+    const resetRoomSelection = () => {
+      selectedRoom.value = null;
+      highlightedRoomId.value = null;
+      view.graphics.removeAll();
+    };
+
+
+    const updateRenderer = () => {
+      if (isFilterApplied.value) {
+        return;
+      }
+
+      if (view) {
+        view.map.layers.items[0].renderer = getRenderer();
+      }
+    };
+
+    const getRenderer = () => {
+      const uniqueValueInfos = Object.keys(roomStatus.value).map((roomNumber) => ({
+        value: roomNumber,
+        symbol: {
+          type: "simple-fill",
+          color:
+            roomStatus.value[roomNumber].is_taken === "brak"
+              ? [246, 222, 184, 1]
+              : roomStatus.value[roomNumber].is_taken
+                ? [165, 0, 36, 1]
+                : [31, 115, 75, 1],
+          outline: {
+            color: highlightedRoomId.value = [0, 0, 0, 0.5],
+            width: highlightedRoomId.value = 1,
+          },
+        },
+      }));
+
+      uniqueValueInfos.push({
+        value: "nr nieznany",
+        symbol: {
+          type: "simple-fill",
+          color: [202, 205, 207, 1],
+          outline: { color: [0, 0, 0, 0.5], width: 1 },
+        },
+      });
+
+      return new UniqueValueRenderer({
+        field: "nazwa_skrocona",
+        uniqueValueInfos: uniqueValueInfos,
+        defaultSymbol: {
+          type: "simple-fill",
+          color: [244, 240, 187, 0.8],
+          outline: {
+            color: [0, 0, 0, 0.5],
+            width: 1,
+          },
+        },
+      });
+    };
+    const ownerGraphicsLayer = new GraphicsLayer({ minScale: 2000 });
+    
+    const initializeMap = async () => {
+      const map = new Map({ basemap: "topo-vector" });
+      view = new MapView({
+        container: mapViewDiv.value,
+        map: map,
+        center: [21.01010, 52.22072],
+        zoom: 19,
+        constraints: {
+          minZoom: 18,
+          maxZoom: 22,
+          geometry: new Circle({
+            center: [21.01010, 52.22072],
+            radius: 300,
+            radiusUnit: "meters",
+          })
+        },
+        ui: {
+          components: ["attribution"],
+        },
+      });
+      return map;
+    };
+
+  
+    const addFeatureLayer = async (map) => {
+      const featureLayer = new FeatureLayer({
+        url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
+        outFields: ["nazwa_skrocona", "nazwa_pelna", "pietro", "funkcja", "klasa"],
+        renderer: getRenderer(),
+        labelingInfo: null,
+        definitionExpression: `budynek_nazwa = 'Gmach Główny' AND poziom IN (${Array.isArray(selectedFloor.value) ? selectedFloor.value.join(", ") : selectedFloor.value})`,
+      });
+      map.add(featureLayer);
+
+      const graphicsLayer = new GraphicsLayer({
+        minScale: 1000,
+        listMode: "hide",
+      });
+      map.add(graphicsLayer);
+
+      const updateLabels = async () => {
+        graphicsLayer.removeAll();
+
+        const floorCondition = Array.isArray(selectedFloor.value)
+          ? `poziom IN (${selectedFloor.value.join(", ")})`
+          : `poziom = ${selectedFloor.value}`;
+
+        const query = featureLayer.createQuery();
+        query.returnGeometry = true;
+        query.outFields = ["nazwa_skrocona"];
+        query.where = `budynek_nazwa = 'Gmach Główny' AND ${floorCondition}`;
+
+        const features = await featureLayer.queryFeatures(query);
+
+        features.features.forEach((feature) => {
+          if (feature.attributes.nazwa_skrocona && feature.attributes.nazwa_skrocona !== "nr nieznany") {
+            const textGraphic = new Graphic({
+              geometry: feature.geometry.centroid,
+              symbol: {
+                type: "text",
+                text: feature.attributes.nazwa_skrocona,
+                color: "#ffffff",
+                font: {
+                  size: 10,
+                  weight: "bold",
+                  family: "Arial",
+                },
+                haloColor: "#000000",
+                haloSize: 1,
+              },
+            });
+            graphicsLayer.add(textGraphic);
+          }
+        });
+      };
+
+      watch(selectedFloor, updateLabels);
+
+      await updateLabels();
+
+      return featureLayer;
     }
-  }
+
+    const createWidgetContainer = () => {
+      const widgetContainer = document.createElement("div");
+      widgetContainer.style.position = "absolute";
+      widgetContainer.style.bottom = "70px";
+      widgetContainer.style.left = "15px";
+      widgetContainer.style.display = "flex";
+      widgetContainer.style.flexDirection = "column";
+      widgetContainer.style.gap = "10px";
+      widgetContainer.id = "widgetContainer";
+
+      view.ui.add(widgetContainer, "manual");
+
+      const zoomWidget = new Zoom({ view });
+      const homeWidget = new Home({ view });
+      const scaleBarWidget = new ScaleBar({ view });
+
+      view.ui.add([zoomWidget, homeWidget], "manual");
+      view.ui.add(scaleBarWidget, "bottom-left");
+
+      widgetContainer.appendChild(homeWidget.container);
+      widgetContainer.appendChild(zoomWidget.container);
+
+      const zoomNode = document.createElement("div");
+      zoomNode.style.display = "inline-block";
+      zoomNode.appendChild(zoomWidget.container || document.createElement("div"));
+      widgetContainer.appendChild(zoomNode);
+
+      const homeNode = document.createElement("div");
+      homeNode.style.display = "inline-block";
+      homeNode.appendChild(homeWidget.container || document.createElement("div"));
+      widgetContainer.appendChild(homeNode);
+    };
+
+    const addCustomButton = () => {
+      const customButton = document.createElement("button");
+      customButton.classList.add("filter-button");
+
+      customButton.innerHTML = `
+        <span class="filter-icon">
+          <svg  xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="black" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/>
+          </svg>
+        </span>
+        <span class="filter-text" style="display:none;">Klasy pomieszczeń</span>
+      `;
+      customButton.style.display = "flex";
+      customButton.style.alignItems = "center";
+      customButton.style.justifyContent = "flex-start";
+      customButton.style.backgroundColor = "#ffffff";
+      customButton.style.gap = "10px";
+      customButton.style.height = "32px"
+      customButton.style.width = "32px"
+      customButton.style.cursor = "pointer";
+      customButton.style.border = "none";
+      customButton.style.padding = "2px 0px 0px 8.5px"
+
+      watch(filterButtonText, (newValue) => {
+        const filterTextElement = customButton.querySelector(".filter-text");
+        if (filterTextElement) {
+          filterTextElement.textContent = newValue;
+        }
+      });
+
+      let enterTimeout, leaveTimeout;
+
+      customButton.addEventListener("mouseenter", () => {
+        clearTimeout(leaveTimeout);
+        enterTimeout = setTimeout(() => {
+          customButton.style.width = "180px";
+          const filterText = customButton.querySelector(".filter-text");
+          filterText.style.whiteSpace = "nowrap";
+          filterText.style.transition = "opacity 0.2s ease-in-out";
+          filterText.style.pointerEvents = "none";
+
+          filterText.style.display = "inline";
+        }, 100);
+      });
+
+      customButton.addEventListener("mouseleave", () => {
+        clearTimeout(enterTimeout);
+
+        leaveTimeout = setTimeout(() => {
+          const filterText = customButton.querySelector(".filter-text");
+          filterText.style.display = "none";
+          customButton.style.width = "32px";
+        }, 100);
+      });
+
+      customButton.addEventListener("click", () => {
+        applyClassFilter();
+      });
+
+      view.ui.add(customButton, "bottom-left");
+
+    }
+
+    const searchRooms = async () => {
+      const searchWidget = new Search({
+        view,
+        allPlaceholder: "Szukaj pokoju",
+        popupEnabled: false,
+        resultGraphicEnabled: false,
+        includeDefaultSources: false,
+        sources: [
+          {
+            layer: new FeatureLayer({
+              url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
+              outFields: ["nazwa_skrocona", "pietro"],
+            }),
+            searchFields: ["nazwa_skrocona"],
+            displayField: "nazwa_skrocona",
+            exactMatch: true,
+            outFields: ["*"],
+            name: "Pokoje",
+            placeholder: "Wyszukaj pokój",
+            filter: { where: "UPPER(budynek_nazwa) = 'GMACH GŁÓWNY'" },
+            suggestionTemplate: "{nazwa_skrocona}",
+          },
+        ],
+      });
+
+      view.ui.add(searchWidget, "top-left");
+
+      setTimeout(() => {
+        const searchInput = document.querySelector(".esri-input");
+        if (searchInput) {
+          searchInput.style.outline = "none";
+        }
+      }, 100);
+
+      searchWidget.on("search-complete", (event) => {
+        resetRoomSelection();
+        view.graphics.removeAll();
+
+        event.results.forEach((result) => {
+          result.results.forEach((feature) => {
+            const roomAttributes = feature.feature.attributes;
+
+            if (roomAttributes.nazwa_skrocona === "242") {
+              searchWidget.clear();
+              const secondFloor = floors.find((floor) => floor.label === 2);
+              if (secondFloor) {
+                isAutoFloorChange.value = true;
+                selectedFloor.value = secondFloor.value;
+              }
+              return;
+            }
+
+            const roomKey = roomAttributes.nazwa_skrocona;
+            const roomFloor = feature.feature.attributes.poziom;
+
+            const floorMapping = floors.find((floor) =>
+              Array.isArray(floor.value)
+                ? floor.value.includes(roomFloor)
+                : floor.value === roomFloor
+            );
+
+            if (!isSelectedFloor(roomFloor)) {
+              isAutoFloorChange.value = true;
+              selectedFloor.value = floorMapping ? floorMapping.value : [roomFloor];
+            }
+
+            const graphic = new Graphic({
+              geometry: feature.feature.geometry,
+              symbol: {
+                type: "simple-fill",
+                color: [0, 0, 0, 0],
+                outline: { color: [0, 0, 0, 0.8], width: 3 },
+              },
+            });
+            view.graphics.add(graphic);
+
+            selectedRoom.value = roomAttributes;
+
+            const roomInfo = roomStatus.value[roomKey];
+            if (roomInfo) {
+              selectedRoom.value.is_taken = roomInfo.is_taken;
+              selectedRoom.value.owner_name = roomInfo.owner_name;
+              selectedRoom.value.owner_surname = roomInfo.owner_surname;
+              selectedRoom.value.issue_time = roomInfo.issue_time;
+            }
+
+            highlightedRoomId.value = roomKey;
+            isSearchHighlightActive.value = true;
+          });
+        });
+
+      });
+    }
+
+    const updateFloor = (floorValue) => {
+      resetRoomSelection();
+      if (isSearchHighlightActive.value) {
+        view.graphics.removeAll();
+        isSearchHighlightActive.value = false;
+      }
+      selectedFloor.value = Array.isArray(floorValue) ? floorValue : [floorValue];
+    };
+    const selectItemType = (type) => {
+      resetRoomSelection();
+      selectedItemType.value = type;
+      fetchRoomStatus().then(() => updateRenderer());
+    };
+
+    const selectItemVersion = (ver) => {
+      resetRoomSelection();
+      version.value = ver;
+      fetchRoomStatus().then(() => updateRenderer());
+    };
+
+    return {
+      mapViewDiv,
+      selectedRoom,
+      floors,
+      selectedFloor,
+      selectedItemType,
+      version,
+      selectItemType,
+      selectItemVersion,
+      updateFloor,
+      isSelectedFloor,
+      applyClassFilter,
+      areOverlaysVisible,
+      filterButtonText,
+      loading
+    };
+  },
 };
 </script>
+
 
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
-.container {
-  background: $background-color url('../assets/back.jpg') top no-repeat;
+.esri-input {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.main-container {
+  background: $background-color url('../assets/back.jpg') no-repeat top;
   background-size: cover;
   color: $text-color;
   font-family: $font-main;
-  overflow: hidden;
   height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  overflow-y: hidden;
 }
 
-*:focus {
-  outline: none;
+nav {
+  text-align: left;
+  height: 100px;
 }
 
-button,
-.avatars,
-.showMap,
-.itemTypesButtons,
-.itemsVersionsButtons,
-.giveItem,
-.giveItemWithoutAU,
-.checkReservations {
+#app {
+  height: 100vh;
   display: flex;
+  flex-direction: row;
+}
+
+.content-wrapper {
+  display: flex;
+  flex: 1;
   justify-content: center;
+}
+
+.informations {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  cursor: pointer;
+  height: 80%;
+  width: 400px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  margin-right: 2%;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 38%;
+}
+
+.item-type-overlay {
+  display: flex;
+  flex-direction: row;
+  pointer-events: auto;
+  position: relative;
+  gap: 15px;
+  z-index: 10;
+}
+
+.map-view {
+  width: 95%;
+  height: 80%;
+  border-radius: 30px;
+  overflow: hidden;
+  position: relative;
+}
+
+.esri-ui .esri-component,
+.esri-ui .esri-widget {
+  background: none;
   border: none;
-  background-color: transparent;
-  transition: all $transition-duration;
+  box-shadow: none;
 }
 
-.logOut {
-  color: $text-color;
+
+.floor-selection-overlay {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  z-index: 10;
 }
 
-.avatars,
-.showMap,
-.itemTypesButtons,
-.itemsVersionsButtons {
-  border-radius: $border-radius-large;
-  background-color: $background-color;
-}
-
-.avatars {
-  height: 35px;
-  width: 35px;
-  background-color: $avatar-bg;
+button {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  margin-right: 10px;
+  aspect-ratio: 1 / 1;
+  background-color: #ffffff;
+  color: #0d1016;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color $transition-duration;
 }
 
-.main-nav,
-.navigtionButtons {
+.itemsVersionsButtons,
+.itemTypesButtons {
   display: flex;
   align-items: center;
-  height: 70px;
-}
-
-.navigtionButtons {
   justify-content: center;
-  margin-right: 10px;
-}
-
-.showMap {
-  width: 250px;
-  height: $button-height;
-  font-size: 18px;
-  margin-right: 100px;
-}
-
-.itemTypesButtons,
-.itemsVersionsButtons {
-  justify-content: space-evenly;
-  width: 160px;
+  background-color: #ffffff;
+  border-radius: 30px;
   height: 50px;
 }
 
 .itemsVersionsButtons {
-  width: 106px;
-  margin-left: 20px;
+  width: 100px;
+}
+
+.itemTypesButtons {
+  width: 150px;
+}
+
+button:hover {
+  background-color: $background-color;
+}
+
+.floor-button {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  color: #0d1016;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color $transition-duration;
+}
+
+.floor-button:hover {
+  background-color: #dcdee4;
+}
+
+.floor-button.selected {
+  transform: scale(1.3);
+  transition: transform 0.1s ease-in-out;
+}
+
+.back-button {
+  text-decoration: none;
+  margin: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: start;
+  color: $text-color;
+  background-color: transparent !important;
 }
 
 button.microphones,
@@ -413,371 +1069,243 @@ button.remote-controllers,
 button.keys,
 button.primary-version,
 button.reserve-version {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
   background-color: transparent;
-
-  &:focus {
-    transform: scale(1.7);
-  }
 }
 
 .selected {
-  transform: scale(1.7);
+  transform: scale(1.3);
+  transition: transform 0.1s ease-in-out;
+}
+
+.selectedButton {
+  transform: scale(1.6);
   transition: transform 0.2s ease-in-out;
 }
 
-.main-page {
+.back-button:hover {
+  transform: scale(1.07);
+  cursor: pointer;
+}
+
+.custom-widget-container {
   display: flex;
-  margin-top: 40px;
-  height: 730px;
+  flex-direction: column;
+  align-items: center;
 }
 
-.mainContent {
-  width: 58%;
-}
-
-.left-action-buttons {
+.room-info {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  width: 21%;
-  height: 650px;
-  margin-top: 50px;
-
-  ul {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-around;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-  }
+  height: 62%;
+  overflow-y: auto;
+  background-color: transparent;
+  color: $text-color;
 }
 
-.rightContent {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  height: 100%;
-  width: 21%;
-  margin-top: 90px;
-}
-
-.filterRoomBox {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  flex-direction: column;
-  height: 150px;
-  width: 80%;
-  background-color: $background-color;
-  border-radius: 10%;
-  font-size: 20px;
-
-  p {
-    margin-top: 35px;
-  }
-
-  input {
-    text-align: center;
-    font-size: 20px;
-    width: 90%;
-    color: $text-color;
-    margin-top: 10px;
-    border: none;
-    background-color: $background-color;
-    border-bottom: 3px solid $primary-color;
-  }
-
-  input::placeholder {
-    font-size: 18px;
-  }
-
-  input:focus::placeholder {
-    color: transparent;
-  }
-}
-
-
-.option {
-  width: 250px
-}
-
-.giveItem,
-.giveItemWithoutAU,
-.checkReservations {
-  flex-direction: column;
-  width: 70%;
-  height: 125px;
-  font-weight: 500;
-  font-size: 16px;
-  margin-left: 20px;
-  padding: 10px 20px;
-  border-radius: 5px;
-}
-
-.giveItem svg,
-.giveItemWithoutAU svg,
-.checkReservations svg {
-  margin-right: 10px;
+.room-info h2 {
+  font-size: 24px;
   margin-bottom: 10px;
 }
 
-.itemsTable {
-  display: grid;
+.room-info div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  grid-template-rows: repeat(4, 1fr);
-  background-color: $background-color;
-  height: calc(7* 80px);
+  margin-top: 25px;
+  gap: 20px;
+}
+
+.room-info p {
+  margin: 5px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.room-info-content {
+  text-align: center
+}
+
+.deviceStatus p {
+  width: 300px;
+  margin-bottom: 1em;
+  text-align: left;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.rect {
+  width: 20px;
+  height: 10px;
+  margin-right: 8px;
+}
+
+.circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin-right: 12px;
+  outline: rgb(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &.green {
+    background-color: rgb(46, 219, 130);
+  }
+
+  &.yellow {
+    background-color: rgb(255, 239, 174);
+  }
+
+  &.orange {
+    background-color: rgb(255, 154, 59);
+  }
+
+  &.red {
+    background-color: rgb(204, 52, 52);
+  }
+
+  &.maroon {
+    background-color: rgb(139, 0, 0);
+  }
+
+  .text {
+    color: black;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+  }
+}
+
+.available .rect {
+  background-color: rgba(31, 115, 75, 1);
+}
+
+.unavailable .rect {
+  background-color: rgba(165, 0, 36, 1);
+}
+
+.nonexistent .rect {
+  background-color: rgba(246, 222, 184, 1);
+}
+
+.separator {
+  border: none;
+  border-top: 2px solid grey;
+  margin: 10px 0;
   width: 100%;
-  border-radius: $border-radius-large;
-  margin: 20px 10% 0 0;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
-.itemsNumber {
-  display: grid;
-  height: calc(7 * 77px);
+
+.functionStatus,
+.deviceStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: $text-color;
+  font-size: 15px;
+  border: 1px solid #4d4d4d;
+  max-height: 230px;
   overflow-y: auto;
   overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: grey $background-color;
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.itemsNumber::-webkit-scrollbar {
+::-webkit-scrollbar {
   width: 8px;
 }
 
-.itemsNumber::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: $background-color;
   border-radius: 10px;
 }
 
-.itemsNumber::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background-color: grey;
   border-radius: 10px;
   border: 2px solid grey;
 }
 
-.itemsNumber::-webkit-scrollbar-thumb:hover {
-  background-color: lighten($primary-color, 10%);
-}
-
-.table-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  align-items: center;
-  justify-items: center;
-}
-
-.table-cell {
-  text-align: center;
-  font-size: 32px;
-  font-weight: 500;
-  width: 4.5em;
-  padding: 0.5em 1em;
-}
-
-.cell-button {
-  background: none;
-  border: none;
-  width: 120%;
-  height: 100%;
-  font-size: 35px;
+.functionStatus p {
+  width: 300px;
+  margin-bottom: 1em;
   text-align: left;
-  padding: 0;
-  color: $text-color;
-  cursor: pointer;
 }
 
-
-.blue-text {
-  color: $primary-color;
-}
-
-.itemsStatus {
+.status {
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  width: 100%;
-  height: 100px;
-  border-radius: 15px;
-  font-size: 1.3em;
+  margin: 8px 0;
 }
 
-td svg {
-  background-color: #397031;
-  border-radius: 50%;
-  margin-left: 10px;
+.admin .rect {
+  background-color: rgba(101, 166, 185, 1);
 }
 
-.keysStatus,
-.microphonesStatus,
-.remoteControllersStatus {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  justify-content: space-evenly;
+.education .rect {
+  background-color: rgba(167, 203, 188, 1);
 }
 
-.keysStatus p {
-  height: 50px;
+.storage .rect {
+  background-color: rgba(161, 167, 166, 1);
 }
 
-
-@media (max-width: 1410px) {
-  .table-row {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .filterRoomBox p {
-    font-size: 16px;
-  }
-
+.recreational .rect {
+  background-color: rgba(204, 146, 114, 1);
 }
 
-@media (max-width: 1024px) {
+.sanitary .rect {
+  background-color: rgba(230, 209, 90, 1);
+}
 
-  .container {
-    overflow-y: auto;
-  }
+.communication .rect {
+  background-color: rgba(202, 205, 207, 1);
+}
 
-  .logo {
-    display: none;
-  }
+.functional .rect {
+  background-color: rgba(161, 167, 166, 1);
+}
 
-  .main-page {
-    flex-direction: column;
-  }
+.business .rect {
+  background-color: rgba(224, 182, 90, 1);
+}
 
-  .mainContent {
-    width: 50%;
-  }
+.conference .rect {
+  background-color: rgba(204, 146, 114, 1);
+}
 
-  .left-action-buttons {
-    order: 1;
+.food .rect {
+  background-color: rgba(176, 178, 217, 1);
+}
+
+@media (max-width: 1100px) {
+
+  #app {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    width: 100%;
-    min-height: 150px;
-    margin-bottom: 20px;
-
-    ul {
-      flex-direction: row;
-      margin-left: 30px;
-    }
   }
 
-  .rightContent {
-    order: 2;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    margin-top: 30px;
-    margin-bottom: 30px;
-
-    p {
-      font-size: 20px;
-    }
+  .informations {
+    display: none;
   }
+}
 
-  .filterRoomBox {
-    width: 90%;
-
-  }
-
-  .mainContent {
-    order: 3;
-    width: 100%;
-  }
-
-  .itemsNumber {
-    height: 460px;
-  }
-
-  .itemsTable {
-    grid-template-rows: unset;
-    display: block;
-    width: 90%;
-    margin: 0 auto;
-    height: 460px;
-
-    td {
-      width: 100%;
-      display: block;
-      text-align: center;
-      font-size: 20px;
-    }
-  }
-
-  .showMap {
-    width: 200px;
-    height: 50px;
-  }
-
-  .navigtionButtons {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-
-    button {
-      margin: 5px 10px;
-    }
-  }
-
-  .table-row {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  @media (max-width: 730px) {
-    .main-page {
-      flex-direction: column;
-    }
-
-    .table-row {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    .left-sidebar {
-      width: 100%;
-      order: 1;
-    }
-
-    .itemsTable {
-      order: 2;
-
-      .navigtionButtons {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        margin-bottom: 20px;
-      }
-
-      .itemTypesButtons,
-      .itemsVersionsButtons {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-around;
-      }
-    }
-  }
-
-  @media (max-width: 670px) {
-    .container {
-      width: 670px;
-    }
-  }
-
-  @media (max-height: 800px) {
-    .main-page {
-      margin-top: 0px;
-    }
+@media (max-width: 678px) {
+  #app {
+    width: 678px;
   }
 }
 </style>

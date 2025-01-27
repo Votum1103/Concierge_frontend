@@ -1,5 +1,4 @@
 <template>
-
     <div class="container">
         <nav>
             <BackButton class="back-button" routeName="MainWindow" buttonText="Wróć">
@@ -359,7 +358,6 @@ textarea {
 
 }
 
-/* Laptopy (1025px–1440px) */
 @media (min-width: 1025px) and (max-width: 1440px) {
     .note-header h1 {
         font-size: 2rem;

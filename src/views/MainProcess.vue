@@ -88,7 +88,7 @@
     </div>
 </template>
 <script>
-//#TODO nie zapomnij o tym, ze jeszcze jakoś trzeba odwzrorwać działąnie skanera
+
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 import RouteButton from '../components/RouteButton.vue';

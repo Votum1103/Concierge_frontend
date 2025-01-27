@@ -92,7 +92,6 @@ export default {
     },
 
     methods: {
-        //#TODO W przypadku jak jestem na ua user to jak pobiorę przedmiot to nie mogę mu nadać notatki.
         loadUserData() {
             this.userId = sessionStorage.getItem('userId');
         },
