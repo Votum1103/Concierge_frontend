@@ -23,78 +23,75 @@
     </body>
 </template>
 
-<script>
-import GoogleFonts from '../components/googleFonts.vue';
-import WUoT_Logo from '../components/WUoT_Logo.vue';
-import api from '../api'
+<script setup>
 
-export default {
-    name: 'UpdateUACredentials',
-    components: {
-        GoogleFonts,
-        WUoT_Logo
-    },
-    data() {
-        return {
-            email: '',
-            encodedEmail: '',
-            name: '',
-            surname: '',
-            errorMessage: '',
-            userId: null,
-            isDataFetched: false,
-        };
-    },
-    methods: {
-        async fetchUserData() {
-            try {
-                const emailFromStorage = sessionStorage.getItem('userEmail');
-                if (!emailFromStorage) {
-                    throw new Error('Nie znaleziono emaila w sessionStorage.');
-                }
-                this.email = emailFromStorage;
+import api from '@/api';
 
-                const encodedEmail = encodeURIComponent(this.email);
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-                this.encodedEmail = encodedEmail;
+const email = ref('');
+const encodedEmail = ref('');
+const name = ref('');
+const surname = ref('');
+const errorMessage = ref('');
+const userId = ref(null);
+let isDataFetched = ref(false);
 
-                const response = await api.get(`/unauthorized-users/email/${encodedEmail}`);
+const router = useRouter();
 
-                this.name = response.data.name;
-                this.surname = response.data.surname;
-                this.userId = response.data.id
-                this.isDataFetched = true;
+onMounted(() => {
+    fetchUserData();
+})
 
-            } catch (error) {
-                this.errorMessage = 'Nie znaleziono użytkownika lub wystąpił błąd!';
-                console.error(error);
-            }
-        },
-        async changeUAUserCredentials() {
-
-            const response = await api.post(`/unauthorized-users/${this.userId}`, {
-                    name: sessionStorage.getItem('username'),
-                    surname: sessionStorage.getItem('surname'),
-                    email: this.email,
-            })
-
-            const createSessionUA = await api.post(`/start-session/unauthorized/${response.data.id}`);
-
-            sessionStorage.setItem('sessionId', createSessionUA.data.id);
-            sessionStorage.removeItem('userEmail');
-            sessionStorage.setItem('lastPage', this.$route.name);
-            this.$router.push({ name: 'MainProcess' });
-        },
-        cancelOperation() {
-            sessionStorage.removeItem('userEmail');
-            this.isDataFetched = false;
-            this.$router.push({ name: 'UnauthorizedUserGiveItem' });
+async function fetchUserData() {
+    try {
+        const emailFromStorage = sessionStorage.getItem('userEmail');
+        if (!emailFromStorage) {
+            throw new Error('Nie znaleziono emaila w sessionStorage.');
         }
-    },
-    mounted() {
-        this.fetchUserData();
+        email.value = emailFromStorage;
+
+        const encodedUserEmail = encodeURIComponent(email.value);
+
+        encodedEmail.value = encodedUserEmail;
+
+        const response = await api.get(`/unauthorized-users/email/${encodedEmail.value}`);
+
+        name.value = response.data.name;
+        surname.value = response.data.surname;
+        userId.value = response.data.id
+        isDataFetched.value = true;
+
+    } catch (error) {
+        errorMessage.value = 'Nie znaleziono użytkownika lub wystąpił błąd!';
+        console.error(error);
     }
-};
+}
+
+async function changeUAUserCredentials() {
+
+    const response = await api.post(`/unauthorized-users/${userId.value}`, {
+        name: sessionStorage.getItem('username'),
+        surname: sessionStorage.getItem('surname'),
+        email: email.value,
+    })
+
+    const createSessionUA = await api.post(`/start-session/unauthorized/${response.data.id}`);
+
+    sessionStorage.setItem('sessionId', createSessionUA.data.id);
+    sessionStorage.removeItem('userEmail');
+    sessionStorage.setItem('lastPage', router.name);
+    router.push({ name: 'MainProcess' });
+}
+
+function cancelOperation() {
+    sessionStorage.removeItem('userEmail');
+    isDataFetched.value = false;
+    router.push({ name: 'UnauthorizedUserGiveItem' });
+}
+
+
 </script>
 
 

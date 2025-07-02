@@ -37,59 +37,50 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import BackButton from '../components/BackButton.vue';
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 import RouteButton from '../components/RouteButton.vue';
 import api from '../api'
 
-export default {
-    name: 'ConciergeLoginAcceptOperation',
-    components: {
-        GoogleFonts,
-        WUoT_Logo,
-        RouteButton,
-        BackButton
-    },
-    data() {
-        return {
-            username: '',
-            password: '',
-            loginError: false
-        };
-    },
-    methods: {
-        async login() {
-            try {
-                const loginResponse = await api.post('/login', new URLSearchParams({
-                    username: this.username,
-                    password: this.password
-                }));
+import { ref } from 'vue'
+import { useRouter } from 'vue-router';
 
-                const accessToken = loginResponse.data.access_token;
-                const refreshToken = loginResponse.data.refresh_token;
-                sessionStorage.setItem('access_token', accessToken);
-                sessionStorage.setItem('refresh_token', refreshToken);
+const username =  ref('');
+const password = ref('');
+const loginError = ref(false); 
 
-                const sessionId = sessionStorage.getItem('sessionId');
-                if (!sessionId) {
-                    throw new Error("Brak session_id w pamięci sesji");
-                }
+const router = useRouter();
 
-                await api.post(`/approve/login/session/${sessionId}`, new URLSearchParams({
-                    grant_type: 'password',
-                    username: this.username,
-                    password: this.password
-                }));
+async function login() {
+    try {
+        const loginResponse = await api.post('/login', new URLSearchParams({
+            username: username.value,
+            password: password.value
+        }));
 
-                this.$router.push({ name: 'MainWindow' });
-            } catch (error) {
-                this.loginError = true;
-                console.error('Błąd logowania lub akceptacji sesji:', error);
-            }
+        const accessToken = loginResponse.data.access_token;
+        const refreshToken = loginResponse.data.refresh_token;
+        sessionStorage.setItem('access_token', accessToken);
+        sessionStorage.setItem('refresh_token', refreshToken);
+
+        const sessionId = sessionStorage.getItem('sessionId');
+        if (!sessionId) {
+            throw new Error("Brak session_id w pamięci sesji");
         }
-    },
+
+        await api.post(`/approve/login/session/${sessionId}`, new URLSearchParams({
+            grant_type: 'password',
+            username: username.value,
+            password: password.value
+        }));
+
+        router.push({ name: 'MainWindow' });
+    } catch (error) {
+        loginError.value = true;
+        console.error('Błąd logowania lub akceptacji sesji:', error);
+    }
 }
 </script>
 

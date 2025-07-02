@@ -37,60 +37,51 @@
         </div>
     </template>
 
-<script>
+<script setup>
 import BackButton from '../components/BackButton.vue';
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 import RouteButton from '../components/RouteButton.vue';
 import api from '../api';
 
-export default {
-    name: 'UserLogin',
-    components: {
-        GoogleFonts,
-        WUoT_Logo,
-        RouteButton,
-        BackButton
-    },
-    data() {
-        return {
-            username: '',
-            password: '',
-            loginError: false
-        };
-    },
-    methods: {
-        async login() {
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-            try {
-                const response = await api.post('http://127.0.0.1:8000/start-session/login', new URLSearchParams({
-                    username: this.username,
-                    password: this.password
-                }));
+const username = ref('');
+const password = ref('');
+let loginError = ref(false);
 
-                const username = response.data.user.name;
+const router = useRouter();
 
-                const surname = response.data.user.surname;
-                const faculty = response.data.user.faculty;
-                const role = response.data.user.role;
-                const userId = response.data.user.id;
-                const sessionId = response.data.id;
+async function login() {
 
-                sessionStorage.setItem('sessionId', sessionId);
-                sessionStorage.setItem('userId', userId);
-                sessionStorage.setItem('username', username);
-                sessionStorage.setItem('surname', surname);
-                sessionStorage.setItem('faculty', faculty);
-                sessionStorage.setItem('role', role);
-                sessionStorage.setItem('lastPage', this.$route.name)
+    try {
+        const response = await api.post('http://127.0.0.1:8000/start-session/login', new URLSearchParams({
+            username: username.value,
+            password: password.value
+        }));
 
-                this.$router.push({ name: 'MainProcess' });
-            } catch (error) {
-                this.loginError = true;
-                console.error('Błąd logowania:', error);
-            }
-        },
-    },
+        const username = response.data.user.name;
+
+        const surname = response.data.user.surname;
+        const faculty = response.data.user.faculty;
+        const role = response.data.user.role;
+        const userId = response.data.user.id;
+        const sessionId = response.data.id;
+
+        sessionStorage.setItem('sessionId', sessionId);
+        sessionStorage.setItem('userId', userId);
+        sessionStorage.setItem('username', username);
+        sessionStorage.setItem('surname', surname);
+        sessionStorage.setItem('faculty', faculty);
+        sessionStorage.setItem('role', role);
+        sessionStorage.setItem('lastPage', router.name)
+
+        router.push({ name: 'MainProcess' });
+    } catch (error) {
+        loginError.value = true;
+        console.error('Błąd logowania:', error);
+    }
 }
 </script>
 
@@ -225,10 +216,11 @@ input::placeholder {
         width: 15.625rem;
     }
 }
+
 @media (max-width: 820px) {
     h1 {
         font-size: 1.5rem;
-    }   
+    }
 
     input {
         width: 90%;

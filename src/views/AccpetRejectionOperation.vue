@@ -23,55 +23,44 @@
 </template>
 
 
-<script>
+<script setup>
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 import api from '../api';
 
-export default {
-    name: 'AccpetRejectionOperation',
-    components: {
-        GoogleFonts,
-        WUoT_Logo
-    },
-    data() {
-        return {
-            session_id: sessionStorage.getItem('sessionId'),
-        };
-    },
-    methods: {
+import { useRouter } from 'vue-router';
 
-        stopCancellingOpertaion() {
-            this.$router.push({ name: 'MainProcess' })
-        },
+const session_id = sessionStorage.getItem('sessionId');
+const router = useRouter();
 
-        async cancelOperation() {
-            const sessionId = sessionStorage.getItem('sessionId');
+function stopCancellingOpertaion() {
+    router.push({ name: 'MainProcess' });
+}
 
-            if (!sessionId) {
-                console.error('Brak sessionId w sessionStorage');
-                this.$router.push({ name: 'MainWindow' }); 
-                return;
-            }
+async function cancelOperation() {
 
-            try {
-                await api.post(`/reject/session/${sessionId}`);
-
-                sessionStorage.removeItem('sessionId');
-                sessionStorage.removeItem('username');
-                sessionStorage.removeItem('surname');
-                sessionStorage.removeItem('faculty');
-                sessionStorage.removeItem('role');
-                sessionStorage.removeItem('userId');
-                sessionStorage.removeItem('lastPage');
-
-                this.$router.push({ name: 'MainWindow' });
-            } catch (error) {
-                console.error('Błąd przy anulowaniu operacji:', error);
-            }
-        },
+    if (!session_id) {
+        console.error('Brak session_id w sessionStorage');
+        router.push({ name: 'MainWindow' }); 
+        return;
     }
-};
+
+    try {
+        await api.post(`/reject/session/${session_id}`);
+
+        sessionStorage.removeItem('sessionId');
+        sessionStorage.removeItem('username');
+        sessionStorage.removeItem('surname');
+        sessionStorage.removeItem('faculty');
+        sessionStorage.removeItem('role');
+        sessionStorage.removeItem('userId');
+        sessionStorage.removeItem('lastPage');
+
+        router.push({ name: 'MainWindow' });
+    } catch (error) {
+        console.error('Błąd przy anulowaniu operacji:', error);
+    }
+}
 </script>
 
 

@@ -1,6 +1,6 @@
 <template>
 
-
+    <!-- #TODO prawdopodobnie będę musiał to usunąć bo nic to nie robi -->
     <div class="container">
         <GoogleFonts />
         <nav>
@@ -53,21 +53,11 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import BackButton from '../components/BackButton.vue';
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 import RouteButton from '../components/RouteButton.vue';
-
-export default {
-    name: 'AddedNote',
-    components: {
-        GoogleFonts,
-        WUoT_Logo,
-        RouteButton,
-        BackButton
-    }
-}
 </script>
 
 <style lang="scss" scoped>

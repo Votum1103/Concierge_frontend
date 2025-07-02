@@ -26,21 +26,11 @@
 </template>
 
 
-<script>
+<script setup>
 import BackButton from '../components/BackButton.vue';
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 import RouteButton from '../components/RouteButton.vue';
-
-export default {
-  name: 'ScanConciergeCard',
-  components: {
-    WUoT_Logo,
-    GoogleFonts,
-    RouteButton,
-    BackButton
-  }
-}
 
 </script>
 

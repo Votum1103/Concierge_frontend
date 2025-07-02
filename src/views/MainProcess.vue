@@ -87,170 +87,160 @@
         </main>
     </div>
 </template>
-<script>
+<script setup>
 
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 import RouteButton from '../components/RouteButton.vue';
 import api from '../api';
 
-export default {
-    name: "MainProcess",
-    components: {
-        WUoT_Logo,
-        GoogleFonts,
-        RouteButton,
-    },
-    data() {
-        return {
-            username: '',
-            surname: '',
-            role: '',
-            faculty: '',
-            userId: '',
-            users: [],
-            items: [],
-            permissions: [],
-            issued: [],
-            received: [],
-            lastPage: sessionStorage.getItem('lastPage') || '',
-            isSmallScreen: window.innerWidth <= 768,
-        };
-    },
-    computed: {
-        headerClass() {
-            if (this.lastPage === 'UserLogin') {
-                return 'text-white';
-            } else if (this.lastPage === 'UnauthorizedUserGiveItem' || this.lastPage === 'UpdateUACredentials') {
-                return 'text-red';
-            }
-            return '';
-        },
-    },
-    mounted() {
-        this.loadUserData();
-        this.fetchLoggedUser();
-        this.fetchPermissions();
-        this.fetchUnapprovedOperations();
-        window.addEventListener("resize", this.handleResize);
-        this.handleResize();
-    },
-    beforeUnmount() {
-        window.removeEventListener("resize", this.handleResize);
-    },
-    methods: {
+import { ref } from 'vue';
+import { onMounted } from 'vue';
+import { onBeforeMount } from 'vue';
 
-        handleResize() {
-            this.isSmallScreen = window.innerWidth <= 768;
-        },
-        loadUserData() {
-            this.username = sessionStorage.getItem('username') || 'Nieznane imię';
-            this.userId = sessionStorage.getItem('userId');
-            this.surname = sessionStorage.getItem('surname') || 'Nieznane nazwisko';
-            this.role = sessionStorage.getItem('role') || 'Rola nieznana';
-            this.faculty = sessionStorage.getItem('faculty') || 'nieznany';
-        },
-        async fetchPermissions() {
-            try {
-                const response = await api.get(`/permissions/active/?user_id=${this.userId}`);
-                const roomNumbers = response.data.map(permission => permission.room.number);
 
-                this.permissions = [];
-                for (let i = 0; i < roomNumbers.length; i += 2) {
-                    this.permissions.push({
-                        col1: roomNumbers[i],
-                        col2: roomNumbers[i + 1] || '',
-                    });
-                }
-            } catch (error) {
-                console.warn('Błąd przy pobieraniu uprawnień:', error);
-            }
-        },
-        async fetchLoggedUser() {
-            try {
-                const response = await api.get(`/operations/users/${this.userId}`);
-                const operations = response.data;
 
-                this.items = operations.map(op => ({
-                    userIds: [op.session.user_id],
-                    roomNumber: op.device.room.number,
-                    time: this.formatTime(op.timestamp),
-                    items: this.formatItems(op),
-                }));
-            } catch (error) {
-                console.warn('Błąd przy pobieraniu informacji o użytkowniku:', error);
-            }
-        },
+const username = ref('');
+const surname = ref('');
+const role = ref('');
+const faculty = ref('');
+const userId = ref('');
+// const users = ref([]);
+const items = ref([]);
+const permissions = ref([]);
+const issued = ref([]);
+const received = ref([]);
+const error = ref('');
+const lastPage = sessionStorage.getItem('lastPage') || '';
+let isSmallScreen = window.innerWidth <= 768;
 
-        async fetchUnapprovedOperations() {
-            this.error = null;
+function headerClass() {
+    if (lastPage.value === 'UserLogin') {
+        return 'text-white';
+    } else if (lastPage === 'UnauthorizedUserGiveItem' || lastPage === 'UpdateUACredentials') {
+        return 'text-red';
+    }
+    return '';
+}
+onMounted(() => {
+    loadUserData();
+    fetchLoggedUser();
+    fetchPermissions();
+    fetchUnapprovedOperations();
+    window.addEventListener("resize", handleResize());
+    handleResize();
+},)
+onBeforeMount(() => {
+    window.removeEventListener("resize", handleResize());
+})
 
-            const sessionId = sessionStorage.getItem("sessionId");
+function handleResize() {
+    isSmallScreen = window.innerWidth <= 768;
+}
+function loadUserData() {
+    username.value = sessionStorage.getItem('username') || 'Nieznane imię';
+    userId.value = sessionStorage.getItem('userId');
+    surname.value = sessionStorage.getItem('surname') || 'Nieznane nazwisko';
+    role.value = sessionStorage.getItem('role') || 'Rola nieznana';
+    faculty.value = sessionStorage.getItem('faculty') || 'nieznany';
+}
+async function fetchPermissions() {
+    try {
+        const response = await api.get(`/permissions/active/?user_id=${userId.value}`);
+        const roomNumbers = response.data.map(permission => permission.room.number);
 
-            if (!sessionId) {
-                this.error = "Brak aktywnej sesji. Upewnij się, że jesteś zalogowany.";
-                return;
-            }
-
-            try {
-                const response = await api.get('/operations/unapproved', {
-                    params: {
-                        session_id: sessionId,
-                    }
-                });
-
-                const operations = response.data;
-
-                const issuedList = [];
-                const receivedList = [];
-
-                for (const operation of operations) {
-                    const roomNumber = operation.device.room.number;
-                    const itemType = operation.device.dev_type;
-
-                    const formattedEntry = `${roomNumber} (${itemType})`;
-
-                    if (operation.operation_type === 'pobranie') {
-                        issuedList.push(formattedEntry);
-                    } else {
-                        receivedList.push(formattedEntry);
-                    }
-                }
-
-                this.issued = issuedList.join(', ');
-                this.received = receivedList.join(', ');
-
-            } catch (error) {
-                console.error("Błąd podczas pobierania niezatwierdzonych operacji:", error);
-                this.error = "Wystąpił błąd podczas pobierania danych.";
-            }
-        },
-        formatTime(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
-        },
-        formatItems(operation) {
-            const items = [];
-            if (operation.device.dev_type) items.push(operation.device.dev_type);
-            if (operation.device.dev_version) items.push(operation.device.dev_version);
-            return items;
-        },
-        getUserNames(userIds) {
-            const names = userIds.map(id => {
-                const user = this.users.find(user => user.id === id);
-                return user ? `${user.name} ${user.surname}` : 'Nieznany użytkownik';
+        permissions.value = [];
+        for (let i = 0; i < roomNumbers.length; i += 2) {
+            permissions.value.push({
+                col1: roomNumbers[i],
+                col2: roomNumbers[i + 1] || '',
             });
-            return names.join(', ');
-        },
-        getPermissionsForUser(employeeId) {
-            return this.permissions
-                .filter(permission => permission.employeeId === employeeId)
-                .map(permission => permission.roomNumber)
-                .join(', ');
-        },
-    },
-};
+        }
+    } catch (error) {
+        console.warn('Błąd przy pobieraniu uprawnień:', error);
+    }
+}
+async function fetchLoggedUser() {
+    try {
+        const response = await api.get(`/operations/users/${userId.value}`);
+        const operations = response.data;
 
+        items.value = operations.map(op => ({
+            userIds: [op.session.user_id],
+            roomNumber: op.device.room.number,
+            time: formatTime(op.timestamp),
+            items: formatItems(op),
+        }));
+    } catch (error) {
+        console.warn('Błąd przy pobieraniu informacji o użytkowniku:', error);
+    }
+}
+
+async function fetchUnapprovedOperations() {
+
+    const sessionId = sessionStorage.getItem("sessionId");
+
+    if (!sessionId) {
+        error.value = "Brak aktywnej sesji. Upewnij się, że jesteś zalogowany.";
+        return;
+    }
+
+    try {
+        const response = await api.get('/operations/unapproved', {
+            params: {
+                session_id: sessionId,
+            }
+        });
+
+        const operations = response.data;
+
+        const issuedList = [];
+        const receivedList = [];
+
+        for (const operation of operations) {
+            const roomNumber = operation.device.room.number;
+            const itemType = operation.device.dev_type;
+
+            const formattedEntry = `${roomNumber} (${itemType})`;
+
+            if (operation.operation_type === 'pobranie') {
+                issuedList.push(formattedEntry);
+            } else {
+                receivedList.push(formattedEntry);
+            }
+        }
+
+        issued.value = issuedList.join(', ');
+        received.value = receivedList.join(', ');
+
+    } catch (error) {
+        console.error("Błąd podczas pobierania niezatwierdzonych operacji:", error);
+        error.value = "Wystąpił błąd podczas pobierania danych.";
+    }
+}
+function formatTime(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+}
+function formatItems(operation) {
+    const items = [];
+    if (operation.device.dev_type) items.push(operation.device.dev_type);
+    if (operation.device.dev_version) items.push(operation.device.dev_version);
+    return items;
+}
+// function getUserNames(userIds) {
+//     const names = userIds.map(id => {
+//         const user = users.value.find(user => user.id === id);
+//         return user ? `${user.name} ${user.surname}` : 'Nieznany użytkownik';
+//     });
+//     return names.join(', ');
+// }
+// function getPermissionsForUser(employeeId) {
+//     return permissions.value
+//         .filter(permission => permission.employeeId === employeeId)
+//         .map(permission => permission.roomNumber)
+//         .join(', ');
+// }
 </script>
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';

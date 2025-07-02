@@ -117,6 +117,7 @@
             <p class="status available"><span class="rect"></span>{{ selectedItemType }} dostępny</p>
             <p class="status unavailable"><span class="rect"></span>{{ selectedItemType }} niedostępny</p>
             <p class="status nonexistent"><span class="rect"></span>{{ selectedItemType }} nie istnieje</p>
+            <hr class="separator" />
             <p class="status green">
               <span class="circle green"><span class="text">AB</span></span>Pobrany 0–1 godziny temu
             </p>
@@ -145,6 +146,9 @@
             <p class="status business"><span class="rect"></span>Biznes lub handel</p>
             <p class="status conference"><span class="rect"></span>Konferencyjny</p>
             <p class="status food"><span class="rect"></span>Dostarczanie żywności</p>
+
+            <hr class="separator" />
+
             <p class="status green">
               <span class="circle green"><span class="text">AB</span></span>Pobrany 0–1 godziny temu
             </p>
@@ -167,7 +171,7 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import BackButton from '../components/BackButton.vue';
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
@@ -185,694 +189,698 @@ import ScaleBar from "@arcgis/core/widgets/ScaleBar";
 import Circle from "@arcgis/core/geometry/Circle";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 
-export default {
-  name: "MapWindow",
-  components: {
-    GoogleFonts,
-    WUoT_Logo,
-    BackButton,
-  },
-  setup() {
-    const filterButtonText = ref("Klasy pomieszczeń");
-    const isAutoFloorChange = ref(false);
-    const mapViewDiv = shallowRef(null);
-    const selectedRoom = ref(null);
-    const roomStatus = ref({});
-    const highlightedRoomId = ref(null);
-    const selectedFloor = ref([9, 1]);
-    const selectedItemType = ref("klucz");
-    const version = ref("podstawowa");
-    const isSearchHighlightActive = ref(false);
-    let view = null;
-    const isFilterApplied = ref(false);
-    const areOverlaysVisible = ref(true);
-    const loading = ref(true)
+const filterButtonText = ref("Klasy pomieszczeń");
+const isAutoFloorChange = ref(false);
+const mapViewDiv = shallowRef(null);
+const selectedRoom = ref(null);
+const roomStatus = ref({});
+const highlightedRoomId = ref(null);
+const selectedFloor = ref([9, 1]);
+const selectedItemType = ref("klucz");
+const version = ref("podstawowa");
+const isSearchHighlightActive = ref(false);
+let view = null;
+const isFilterApplied = ref(false);
+const areOverlaysVisible = ref(true);
+const loading = ref(true)
 
-    const addOwnerInitialsGraphics = async (featureLayer) => {
-      if (!view || !roomStatus.value || !selectedFloor.value) return;
-      
-      ownerGraphicsLayer.removeAll();
+const addOwnerInitialsGraphics = async (featureLayer) => {
+  if (!view || !roomStatus.value || !selectedFloor.value) return;
 
-      const floorCondition = Array.isArray(selectedFloor.value)
-        ? `poziom IN (${selectedFloor.value.join(", ")})`
-        : `poziom = ${selectedFloor.value}`;
+  ownerGraphicsLayer.removeAll();
 
-      const buildingCondition = `budynek_nazwa = 'Gmach Główny'`;
-      const whereCondition = `${buildingCondition} AND ${floorCondition}`;
+  const floorCondition = Array.isArray(selectedFloor.value)
+    ? `poziom IN (${selectedFloor.value.join(", ")})`
+    : `poziom = ${selectedFloor.value}`;
 
-      const features = await featureLayer.queryFeatures({
-        where: whereCondition,
-        outFields: ["nazwa_skrocona", "poziom"],
-        returnGeometry: true,
-      });
+  const buildingCondition = `budynek_nazwa = 'Gmach Główny'`;
+  const whereCondition = `${buildingCondition} AND ${floorCondition}`;
 
-      const currentTime = new Date();
+  const features = await featureLayer.queryFeatures({
+    where: whereCondition,
+    outFields: ["nazwa_skrocona", "poziom"],
+    returnGeometry: true,
+  });
 
-      features.features.forEach((feature) => {
-        const roomKey = feature.attributes.nazwa_skrocona;
-        const roomInfo = roomStatus.value[roomKey];
+  const currentTime = new Date();
 
-        if (roomInfo?.is_taken !== "brak" && roomInfo?.owner_name && roomInfo?.owner_surname) {
-          const initials = `${roomInfo.owner_name[0]}${roomInfo.owner_surname[0]}`.toUpperCase();
+  features.features.forEach((feature) => {
+    const roomKey = feature.attributes.nazwa_skrocona;
+    const roomInfo = roomStatus.value[roomKey];
 
-          const issueTime = new Date(roomInfo.issue_time);
-          const timeDiffInHours = (currentTime - issueTime) / (1000 * 60 * 60); 
+    if (roomInfo?.is_taken !== "brak" && roomInfo?.owner_name && roomInfo?.owner_surname) {
+      const initials = `${roomInfo.owner_name[0]}${roomInfo.owner_surname[0]}`.toUpperCase();
 
-          let backgroundColor;
-          if (timeDiffInHours <= 1) {
-            backgroundColor = [46, 219, 130, 1]; 
-          } else if (timeDiffInHours > 1 && timeDiffInHours <= 2) {
-            backgroundColor = [255, 239, 174, 1]; 
-          } else if (timeDiffInHours > 2 && timeDiffInHours <= 3) {
-            backgroundColor = [255, 154, 59, 1]; 
-          } else if (timeDiffInHours > 3 && timeDiffInHours <= 10) {
-            backgroundColor = [204, 52, 52, 1];
-          } else {
-            backgroundColor = [139, 0, 0, 1];
-          }
+      const issueTime = new Date(roomInfo.issue_time);
+      const timeDiffInHours = (currentTime - issueTime) / (1000 * 60 * 60);
 
-          const geometry = feature.geometry;
-          let insidePoint;
-
-          let areaInSquareMeters = 0;
-
-          if (geometry.type === "polygon") {
-            areaInSquareMeters = geometry.extent.width * geometry.extent.height;
-          }
-
-          const isSmallRoom = areaInSquareMeters > 0 && areaInSquareMeters < 5;
-          if (!isSmallRoom) {
-            if (geometry.type === "polygon") {
-              const rings = geometry.rings[0];
-              const centroid = geometry.centroid;
-
-              const [x1, y1] = rings[0];
-              insidePoint = {
-                type: "point",
-                spatialReference: geometry.spatialReference,
-                x: x1 + (centroid.x - x1) * 0.5,
-                y: y1 + (centroid.y - y1) * 0.5,
-              };
-            } else if (geometry.type === "extent") {
-              insidePoint = {
-                type: "point",
-                spatialReference: geometry.spatialReference,
-                x: geometry.xmin + (geometry.xmax - geometry.xmin) * 0.4,
-                y: geometry.ymin + (geometry.ymax - geometry.ymin) * 0.4,
-              };
-            } else {
-              insidePoint = geometry;
-            }
-
-            const circleGraphic = new Graphic({
-              geometry: insidePoint,
-              symbol: {
-                type: "simple-marker",
-                style: "circle",
-                color: backgroundColor,
-                size: 16,
-                outline: {
-                  color: [0, 0, 0, 0.5],
-                  width: 2,
-                },
-              },
-            });
-
-            const textGraphic = new Graphic({
-              geometry: insidePoint,
-              symbol: {
-                type: "text",
-                text: initials,
-                color: "black",
-                font: {
-                  size: 8,
-                  weight: "bold",
-                  family: "Arial",
-                },
-                horizontalAlignment: "center",
-                verticalAlignment: "middle",
-              },
-            });
-
-            ownerGraphicsLayer.add(circleGraphic);
-            ownerGraphicsLayer.add(textGraphic);
-          }
-        }
-      });
-    };
-
-    onMounted(async () => {
-      if (!checkConnection()) {
-        loading.value = false;
-        return;
-      }
-      await fetchRooms();
-      await fetchRoomStatus();
-
-      let map = await initializeMap();
-      let featureLayer = await addFeatureLayer(map)
-      map.add(ownerGraphicsLayer);
-
-      addCustomButton();
-      createWidgetContainer();
-      await addOwnerInitialsGraphics(featureLayer);
-      await searchRooms();
-
-      const itemTypeOverlayNode = document.querySelector(".item-type-overlay");
-      if (itemTypeOverlayNode) {
-        view.ui.add(itemTypeOverlayNode, "top-right");
+      let backgroundColor;
+      if (timeDiffInHours <= 1) {
+        backgroundColor = [46, 219, 130, 1];
+      } else if (timeDiffInHours > 1 && timeDiffInHours <= 2) {
+        backgroundColor = [255, 239, 174, 1];
+      } else if (timeDiffInHours > 2 && timeDiffInHours <= 3) {
+        backgroundColor = [255, 154, 59, 1];
+      } else if (timeDiffInHours > 3 && timeDiffInHours <= 10) {
+        backgroundColor = [204, 52, 52, 1];
+      } else {
+        backgroundColor = [139, 0, 0, 1];
       }
 
-      const deviceStatusNode = document.querySelector(".floor-selection-overlay");
-      if (deviceStatusNode) {
-        view.ui.add(deviceStatusNode, "bottom-right");
+      const geometry = feature.geometry;
+      let insidePoint;
+
+      let areaInSquareMeters = 0;
+
+      if (geometry.type === "polygon") {
+        areaInSquareMeters = geometry.extent.width * geometry.extent.height;
       }
 
-      view.on("click", (event) => {
-        resetRoomSelection();
-        view.graphics.removeAll();
-        view.hitTest(event).then((response) => {
-          const results = response.results;
-          if (results.length > 0) {
-            const graphic = results.filter((result) => result.graphic.layer === featureLayer)[0]?.graphic;
-            if (graphic) {
-              selectedRoom.value = graphic.attributes;
-              const roomInfo = roomStatus.value[selectedRoom.value.nazwa_skrocona];
-              if (roomInfo) {
-                selectedRoom.value.is_taken = roomInfo.is_taken;
-                selectedRoom.value.owner_name = roomInfo.owner_name;
-                selectedRoom.value.owner_surname = roomInfo.owner_surname;
-                selectedRoom.value.issue_time = roomInfo.issue_time;
-              }
-              highlightedRoomId.value = graphic.attributes.nazwa_skrocona;
+      const isSmallRoom = areaInSquareMeters > 0 && areaInSquareMeters < 5;
+      if (!isSmallRoom) {
+        if (geometry.type === "polygon") {
+          const rings = geometry.rings[0];
+          const centroid = geometry.centroid;
 
-              updateOutline(graphic.geometry);
-            } else {
-              resetRoomSelection();
-            }
-          } else {
-            resetRoomSelection();
-          }
-        });
-      });
-      watch(highlightedRoomId, updateRenderer);
-
-      watch(selectedFloor, async (newFloor) => {
-        if (!isAutoFloorChange.value) {
-          resetRoomSelection();
-          view.graphics.removeAll();
-          isSearchHighlightActive.value = false;
+          const [x1, y1] = rings[0];
+          insidePoint = {
+            type: "point",
+            spatialReference: geometry.spatialReference,
+            x: x1 + (centroid.x - x1) * 0.5,
+            y: y1 + (centroid.y - y1) * 0.5,
+          };
+        } else if (geometry.type === "extent") {
+          insidePoint = {
+            type: "point",
+            spatialReference: geometry.spatialReference,
+            x: geometry.xmin + (geometry.xmax - geometry.xmin) * 0.4,
+            y: geometry.ymin + (geometry.ymax - geometry.ymin) * 0.4,
+          };
         } else {
-          isAutoFloorChange.value = false;
+          insidePoint = geometry;
         }
 
-        const floorNumbers = newFloor.join(", ");
-        featureLayer.definitionExpression = `budynek_nazwa = 'Gmach Główny' AND poziom IN (${floorNumbers})`;
-
-        featureLayer.refresh();
-        await addOwnerInitialsGraphics(featureLayer);
-      });
-
-      watch([selectedItemType, version], async () => {
-        resetRoomSelection();
-        await fetchRoomStatus();
-        updateRenderer();
-        await addOwnerInitialsGraphics(featureLayer);
-      });
-    });
-
-    const checkConnection = () => {
-      return navigator.onLine;
-    };
-
-    const floors = [
-      { label: 0, value: [9, 1] },
-      { label: 1, value: [2] },
-      { label: 2, value: [3, 6] },
-      { label: 3, value: [4, 8] },
-      { label: 4, value: [5] },
-    ];
-
-    const fetchRooms = async () => {
-      try {
-        const response = await api.get(`/rooms/`);
-        roomStatus.value = {};
-        response.data.forEach((room) => {
-          roomStatus.value[room.number] = { is_taken: "brak", owner_name: null, owner_surname: null, issue_time: null };
-        });
-      } catch (error) {
-        console.error("Error fetching rooms:", error);
-      }
-    };
-
-    const fetchRoomStatus = async () => {
-      try {
-        const response = await api.get(`/devices/?dev_type=${selectedItemType.value}&dev_version=${version.value}`);
-
-        Object.keys(roomStatus.value).forEach((roomNumber) => {
-          roomStatus.value[roomNumber].is_taken = "brak";
-          roomStatus.value[roomNumber].owner_name = null;
-          roomStatus.value[roomNumber].owner_surname = null;
-          roomStatus.value[roomNumber].issue_time = null;
-        });
-        response.data.forEach((device) => {
-          if (roomStatus.value[device.room_number]) {
-            roomStatus.value[device.room_number].is_taken = device.is_taken;
-            roomStatus.value[device.room_number].owner_name = device.owner_name;
-            roomStatus.value[device.room_number].owner_surname = device.owner_surname;
-            roomStatus.value[device.room_number].issue_time = device.issue_time;
-          }
-        });
-      } catch (error) {
-        console.error("Error fetching room status:", error);
-      }
-    };
-
-    const applyClassFilter = () => {
-      isFilterApplied.value = !isFilterApplied.value;
-      areOverlaysVisible.value = !isFilterApplied.value;
-
-      if (isFilterApplied.value) {
-        filterButtonText.value = "Dostępność urządzeń";
-
-        const classColorMapping = {
-          "administracyjny": [101, 166, 185, 1],
-          "działalności edukacyjnej lub badawczej": [167, 203, 188, 1],
-          "przechowywania": [161, 167, 166, 1],
-          "rekreacyjny": [204, 146, 114, 1],
-          "sanitarne": [230, 209, 90, 1],
-          "funkcyjny": [161, 167, 166, 1],
-          "biznesu lub handlu": [224, 182, 90, 1],
-          "konferencyjny": [204, 146, 114, 1],
-          "komunikacji": [202, 205, 207, 1],
-          "dostarczanie żywności": [176, 178, 217, 1],
-        };
-
-        const uniqueValueInfos = Object.entries(classColorMapping).map(([key, color]) => ({
-          value: key,
+        const circleGraphic = new Graphic({
+          geometry: insidePoint,
           symbol: {
-            type: "simple-fill",
-            color,
+            type: "simple-marker",
+            style: "circle",
+            color: backgroundColor,
+            size: 16,
             outline: {
               color: [0, 0, 0, 0.5],
-              width: 1,
+              width: 2,
             },
           },
-        }));
-
-
-        const renderer = new UniqueValueRenderer({
-          field: "klasa",
-          uniqueValueInfos
         });
 
-        if (view && view.map && view.map.layers.items.length > 0) {
-          const featureLayer = view.map.layers.items[0];
-          featureLayer.renderer = renderer;
+        const textGraphic = new Graphic({
+          geometry: insidePoint,
+          symbol: {
+            type: "text",
+            text: initials,
+            color: "black",
+            font: {
+              size: 8,
+              weight: "bold",
+              family: "Arial",
+            },
+            horizontalAlignment: "center",
+            verticalAlignment: "middle",
+          },
+        });
+
+        ownerGraphicsLayer.add(circleGraphic);
+        ownerGraphicsLayer.add(textGraphic);
+      }
+    }
+  });
+};
+
+onMounted(async () => {
+  if (!checkConnection()) {
+    loading.value = false;
+    return;
+  }
+  await fetchRooms();
+  await fetchRoomStatus();
+
+  let map = await initializeMap();
+  let featureLayer = await addFeatureLayer(map)
+  map.add(ownerGraphicsLayer);
+
+  // #TODO komponenty się przestawiają po czasie trzeba to naprawić, np. przyciski od pięter po włączeniu strony od nowa
+
+  addCustomButton();
+  createWidgetContainer();
+  await addOwnerInitialsGraphics(featureLayer);
+  await searchRooms();
+
+  const itemTypeOverlayNode = document.querySelector(".item-type-overlay");
+  if (itemTypeOverlayNode) {
+    view.ui.add(itemTypeOverlayNode, "top-right");
+  }
+
+  const deviceStatusNode = document.querySelector(".floor-selection-overlay");
+  if (deviceStatusNode) {
+    view.ui.add(deviceStatusNode, "bottom-right");
+  }
+
+  view.on("click", (event) => {
+    resetRoomSelection();
+    view.graphics.removeAll();
+    view.hitTest(event).then((response) => {
+      const results = response.results;
+      if (results.length > 0) {
+        const graphic = results.filter((result) => result.graphic.layer === featureLayer)[0]?.graphic;
+        if (graphic) {
+          selectedRoom.value = graphic.attributes;
+          const roomInfo = roomStatus.value[selectedRoom.value.nazwa_skrocona];
+          if (roomInfo) {
+            selectedRoom.value.is_taken = roomInfo.is_taken;
+            selectedRoom.value.owner_name = roomInfo.owner_name;
+            selectedRoom.value.owner_surname = roomInfo.owner_surname;
+            selectedRoom.value.issue_time = roomInfo.issue_time;
+          }
+          highlightedRoomId.value = graphic.attributes.nazwa_skrocona;
+
+          updateOutline(graphic.geometry);
+        } else {
+          resetRoomSelection();
         }
       } else {
-        filterButtonText.value = "Klasy pomieszczeń";
-        updateRenderer();
+        resetRoomSelection();
       }
-      const featureLayer = view.map.layers.items[0];
-      addOwnerInitialsGraphics(featureLayer);
-    };
+    });
+  });
+  watch(highlightedRoomId, updateRenderer);
 
-    const isSelectedFloor = (floorValue) => {
-      if (Array.isArray(selectedFloor.value)) {
-        return selectedFloor.value.some(val => Array.isArray(floorValue) ? floorValue.includes(val) : val === floorValue);
-      }
-      return Array.isArray(floorValue) ? floorValue.includes(selectedFloor.value) : selectedFloor.value === floorValue;
-    };
-
-    const updateOutline = (geometry) => {
+  watch(selectedFloor, async (newFloor) => {
+    if (!isAutoFloorChange.value) {
+      resetRoomSelection();
       view.graphics.removeAll();
+      isSearchHighlightActive.value = false;
+    } else {
+      isAutoFloorChange.value = false;
+    }
 
-      if (
-        selectedRoom.value &&
-        selectedRoom.value.nazwa_skrocona === "nr nieznany" &&
-        selectedRoom.value.nazwa_pelna === null
-      ) {
-        return;
+    const floorNumbers = newFloor.join(", ");
+    featureLayer.definitionExpression = `budynek_nazwa = 'Gmach Główny' AND poziom IN (${floorNumbers})`;
+
+    featureLayer.refresh();
+    await addOwnerInitialsGraphics(featureLayer);
+  });
+
+  watch([selectedItemType, version], async () => {
+    resetRoomSelection();
+    await fetchRoomStatus();
+    updateRenderer();
+    await addOwnerInitialsGraphics(featureLayer);
+  });
+});
+
+const checkConnection = () => {
+  return navigator.onLine;
+};
+
+const floors = [
+  { label: 0, value: [9, 1] },
+  { label: 1, value: [2] },
+  { label: 2, value: [3, 6] },
+  { label: 3, value: [4, 8] },
+  { label: 4, value: [5] },
+];
+
+const fetchRooms = async () => {
+  try {
+    const response = await api.get(`/rooms/`);
+    roomStatus.value = {};
+    response.data.forEach((room) => {
+      roomStatus.value[room.number] = { is_taken: "brak", owner_name: null, owner_surname: null, issue_time: null };
+    });
+  } catch (error) {
+    console.error("Error fetching rooms:", error);
+  }
+};
+
+const fetchRoomStatus = async () => {
+  try {
+    const response = await api.get(`/devices/?dev_type=${selectedItemType.value}&dev_version=${version.value}`);
+
+    Object.keys(roomStatus.value).forEach((roomNumber) => {
+      roomStatus.value[roomNumber].is_taken = "brak";
+      roomStatus.value[roomNumber].owner_name = null;
+      roomStatus.value[roomNumber].owner_surname = null;
+      roomStatus.value[roomNumber].issue_time = null;
+    });
+    response.data.forEach((device) => {
+      if (roomStatus.value[device.room_number]) {
+        roomStatus.value[device.room_number].is_taken = device.is_taken;
+        roomStatus.value[device.room_number].owner_name = device.owner_name;
+        roomStatus.value[device.room_number].owner_surname = device.owner_surname;
+        roomStatus.value[device.room_number].issue_time = device.issue_time;
       }
+    });
+  } catch (error) {
+    console.error("Error fetching room status:", error);
+  }
+};
 
-      if (geometry) {
-        const highlightGraphic = new Graphic({
-          geometry,
+const applyClassFilter = () => {
+  isFilterApplied.value = !isFilterApplied.value;
+  areOverlaysVisible.value = !isFilterApplied.value;
+
+  if (isFilterApplied.value) {
+    filterButtonText.value = "Dostępność urządzeń";
+
+    const classColorMapping = {
+      "administracyjny": [101, 166, 185, 1],
+      "działalności edukacyjnej lub badawczej": [167, 203, 188, 1],
+      "przechowywania": [161, 167, 166, 1],
+      "rekreacyjny": [204, 146, 114, 1],
+      "sanitarne": [230, 209, 90, 1],
+      "funkcyjny": [161, 167, 166, 1],
+      "biznesu lub handlu": [224, 182, 90, 1],
+      "konferencyjny": [204, 146, 114, 1],
+      "komunikacji": [202, 205, 207, 1],
+      "dostarczanie żywności": [176, 178, 217, 1],
+    };
+
+    const uniqueValueInfos = Object.entries(classColorMapping).map(([key, color]) => ({
+      value: key,
+      symbol: {
+        type: "simple-fill",
+        color,
+        outline: {
+          color: [0, 0, 0, 0.5],
+          width: 1,
+        },
+      },
+    }));
+
+
+    const renderer = new UniqueValueRenderer({
+      field: "klasa",
+      uniqueValueInfos
+    });
+
+    if (view && view.map && view.map.layers.items.length > 0) {
+      const featureLayer = view.map.layers.items[0];
+      featureLayer.renderer = renderer;
+    }
+  } else {
+    filterButtonText.value = "Klasy pomieszczeń";
+    updateRenderer();
+  }
+  const featureLayer = view.map.layers.items[0];
+  addOwnerInitialsGraphics(featureLayer);
+};
+
+const isSelectedFloor = (floorValue) => {
+  if (Array.isArray(selectedFloor.value)) {
+    return selectedFloor.value.some(val => Array.isArray(floorValue) ? floorValue.includes(val) : val === floorValue);
+  }
+  return Array.isArray(floorValue) ? floorValue.includes(selectedFloor.value) : selectedFloor.value === floorValue;
+};
+
+const updateOutline = (geometry) => {
+  view.graphics.removeAll();
+
+  if (
+    selectedRoom.value &&
+    selectedRoom.value.nazwa_skrocona === "nr nieznany" &&
+    selectedRoom.value.nazwa_pelna === null
+  ) {
+    return;
+  }
+
+  if (geometry) {
+    const highlightGraphic = new Graphic({
+      geometry,
+      symbol: {
+        type: "simple-fill",
+        color: [0, 0, 0, 0],
+        outline: {
+          color: [0, 0, 0, 1],
+          width: 3,
+        },
+      },
+    });
+
+    view.graphics.add(highlightGraphic);
+  }
+};
+
+const resetRoomSelection = () => {
+  selectedRoom.value = null;
+  highlightedRoomId.value = null;
+  view.graphics.removeAll();
+};
+
+
+const updateRenderer = () => {
+  if (isFilterApplied.value) {
+    return;
+  }
+
+  if (view) {
+    view.map.layers.items[0].renderer = getRenderer();
+  }
+};
+
+const getRenderer = () => {
+  const uniqueValueInfos = Object.keys(roomStatus.value).map((roomNumber) => ({
+    value: roomNumber,
+    symbol: {
+      type: "simple-fill",
+      color:
+        roomStatus.value[roomNumber].is_taken === "brak"
+          ? [246, 222, 184, 1]
+          : roomStatus.value[roomNumber].is_taken
+            ? [165, 0, 36, 1]
+            : [31, 115, 75, 1],
+      outline: {
+        color: highlightedRoomId.value = [0, 0, 0, 0.5],
+        width: highlightedRoomId.value = 1,
+      },
+    },
+  }));
+
+  uniqueValueInfos.push({
+    value: "nr nieznany",
+    symbol: {
+      type: "simple-fill",
+      color: [202, 205, 207, 1],
+      outline: { color: [0, 0, 0, 0.5], width: 1 },
+    },
+  });
+
+  return new UniqueValueRenderer({
+    field: "nazwa_skrocona",
+    uniqueValueInfos: uniqueValueInfos,
+    defaultSymbol: {
+      type: "simple-fill",
+      color: [244, 240, 187, 0.8],
+      outline: {
+        color: [0, 0, 0, 0.5],
+        width: 1,
+      },
+    },
+  });
+};
+const ownerGraphicsLayer = new GraphicsLayer({ minScale: 2000 });
+
+const initializeMap = async () => {
+  const map = new Map({ basemap: "topo-vector" });
+  view = new MapView({
+    container: mapViewDiv.value,
+    map: map,
+    center: [21.01010, 52.22072],
+    zoom: 19,
+    constraints: {
+      minZoom: 18,
+      maxZoom: 22,
+      geometry: new Circle({
+        center: [21.01010, 52.22072],
+        radius: 300,
+        radiusUnit: "meters",
+      })
+    },
+    ui: {
+      components: ["attribution"],
+    },
+  });
+  return map;
+};
+
+
+const addFeatureLayer = async (map) => {
+  const featureLayer = new FeatureLayer({
+    url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
+    outFields: ["nazwa_skrocona", "nazwa_pelna", "pietro", "funkcja", "klasa"],
+    renderer: getRenderer(),
+    labelingInfo: null,
+    definitionExpression: `budynek_nazwa = 'Gmach Główny' AND poziom IN (${Array.isArray(selectedFloor.value) ? selectedFloor.value.join(", ") : selectedFloor.value})`,
+  });
+  map.add(featureLayer);
+
+  const graphicsLayer = new GraphicsLayer({
+    minScale: 1000,
+    listMode: "hide",
+  });
+  map.add(graphicsLayer);
+
+  const updateLabels = async () => {
+    graphicsLayer.removeAll();
+
+    const floorCondition = Array.isArray(selectedFloor.value)
+      ? `poziom IN (${selectedFloor.value.join(", ")})`
+      : `poziom = ${selectedFloor.value}`;
+
+    const query = featureLayer.createQuery();
+    query.returnGeometry = true;
+    query.outFields = ["nazwa_skrocona"];
+    query.where = `budynek_nazwa = 'Gmach Główny' AND ${floorCondition}`;
+
+    const features = await featureLayer.queryFeatures(query);
+
+    features.features.forEach((feature) => {
+      if (feature.attributes.nazwa_skrocona && feature.attributes.nazwa_skrocona !== "nr nieznany") {
+        const textGraphic = new Graphic({
+          geometry: feature.geometry.centroid,
+          symbol: {
+            type: "text",
+            text: feature.attributes.nazwa_skrocona,
+            color: "#ffffff",
+            font: {
+              size: 10,
+              weight: "bold",
+              family: "Arial",
+            },
+            haloColor: "#000000",
+            haloSize: 1,
+          },
+        });
+        graphicsLayer.add(textGraphic);
+      }
+    });
+  };
+
+  watch(selectedFloor, updateLabels);
+
+  await updateLabels();
+
+  return featureLayer;
+}
+
+const createWidgetContainer = () => {
+  const widgetContainer = document.createElement("div");
+  widgetContainer.style.position = "absolute";
+  widgetContainer.style.bottom = "70px";
+  widgetContainer.style.left = "15px";
+  widgetContainer.style.display = "flex";
+  widgetContainer.style.flexDirection = "column";
+  widgetContainer.style.gap = "10px";
+  widgetContainer.id = "widgetContainer";
+
+  view.ui.add(widgetContainer, "manual");
+
+  const zoomWidget = new Zoom({ view });
+  const homeWidget = new Home({ view });
+  const scaleBarWidget = new ScaleBar({ view });
+
+  view.ui.add([zoomWidget, homeWidget], "manual");
+  view.ui.add(scaleBarWidget, "bottom-left");
+
+  widgetContainer.appendChild(homeWidget.container);
+  widgetContainer.appendChild(zoomWidget.container);
+
+  const zoomNode = document.createElement("div");
+  zoomNode.style.display = "inline-block";
+  zoomNode.appendChild(zoomWidget.container || document.createElement("div"));
+  widgetContainer.appendChild(zoomNode);
+
+  const homeNode = document.createElement("div");
+  homeNode.style.display = "inline-block";
+  homeNode.appendChild(homeWidget.container || document.createElement("div"));
+  widgetContainer.appendChild(homeNode);
+};
+
+const addCustomButton = () => {
+  const customButton = document.createElement("button");
+  customButton.classList.add("filter-button");
+
+  customButton.innerHTML = `
+    <span class="filter-icon">
+      <svg  xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="black" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/>
+      </svg>
+    </span>
+    <span class="filter-text" style="display:none;">Klasy pomieszczeń</span>
+  `;
+  customButton.style.display = "flex";
+  customButton.style.alignItems = "center";
+  customButton.style.justifyContent = "flex-start";
+  customButton.style.backgroundColor = "#ffffff";
+  customButton.style.gap = "10px";
+  customButton.style.height = "32px"
+  customButton.style.width = "32px"
+  customButton.style.cursor = "pointer";
+  customButton.style.border = "none";
+  customButton.style.padding = "2px 0px 0px 8.5px"
+
+  watch(filterButtonText, (newValue) => {
+    const filterTextElement = customButton.querySelector(".filter-text");
+    if (filterTextElement) {
+      filterTextElement.textContent = newValue;
+    }
+  });
+
+  let enterTimeout, leaveTimeout;
+
+  customButton.addEventListener("mouseenter", () => {
+    clearTimeout(leaveTimeout);
+    enterTimeout = setTimeout(() => {
+      customButton.style.width = "180px";
+      const filterText = customButton.querySelector(".filter-text");
+      filterText.style.whiteSpace = "nowrap";
+      filterText.style.transition = "opacity 0.2s ease-in-out";
+      filterText.style.pointerEvents = "none";
+
+      filterText.style.display = "inline";
+    }, 100);
+  });
+
+  customButton.addEventListener("mouseleave", () => {
+    clearTimeout(enterTimeout);
+
+    leaveTimeout = setTimeout(() => {
+      const filterText = customButton.querySelector(".filter-text");
+      filterText.style.display = "none";
+      customButton.style.width = "32px";
+    }, 100);
+  });
+
+  customButton.addEventListener("click", () => {
+    applyClassFilter();
+  });
+
+  view.ui.add(customButton, "bottom-left");
+
+}
+
+const searchRooms = async () => {
+  const searchWidget = new Search({
+    view,
+    allPlaceholder: "Szukaj pokoju",
+    popupEnabled: false,
+    resultGraphicEnabled: false,
+    includeDefaultSources: false,
+    sources: [
+      {
+        layer: new FeatureLayer({
+          url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
+          outFields: ["nazwa_skrocona", "pietro"],
+        }),
+        searchFields: ["nazwa_skrocona"],
+        displayField: "nazwa_skrocona",
+        exactMatch: true,
+        outFields: ["*"],
+        name: "Pokoje",
+        placeholder: "Wyszukaj pokój",
+        filter: { where: "UPPER(budynek_nazwa) = 'GMACH GŁÓWNY'" },
+        suggestionTemplate: "{nazwa_skrocona}",
+      },
+    ],
+  });
+
+  view.ui.add(searchWidget, "top-left");
+
+  setTimeout(() => {
+    const searchInput = document.querySelector(".esri-input");
+    if (searchInput) {
+      searchInput.style.outline = "none";
+    }
+  }, 100);
+
+  searchWidget.on("search-complete", (event) => {
+    resetRoomSelection();
+    view.graphics.removeAll();
+
+    event.results.forEach((result) => {
+      result.results.forEach((feature) => {
+        const roomAttributes = feature.feature.attributes;
+
+        if (roomAttributes.nazwa_skrocona === "242") {
+          searchWidget.clear();
+          const secondFloor = floors.find((floor) => floor.label === 2);
+          if (secondFloor) {
+            isAutoFloorChange.value = true;
+            selectedFloor.value = secondFloor.value;
+          }
+          return;
+        }
+
+        const roomKey = roomAttributes.nazwa_skrocona;
+        const roomFloor = feature.feature.attributes.poziom;
+
+        const floorMapping = floors.find((floor) =>
+          Array.isArray(floor.value)
+            ? floor.value.includes(roomFloor)
+            : floor.value === roomFloor
+        );
+
+        if (!isSelectedFloor(roomFloor)) {
+          isAutoFloorChange.value = true;
+          selectedFloor.value = floorMapping ? floorMapping.value : [roomFloor];
+        }
+
+        const graphic = new Graphic({
+          geometry: feature.feature.geometry,
           symbol: {
             type: "simple-fill",
             color: [0, 0, 0, 0],
-            outline: {
-              color: [0, 0, 0, 1],
-              width: 3,
-            },
+            outline: { color: [0, 0, 0, 0.8], width: 3 },
           },
         });
+        view.graphics.add(graphic);
 
-        view.graphics.add(highlightGraphic);
-      }
-    };
+        selectedRoom.value = roomAttributes;
 
-    const resetRoomSelection = () => {
-      selectedRoom.value = null;
-      highlightedRoomId.value = null;
-      view.graphics.removeAll();
-    };
-
-
-    const updateRenderer = () => {
-      if (isFilterApplied.value) {
-        return;
-      }
-
-      if (view) {
-        view.map.layers.items[0].renderer = getRenderer();
-      }
-    };
-
-    const getRenderer = () => {
-      const uniqueValueInfos = Object.keys(roomStatus.value).map((roomNumber) => ({
-        value: roomNumber,
-        symbol: {
-          type: "simple-fill",
-          color:
-            roomStatus.value[roomNumber].is_taken === "brak"
-              ? [246, 222, 184, 1]
-              : roomStatus.value[roomNumber].is_taken
-                ? [165, 0, 36, 1]
-                : [31, 115, 75, 1],
-          outline: {
-            color: highlightedRoomId.value = [0, 0, 0, 0.5],
-            width: highlightedRoomId.value = 1,
-          },
-        },
-      }));
-
-      uniqueValueInfos.push({
-        value: "nr nieznany",
-        symbol: {
-          type: "simple-fill",
-          color: [202, 205, 207, 1],
-          outline: { color: [0, 0, 0, 0.5], width: 1 },
-        },
-      });
-
-      return new UniqueValueRenderer({
-        field: "nazwa_skrocona",
-        uniqueValueInfos: uniqueValueInfos,
-        defaultSymbol: {
-          type: "simple-fill",
-          color: [244, 240, 187, 0.8],
-          outline: {
-            color: [0, 0, 0, 0.5],
-            width: 1,
-          },
-        },
-      });
-    };
-    const ownerGraphicsLayer = new GraphicsLayer({ minScale: 2000, });
-    const initializeMap = async () => {
-      const map = new Map({ basemap: "topo-vector" });
-      view = new MapView({
-        container: mapViewDiv.value,
-        map: map,
-        center: [21.01010, 52.22072],
-        zoom: 19,
-        constraints: {
-          minZoom: 18,
-          maxZoom: 22,
-          geometry: new Circle({
-            center: [21.01010, 52.22072],
-            radius: 300,
-            radiusUnit: "meters",
-          })
-        },
-        ui: {
-          components: ["attribution"],
-        },
-      });
-      return map;
-    };
-
-    const addFeatureLayer = async (map) => {
-      const featureLayer = new FeatureLayer({
-        url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
-        outFields: ["nazwa_skrocona", "nazwa_pelna", "pietro", "funkcja", "klasa"],
-        renderer: getRenderer(),
-        labelingInfo: [
-          {
-            labelExpressionInfo: {
-              expression: "IIF($feature.nazwa_skrocona != 'nr nieznany', $feature.nazwa_skrocona, '')"
-            },
-            symbol: {
-              type: "text",
-              color: "#000000",
-              font: {
-                size: 10,
-                weight: "bold",
-                family: "Arial",
-              },
-              haloColor: "#ffffff",
-              haloSize: 0.7,
-            },
-            minScale: 1000,
-            maxScale: 0,
-          },
-        ],
-        definitionExpression: `budynek_nazwa = 'Gmach Główny' AND poziom IN (${Array.isArray(selectedFloor.value) ? selectedFloor.value.join(", ") : selectedFloor.value})`,
-      });
-
-      map.add(featureLayer);
-      return featureLayer
-    }
-
-    const createWidgetContainer = () => {
-      const widgetContainer = document.createElement("div");
-      widgetContainer.style.position = "absolute";
-      widgetContainer.style.bottom = "70px";
-      widgetContainer.style.left = "15px";
-      widgetContainer.style.display = "flex";
-      widgetContainer.style.flexDirection = "column";
-      widgetContainer.style.gap = "10px";
-      widgetContainer.id = "widgetContainer";
-
-      view.ui.add(widgetContainer, "manual");
-
-      const zoomWidget = new Zoom({ view });
-      const homeWidget = new Home({ view });
-      const scaleBarWidget = new ScaleBar({ view });
-
-      view.ui.add([zoomWidget, homeWidget], "manual");
-      view.ui.add(scaleBarWidget, "bottom-left");
-
-      widgetContainer.appendChild(homeWidget.container);
-      widgetContainer.appendChild(zoomWidget.container);
-
-      const zoomNode = document.createElement("div");
-      zoomNode.style.display = "inline-block";
-      zoomNode.appendChild(zoomWidget.container || document.createElement("div"));
-      widgetContainer.appendChild(zoomNode);
-
-      const homeNode = document.createElement("div");
-      homeNode.style.display = "inline-block";
-      homeNode.appendChild(homeWidget.container || document.createElement("div"));
-      widgetContainer.appendChild(homeNode);
-    };
-
-    const addCustomButton = () => {
-      const customButton = document.createElement("button");
-      customButton.classList.add("filter-button");
-
-      customButton.innerHTML = `
-        <span class="filter-icon">
-          <svg  xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="black" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/>
-          </svg>
-        </span>
-        <span class="filter-text" style="display:none;">Klasy pomieszczeń</span>
-      `;
-      customButton.style.display = "flex";
-      customButton.style.alignItems = "center";
-      customButton.style.justifyContent = "flex-start";
-      customButton.style.backgroundColor = "#ffffff";
-      customButton.style.gap = "10px";
-      customButton.style.height = "32px"
-      customButton.style.width = "32px"
-      customButton.style.cursor = "pointer";
-      customButton.style.border = "none";
-      customButton.style.padding = "2px 0px 0px 8.5px"
-
-      watch(filterButtonText, (newValue) => {
-        const filterTextElement = customButton.querySelector(".filter-text");
-        if (filterTextElement) {
-          filterTextElement.textContent = newValue;
+        const roomInfo = roomStatus.value[roomKey];
+        if (roomInfo) {
+          selectedRoom.value.is_taken = roomInfo.is_taken;
+          selectedRoom.value.owner_name = roomInfo.owner_name;
+          selectedRoom.value.owner_surname = roomInfo.owner_surname;
+          selectedRoom.value.issue_time = roomInfo.issue_time;
         }
+
+        highlightedRoomId.value = roomKey;
+        isSearchHighlightActive.value = true;
       });
+    });
 
-      let enterTimeout, leaveTimeout;
+  });
+}
 
-      customButton.addEventListener("mouseenter", () => {
-        clearTimeout(leaveTimeout);
-        enterTimeout = setTimeout(() => {
-          customButton.style.width = "180px";
-          const filterText = customButton.querySelector(".filter-text");
-          filterText.style.whiteSpace = "nowrap";
-          filterText.style.transition = "opacity 0.2s ease-in-out";
-          filterText.style.pointerEvents = "none";
+const updateFloor = (floorValue) => {
+  resetRoomSelection();
+  if (isSearchHighlightActive.value) {
+    view.graphics.removeAll();
+    isSearchHighlightActive.value = false;
+  }
+  selectedFloor.value = Array.isArray(floorValue) ? floorValue : [floorValue];
+};
+const selectItemType = (type) => {
+  resetRoomSelection();
+  selectedItemType.value = type;
+  fetchRoomStatus().then(() => updateRenderer());
+};
 
-          filterText.style.display = "inline";
-        }, 100);
-      });
-
-      customButton.addEventListener("mouseleave", () => {
-        clearTimeout(enterTimeout);
-
-        leaveTimeout = setTimeout(() => {
-          const filterText = customButton.querySelector(".filter-text");
-          filterText.style.display = "none";
-          customButton.style.width = "32px";
-        }, 100);
-      });
-
-      customButton.addEventListener("click", () => {
-        applyClassFilter();
-      });
-
-      view.ui.add(customButton, "bottom-left");
-
-    }
-
-    const searchRooms = async () => {
-      const searchWidget = new Search({
-        view,
-        allPlaceholder: "Szukaj pokoju",
-        popupEnabled: false,
-        resultGraphicEnabled: false,
-        includeDefaultSources: false,
-        sources: [
-          {
-            layer: new FeatureLayer({
-              url: "https://arcgis.cenagis.edu.pl/server/rest/services/SION2_Topo_MV/sion2_topo_indoor_all/MapServer/5",
-              outFields: ["nazwa_skrocona", "pietro"],
-            }),
-            searchFields: ["nazwa_skrocona"],
-            displayField: "nazwa_skrocona",
-            exactMatch: true,
-            outFields: ["*"],
-            name: "Pokoje",
-            placeholder: "Wyszukaj pokój",
-            filter: { where: "UPPER(budynek_nazwa) = 'GMACH GŁÓWNY'" },
-            suggestionTemplate: "{nazwa_skrocona}",
-          },
-        ],
-      });
-
-      view.ui.add(searchWidget, "top-left");
-
-      setTimeout(() => {
-        const searchInput = document.querySelector(".esri-input");
-        if (searchInput) {
-          searchInput.style.outline = "none";
-        }
-      }, 100);
-
-      searchWidget.on("search-complete", (event) => {
-        resetRoomSelection();
-        view.graphics.removeAll();
-
-        event.results.forEach((result) => {
-          result.results.forEach((feature) => {
-            const roomAttributes = feature.feature.attributes;
-
-            if (roomAttributes.nazwa_skrocona === "242") {
-              searchWidget.clear();
-              const secondFloor = floors.find((floor) => floor.label === 2);
-              if (secondFloor) {
-                isAutoFloorChange.value = true;
-                selectedFloor.value = secondFloor.value;
-              }
-              return;
-            }
-
-            const roomKey = roomAttributes.nazwa_skrocona;
-            const roomFloor = feature.feature.attributes.poziom;
-
-            const floorMapping = floors.find((floor) =>
-              Array.isArray(floor.value)
-                ? floor.value.includes(roomFloor)
-                : floor.value === roomFloor
-            );
-
-            if (!isSelectedFloor(roomFloor)) {
-              isAutoFloorChange.value = true;
-              selectedFloor.value = floorMapping ? floorMapping.value : [roomFloor];
-            }
-
-            const graphic = new Graphic({
-              geometry: feature.feature.geometry,
-              symbol: {
-                type: "simple-fill",
-                color: [0, 0, 0, 0],
-                outline: { color: [0, 0, 0, 0.8], width: 3 },
-              },
-            });
-            view.graphics.add(graphic);
-
-            selectedRoom.value = roomAttributes;
-
-            const roomInfo = roomStatus.value[roomKey];
-            if (roomInfo) {
-              selectedRoom.value.is_taken = roomInfo.is_taken;
-              selectedRoom.value.owner_name = roomInfo.owner_name;
-              selectedRoom.value.owner_surname = roomInfo.owner_surname;
-              selectedRoom.value.issue_time = roomInfo.issue_time;
-            }
-
-            highlightedRoomId.value = roomKey;
-            isSearchHighlightActive.value = true;
-          });
-        });
-
-      });
-    }
-
-    const updateFloor = (floorValue) => {
-      resetRoomSelection();
-      if (isSearchHighlightActive.value) {
-        view.graphics.removeAll();
-        isSearchHighlightActive.value = false;
-      }
-      selectedFloor.value = Array.isArray(floorValue) ? floorValue : [floorValue];
-    };
-    const selectItemType = (type) => {
-      resetRoomSelection();
-      selectedItemType.value = type;
-      fetchRoomStatus().then(() => updateRenderer());
-    };
-
-    const selectItemVersion = (ver) => {
-      resetRoomSelection();
-      version.value = ver;
-      fetchRoomStatus().then(() => updateRenderer());
-    };
-
-    return {
-      mapViewDiv,
-      selectedRoom,
-      floors,
-      selectedFloor,
-      selectedItemType,
-      version,
-      selectItemType,
-      selectItemVersion,
-      updateFloor,
-      isSelectedFloor,
-      applyClassFilter,
-      areOverlaysVisible,
-      filterButtonText,
-      loading
-    };
-  },
+const selectItemVersion = (ver) => {
+  resetRoomSelection();
+  version.value = ver;
+  fetchRoomStatus().then(() => updateRenderer());
 };
 </script>
 
@@ -880,6 +888,10 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
 
+.esri-input {
+  outline: none !important;
+  box-shadow: none !important;
+}
 
 .main-container {
   background: $background-color url('../assets/back.jpg') no-repeat top;
@@ -971,7 +983,6 @@ button {
   font-weight: bold;
   cursor: pointer;
   transition: background-color $transition-duration;
-  outline: none;
 }
 
 .itemsVersionsButtons,
@@ -1163,6 +1174,14 @@ button.reserve-version {
 .nonexistent .rect {
   background-color: rgba(246, 222, 184, 1);
 }
+
+.separator {
+  border: none;
+  border-top: 2px solid grey;
+  margin: 10px 0;
+  width: 100%;
+}
+
 
 .functionStatus,
 .deviceStatus {

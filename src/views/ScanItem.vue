@@ -1,9 +1,9 @@
 <template>
 
     <div class="container">
-    <GoogleFonts/>
+        <GoogleFonts />
         <nav>
-            <WUoT_Logo/>
+            <WUoT_Logo />
         </nav>
         <main>
             <section class="main-window">
@@ -17,23 +17,15 @@
         </main>
     </div>
 </template>
-<script>
+<script setup>
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 import RouteButton from '../components/RouteButton.vue';
 
-export default {
-    name: 'ScanItem',
-    components: {
-        GoogleFonts,
-        WUoT_Logo,
-        RouteButton
-    }
-
-}
 </script>
 <style lang="scss" scoped>
 @import '../assets/style/variables.scss';
+
 .container {
     background: $background-color;
     background-image: url('../assets/back.jpg');
@@ -160,18 +152,18 @@ button:hover {
 }
 
 @media (max-width: 768px) {
-  h1 {
-    font-size: x-large;
-  }
+    h1 {
+        font-size: x-large;
+    }
 
-  .loader {
-    font-size: 25px;
-  }
+    .loader {
+        font-size: 25px;
+    }
 }
 
 @media (max-width: 560px) {
-  img {
-    display: none;
-  }
+    img {
+        display: none;
+    }
 }
 </style>

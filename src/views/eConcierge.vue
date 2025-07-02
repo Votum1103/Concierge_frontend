@@ -17,19 +17,10 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 import RouteButton from '../components/RouteButton.vue';
-export default {
-  name: 'eConcierge',
-  components: {
-    WUoT_Logo,
-    GoogleFonts,
-    RouteButton
-  }
-}
-
 </script>
 
 <style lang="scss" scoped>

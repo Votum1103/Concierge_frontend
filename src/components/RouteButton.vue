@@ -11,27 +11,28 @@
   </button>
 </template>
 
-<script>
-export default {
-  name: 'RouteButton',
-  props: {
-    routeName: {
-      type: String,
-      required: true
-    },
-    buttonText: {
-      type: String,
-      required: true
-    }
+<script setup>
+import { useRouter } from 'vue-router';
+import { defineProps, defineEmits } from 'vue';
+
+const router = useRouter();
+
+const props = defineProps({
+  routeName: {
+    type: String,
+    required: true
   },
-  methods: {
-    async handleClick() {
-
-      await this.$emit('click');
-
-      this.$router.push({ name: this.routeName });
-    }
+  buttonText: {
+    type: String,
+    required: true
   }
+});
+
+const emit = defineEmits(['click']);
+
+async function handleClick() {
+  await emit('click');
+  router.push({ name: props.routeName });
 }
 </script>
 

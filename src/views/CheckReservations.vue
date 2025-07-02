@@ -70,88 +70,79 @@
 </template>
 
 
-<script>
+<script setup>
 import api from '../api';
 import BackButton from '../components/BackButton.vue';
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 
-export default {
-    name: 'CheckReservations',
-    components: {
-        GoogleFonts,
-        WUoT_Logo,
-        BackButton
-    },
-    data() {
-        return {
-            roomNumber: '',
-            startDate: '',
-            endTime: '',
-            userFilter: '',
-            reservations: [],
-            errorMessage: '' 
-        };
-    },
-    mounted() {
-        this.searchReservations()
-    },
-    methods: {
-        async searchReservations() {
-            const accesToken = sessionStorage.getItem('access_token');
-            if (!accesToken) {
-                console.error('Brak tokena dostępu. Upewnij się, że jesteś zalogowany.');
+import { ref } from 'vue';
+import { onMounted } from 'vue';
+
+const roomNumber = ref('');
+const startDate = ref('');
+const endTime = ref('');
+const userFilter = ref('');
+const reservations = ref([]);
+const errorMessage = ref('');
+
+async function searchReservations() {
+    const accesToken = sessionStorage.getItem('access_token');
+    if (!accesToken) {
+        console.error('Brak tokena dostępu. Upewnij się, że jesteś zalogowany.');
+        return;
+    }
+    const headers = { Authorization: `Bearer ${accesToken}` };
+
+    try {
+        errorMessage.value = '';
+
+        const queryParams = new URLSearchParams();
+
+        if (roomNumber.value) {
+            const roomResponse = await api.get(`/rooms/?number=${roomNumber.value}`, { headers });
+            const roomId = roomResponse.data[0]?.id;
+
+            if (!roomId) {
+                errorMessage.value = 'Brak rezerwacji o zadanych kryteriach';
+                reservations.value = [];
                 return;
             }
-            const headers = { Authorization: `Bearer ${accesToken}` };
-
-            try {
-                this.errorMessage = '';
-
-                const queryParams = new URLSearchParams();
-
-                if (this.roomNumber) {
-                    const roomResponse = await api.get(`/rooms/?number=${this.roomNumber}`, { headers });
-                    const roomId = roomResponse.data[0]?.id;
-
-                    if (!roomId) {
-                        this.errorMessage = 'Brak rezerwacji o zadanych kryteriach';
-                        this.reservations = [];
-                        return;
-                    }
-                    queryParams.append('room_id', roomId);
-                }
-
-                if (this.startDate) {
-                    queryParams.append('date', this.startDate);
-                }
-
-                if (this.endTime) {
-                    queryParams.append('start_time', this.endTime);
-                }
-
-                if (this.userFilter) {
-                    queryParams.append('surname', this.userFilter);
-                }
-
-                const reservationsResponse = await api.get(`/permissions/?${queryParams.toString()}` );
-
-                this.reservations = reservationsResponse.data.length > 0 ? reservationsResponse.data : [];
-
-                if (this.reservations.length === 0) {
-                    this.errorMessage = 'Brak rezerwacji o zadanych kryteriach';
-                }
-            } catch (error) {
-                console.error('Błąd przy pobieraniu danych z API:', error);
-                this.errorMessage = 'Brak rezerwacji o zadanych kryteriach';
-            }
-        },
-        formatTime(time) {
-            const date = new Date(`1970-01-01T${time}`);
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            queryParams.append('room_id', roomId);
         }
+
+        if (startDate.value) {
+            queryParams.append('date', startDate.value);
+        }
+
+        if (endTime.value) {
+            queryParams.append('start_time', endTime.value);
+        }
+
+        if (userFilter.value) {
+            queryParams.append('surname', userFilter.value);
+        }
+
+        const reservationsResponse = await api.get(`/permissions/?${queryParams.toString()}`);
+
+        reservations.value = reservationsResponse.data.length > 0 ? reservationsResponse.data : [];
+
+        if (reservations.value.length === 0) {
+            errorMessage.value = 'Brak rezerwacji o zadanych kryteriach';
+        }
+    } catch (error) {
+        console.error('Błąd przy pobieraniu danych z API:', error);
+        errorMessage.value = 'Brak rezerwacji o zadanych kryteriach';
     }
 }
+function formatTime(time) {
+    const date = new Date(`1970-01-01T${time}`);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+onMounted(() => {
+    searchReservations();
+});
 </script>
 
 
@@ -402,9 +393,11 @@ select:-webkit-autofill:focus {
         width: 680px;
         padding: 20px;
     }
+
     h1 {
         font-size: 20px;
     }
+
     form {
         flex-direction: column;
         gap: 10px;
@@ -414,12 +407,15 @@ select:-webkit-autofill:focus {
         width: 100%;
         gap: 0px;
     }
+
     .header-items {
         font-size: 0.65em;
     }
+
     .table-cell {
         font-size: 0.9em;
     }
+
     .items-table {
         max-height: 200px;
     }
@@ -433,18 +429,23 @@ select:-webkit-autofill:focus {
     .form-container {
         gap: 15px;
     }
+
     .form-group input {
         width: 80%;
     }
+
     form {
         gap: 1em;
     }
+
     h1 {
         font-size: 24px;
     }
+
     .header-item {
         font-size: 14px;
     }
+
     .table-cell {
         font-size: 1em;
     }
@@ -454,15 +455,19 @@ select:-webkit-autofill:focus {
     .form-container {
         gap: 15px;
     }
+
     .form-group input {
         width: 80%;
     }
+
     h1 {
         font-size: 24px;
     }
+
     .header-item {
         font-size: 14px;
-    }   
+    }
+
     .table-cell {
         font-size: 1.1em;
     }
@@ -472,6 +477,7 @@ select:-webkit-autofill:focus {
     .form-container {
         gap: 30px;
     }
+
     .form-group input {
         width: 250px;
     }
@@ -481,17 +487,20 @@ select:-webkit-autofill:focus {
     .form-container {
         gap: 50px;
     }
+
     .form-group input {
         width: 300px;
     }
+
     .tableContent {
         max-width: 1200px;
     }
 }
+
 @media (max-height: 800px) {
     main {
-    gap: 85px;
-}
+        gap: 85px;
+    }
 }
 
 @media (max-height: 800px) and (max-width: 680px) {
@@ -503,5 +512,4 @@ select:-webkit-autofill:focus {
         display: none;
     }
 }
-
 </style>

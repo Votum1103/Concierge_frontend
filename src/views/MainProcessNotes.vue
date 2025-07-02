@@ -39,7 +39,8 @@
                 </div>
 
                 <div class="button-container">
-                    <button class="add-button" v-if="!isAdding && editingIndex === null && currentItem" @click="addNote">Dodaj
+                    <button class="add-button" v-if="!isAdding && editingIndex === null && currentItem"
+                        @click="addNote">Dodaj
                         notatkę</button>
                     <button class="save-button" v-if="isAdding" @click="saveNewNote">Zapisz</button>
                     <button class="save-button" v-if="editingIndex !== null && !isAdding"
@@ -56,214 +57,204 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import BackButton from '../components/BackButton.vue';
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 import api from '../api';
 
-export default {
-    name: 'MainProcessNotes',
-    components: {
-        WUoT_Logo,
-        GoogleFonts,
-        BackButton,
-    },
-    data() {
-        return {
-            userId: '',
-            itemId: '',
-            items: [],
-            notes: [],
-            currentItem: null,
-            roomNumber: null,
-            devType: null,
-            devVersion: null,
-            newNote: '',
-            editingIndex: null,
-            selectedNote: null,
-            isAdding: false,
-            editedNote: "",
+import { ref } from 'vue';
+import { onMounted } from 'vue';
+
+const userId = ref('');
+// const itemId = ref('');
+const items = ref([]);
+const notes = ref([]);
+const currentItem = ref(null);
+const roomNumber = ref(null);
+const devType = ref(null);
+const devVersion = ref(null);
+// const newNote = ref('');
+const editingIndex = ref(null);
+const selectedNote = ref(null);
+let isAdding = ref(false);
+const editedNote = ref("");
+
+onMounted(() => {
+    loadUserData()
+    fetchLoggedUser()
+})
+
+function loadUserData() {
+    userId.value = sessionStorage.getItem('userId');
+}
+
+async function fetchLoggedUser() {
+    try {
+        const response = await api.get(`/operations/users/${userId.value}`);
+        const operations = response.data;
+
+        const serverItems = operations.map(op => ({
+            userIds: [op.session.user_id],
+            roomNumber: op.device.room?.number || 'Nieznany pokój',
+            time: formatTime(op.timestamp),
+            items: formatItems(op),
+            id: op.device.id,
+            devType: op.device.dev_type || 'Nieznany typ',
+        }));
+
+        const sessionId = sessionStorage.getItem("sessionId");
+        if (!sessionId) {
+            console.error("Brak aktywnej sesji. Upewnij się, że jesteś zalogowany.");
+            return;
         }
-    },
-    mounted() {
-        this.loadUserData()
-        this.fetchLoggedUser()
-    },
 
-    methods: {
-        loadUserData() {
-            this.userId = sessionStorage.getItem('userId');
-        },
+        let unapprovedDevices = [];
+        try {
+            const unapprovedDevicesResponse = await api.get('/operations/unapproved', {
+                params: { session_id: sessionId }
+            });
 
-        async fetchLoggedUser() {
-            try {
-                const response = await api.get(`/operations/users/${this.userId}`);
-                const operations = response.data;
+            unapprovedDevices = unapprovedDevicesResponse.data.map(ud => ({
+                id: ud.device.id,
+                devType: ud.device.dev_type || 'Nieznany typ',
+                devVersion: ud.device.dev_version,
+                roomNumber: ud.device.room?.number || 'Nieznany pokój',
+                items: formatItems(ud),
+            }));
+        } catch (error) {
+            console.warn("Błąd podczas pobierania niezatwierdzonych urządzeń:", error);
+            unapprovedDevices = [];
+        }
 
-                const serverItems = operations.map(op => ({
-                    userIds: [op.session.user_id],
-                    roomNumber: op.device.room?.number || 'Nieznany pokój',
-                    time: this.formatTime(op.timestamp),
-                    items: this.formatItems(op),
-                    id: op.device.id,
-                    devType: op.device.dev_type || 'Nieznany typ',
-                }));
+        const serverItemIds = new Set(serverItems.map(item => item.id));
+        const filteredUnapprovedDevices = unapprovedDevices.filter(
+            device => !serverItemIds.has(device.id)
+        );
 
-                const sessionId = sessionStorage.getItem("sessionId");
-                if (!sessionId) {
-                    console.error("Brak aktywnej sesji. Upewnij się, że jesteś zalogowany.");
-                    return;
-                }
+        items.value = [...filteredUnapprovedDevices, ...serverItems];
+    } catch (error) {
+        console.error('Błąd przy pobieraniu danych użytkownika:', error);
+    }
+}
 
-                let unapprovedDevices = [];
-                try {
-                    const unapprovedDevicesResponse = await api.get('/operations/unapproved', {
-                        params: { session_id: sessionId }
-                    });
+async function fetchNotes(item) {
+    notes.value = [];
+    selectedNote.value = null;
+    currentItem.value = item;
 
-                    unapprovedDevices = unapprovedDevicesResponse.data.map(ud => ({
-                        id: ud.device.id,
-                        devType: ud.device.dev_type || 'Nieznany typ',
-                        devVersion: ud.device.dev_version,
-                        roomNumber: ud.device.room?.number || 'Nieznany pokój',
-                        items: this.formatItems(ud),
-                    }));
-                } catch (error) {
-                    console.warn("Błąd podczas pobierania niezatwierdzonych urządzeń:", error);
-                    unapprovedDevices = [];
-                }
+    roomNumber.value = item.roomNumber;
+    devType.value = item.items[0] || 'Brak typu';
+    devVersion.value = item.items[1] || 'Brak wersji';
 
-                const serverItemIds = new Set(serverItems.map(item => item.id));
-                const filteredUnapprovedDevices = unapprovedDevices.filter(
-                    device => !serverItemIds.has(device.id)
-                );
-
-                this.items = [...filteredUnapprovedDevices, ...serverItems];
-            } catch (error) {
-                console.error('Błąd przy pobieraniu danych użytkownika:', error);
-            }
-        },
-
-        async fetchNotes(item) {
-            this.notes = [];
-            this.selectedNote = null;
-            this.currentItem = item;
-
-            this.roomNumber = item.roomNumber;
-            this.devType = item.items[0] || 'Brak typu';
-            this.devVersion = item.items[1] || 'Brak wersji';
-
-            try {
-                const response = await api.get(`/notes/devices/?device_id=${item.id}`);
-                this.notes = response.data.map(noteObj => ({
-                    id: noteObj.id,
-                    device: item.id,
-                    note: noteObj.note
-                }));
-            } catch (error) {
-                if (error.status === "404") {
-                    this.notes = [];
-                }
-            }
-        },
-
-        addNote() {
-            if (!this.currentItem) {
-                console.error("Nie wybrano przedmiotu!");
-                return;
-            }
-
-            this.notes.push({ id: null, device: this.currentItem.id, note: '', isEditing: true });
-            this.editingIndex = this.notes.length - 1;
-            this.isAdding = true;
-            this.editedNote = '';
-        },
-
-        toggleNoteSelection(index) {
-            if (this.editingIndex === null) {
-                this.selectedNote = this.selectedNote === index ? null : index;
-            }
-        },
-
-        cancelEditingOrAdding() {
-            if (this.isAdding) {
-                this.notes.pop();
-                this.isAdding = false;
-            }
-            this.editingIndex = null;
-            this.editedNote = '';
-            this.selectedNote = null;
-        },
-
-        async saveNewNote() {
-            if (!this.currentItem) {
-                console.error("Nie wybrano przedmiotu!");
-                return;
-            }
-
-            try {
-                const newNote = {
-                    device_id: this.currentItem.id, 
-                    note: this.editedNote
-                };
-
-                const response = await api.post('/notes/devices/', newNote);
-                const savedNote = response.data;
-                this.notes[this.editingIndex] = { ...savedNote, isEditing: false };
-                this.editingIndex = null;
-                this.isAdding = false;
-                this.editedNote = '';
-            } catch (error) {
-                console.error("Błąd podczas dodawania notatki: ", error);
-            }
-        },
-
-        editNote() {
-            this.editingIndex = this.selectedNote;
-            this.editedNote = this.notes[this.selectedNote].note;
-            this.isAdding = false;
-        },
-
-        async saveEditedNote() {
-            const noteId = this.notes[this.editingIndex].id;
-
-            try {
-                await api.put(`/notes/devices/${noteId}`, { note: this.editedNote });
-                this.notes[this.editingIndex].note = this.editedNote;
-                this.editingIndex = null;
-                this.editedNote = '';
-            } catch (error) {
-                console.error('Błąd podczas zapisywania notatki:', error);
-            }
-        },
-
-        async deleteNote() {
-            const noteId = this.notes[this.selectedNote].id;
-
-            try {
-                await api.delete(`/notes/devices/${noteId}`);
-                this.notes.splice(this.selectedNote, 1);
-                this.selectedNote = null;
-                this.editingIndex = null;
-                this.editedNote = '';
-            } catch (error) {
-                console.error('Błąd podczas usuwania notatki:', error);
-            }
-        },
-
-        formatTime(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
-        },
-
-        formatItems(operation) {
-            const items = [];
-            if (operation.device.dev_type) items.push(operation.device.dev_type);
-            if (operation.device.dev_version) items.push(operation.device.dev_version);
-            return items;
+    try {
+        const response = await api.get(`/notes/devices/?device_id=${item.id}`);
+        notes.value = response.data.map(noteObj => ({
+            id: noteObj.id,
+            device: item.id,
+            note: noteObj.note
+        }));
+    } catch (error) {
+        if (error.status === "404") {
+            notes.value = [];
         }
     }
+}
+
+function addNote() {
+    if (!currentItem.value) {
+        console.error("Nie wybrano przedmiotu!");
+        return;
+    }
+
+    notes.value.push({ id: null, device: currentItem.value.id, note: '', isEditing: true });
+    editingIndex.value = notes.value.length - 1;
+    isAdding.value = true;
+    editedNote.value = '';
+}
+
+function toggleNoteSelection(index) {
+    if (editingIndex.value === null) {
+        selectedNote.value = selectedNote.value === index ? null : index;
+    }
+}
+
+function cancelEditingOrAdding() {
+    if (isAdding.value) {
+        notes.value.pop();
+        isAdding.value = false;
+    }
+    editingIndex.value = null;
+    editedNote.value = '';
+    selectedNote.value = null;
+}
+
+async function saveNewNote() {
+    if (!currentItem.value) {
+        console.error("Nie wybrano przedmiotu!");
+        return;
+    }
+
+    try {
+        const newNote = {
+            device_id: currentItem.value.id,
+            note: editedNote.value
+        };
+
+        const response = await api.post('/notes/devices/', newNote);
+        const savedNote = response.data;
+        notes.value[editingIndex.value] = { ...savedNote, isEditing: false };
+        editingIndex.value = null;
+        isAdding.value = false;
+        editedNote.value = '';
+    } catch (error) {
+        console.error("Błąd podczas dodawania notatki: ", error);
+    }
+}
+
+function editNote() {
+    editingIndex.value = selectedNote.value;
+    editedNote.value = notes.value[selectedNote.value].note;
+    isAdding.value = false;
+}
+
+async function saveEditedNote() {
+    const noteId = notes.value[editingIndex.value].id;
+
+    try {
+        await api.put(`/notes/devices/${noteId}`, { note: editedNote.value });
+        notes.value[editingIndex.value].note = editedNote.value;
+        editingIndex.value = null;
+        editedNote.value = '';
+    } catch (error) {
+        console.error('Błąd podczas zapisywania notatki:', error);
+    }
+}
+
+async function deleteNote() {
+    const noteId = notes.value[selectedNote.value].id;
+
+    try {
+        await api.delete(`/notes/devices/${noteId}`);
+        notes.value.splice(selectedNote.value, 1);
+        selectedNote.value = null;
+        editingIndex.value = null;
+        editedNote.value = '';
+    } catch (error) {
+        console.error('Błąd podczas usuwania notatki:', error);
+    }
+}
+
+function formatTime(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatItems(operation) {
+    const items = [];
+    if (operation.device.dev_type) items.push(operation.device.dev_type);
+    if (operation.device.dev_version) items.push(operation.device.dev_version);
+    return items;
 }
 </script>
 
@@ -461,21 +452,26 @@ textarea {
 .cancel-button:hover {
     background-color: $primary-color;
 }
+
 @media (max-width: 950px) {
     .device-button {
         font-size: 12px;
-        
+
     }
+
     .leftsideContent {
         width: 20%;
     }
+
     .note-box {
         font-size: 14px;
         width: 80%;
     }
+
     .note-editor {
         padding-left: 50px;
     }
+
     .notes-container {
         align-items: center;
     }

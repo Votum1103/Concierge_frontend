@@ -43,71 +43,64 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import BackButton from '../components/BackButton.vue';
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 import api from '../api';
 
-export default {
-    name: 'UnauthorizedUserGiveItem',
-    components: {
-        GoogleFonts,
-        WUoT_Logo,
-        BackButton
-    },
-    data() {
-        return {
-            formData: {
-                name: '',
-                surname: '',
-                email: '',
-                position: '',
-                note: ''
-            }
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+
+let formData = ref({
+    name: '',
+    surname: '',
+    email: '',
+    position: '',
+    note: ''
+})
+
+const router = useRouter();
+
+async function submitForm() {
+    try {
+        const response = await api.post('/unauthorized-users', {
+            name: formData.value.name,
+            surname: formData.value.surname,
+            email: formData.value.email,
+            note: formData.value.note
+        });
+
+        formData.value = {
+            name: '',
+            surname: '',
+            email: '',
+            position: '',
+            note: ''
         };
-    },
-    methods: {
-        async submitForm() {
-            try {
-                const response = await api.post('/unauthorized-users', {
-                    name: this.formData.name,
-                    surname: this.formData.surname,
-                    email: this.formData.email,
-                    note: this.formData.note
-                });
 
-                this.formData = {
-                    name: '',
-                    surname: '',
-                    email: '',
-                    position: '',
-                    note: ''
-                };
+        const createSessionUA = await api.post(`/start-session/unauthorized/${response.data.id}`);
 
-                const createSessionUA = await api.post(`/start-session/unauthorized/${response.data.id}`);
+        sessionStorage.setItem('userId', response.data.id);
+        sessionStorage.setItem('lastPage', router.name);
+        sessionStorage.setItem('username', response.data.name);
+        sessionStorage.setItem('surname', response.data.surname);
+        sessionStorage.setItem('sessionId', createSessionUA.data.id);
+        sessionStorage.setItem('userEmail', formData.value.email);
 
-                sessionStorage.setItem('userId', response.data.id);
-                sessionStorage.setItem('lastPage', this.$route.name);
-                sessionStorage.setItem('username', response.data.name);
-                sessionStorage.setItem('surname', response.data.surname);
-                sessionStorage.setItem('sessionId', createSessionUA.data.id);
-                sessionStorage.setItem('userEmail', this.formData.email);
+        router.push({ name: 'MainProcess' });
+    } catch (error) {
+        console.error('Błąd podczas tworzenia użytkownika:', error);
+        if (error.response && error.response.status === 409) {
+            sessionStorage.setItem('userEmail', formData.value.email);
+            sessionStorage.setItem('username', formData.value.name);
+            sessionStorage.setItem('surname', formData.value.surname);
 
-                this.$router.push({ name: 'MainProcess' });
-            } catch (error) {
-                console.error('Błąd podczas tworzenia użytkownika:', error);
-                if (error.response && error.response.status === 409) {
-                    sessionStorage.setItem('userEmail', this.formData.email);
-                    sessionStorage.setItem('username', this.formData.name);
-                    sessionStorage.setItem('surname', this.formData.surname);
-
-                    this.$router.push({ name: 'UpdateUACredentials' });
-                }
-            }
+            router.push({ name: 'UpdateUACredentials' });
         }
     }
-};
+}
 </script>
 
 <style lang="scss" scoped>

@@ -23,66 +23,59 @@
 </template>
 
 
-<script>
+<script setup>
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 import api from '@/api';
 
-export default {
-    name: 'UnauthorizedUserAlert',
-    components: {
-        GoogleFonts,
-        WUoT_Logo
-    },
-    data() {
-        return {
-            error: '',
-            session_id: sessionStorage.getItem('sessionId'),
-            roomNumber: '',
-        };
-    },
-    mounted() {
-        this.fetchItemDetails()
-    },
-    methods: {
-        async fetchItemDetails() {
-            const selectedItemCode = sessionStorage.getItem('SelectedItemCode');
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-            try {
-                const response = await api.get(`/devices/code/${selectedItemCode}`);
-                const itemDetails = response.data;
+const error = ref('');
+const session_id = sessionStorage.getItem('sessionId');
+const roomNumber = ref('');
 
-                this.roomNumber = itemDetails.room.number;
+const router = useRouter();
 
-                return itemDetails;
-            } catch (error) {
-                console.error('Błąd podczas pobierania szczegółów przedmiotu:', error);
-                this.error = 'Nie udało się pobrać szczegółów przedmiotu.';
-                throw error;
-            }
-        },
-        async changeItemStatus() {
-            try {
-                const selectedItemCode = sessionStorage.getItem('SelectedItemCode');
-                await api.post('/operations/change-status', {
-                    device_code: selectedItemCode,
-                    session_id: this.session_id,
-                    force: true
-                });
+onMounted(() => {
+    fetchItemDetails();
+})
 
-                this.$router.push({ name: 'MainProcess' });
-            } catch (error) {
-                console.error('Błąd podczas zmiany statusu:', error);
-                this.error = 'Wystąpił błąd podczas operacji.';
-            }
-        },
-        cancelOperation() {
-            this.roomNumber = '';
-            this.error = '';
-            this.$router.push({ name: 'MainProcess' });
-        }
+async function fetchItemDetails() {
+    const selectedItemCode = sessionStorage.getItem('SelectedItemCode');
+
+    try {
+        const response = await api.get(`/devices/code/${selectedItemCode}`);
+        const itemDetails = response.data;
+
+        roomNumber.value = itemDetails.room?.number ?? 'Brak przypisanego pokoju';
+
+        return itemDetails;
+    } catch (e) {
+        error.value = e;
+        throw error.value;
     }
-};
+}
+async function changeItemStatus() {
+    try {
+        const selectedItemCode = sessionStorage.getItem('SelectedItemCode');
+        await api.post('/operations/change-status', {
+            device_code: selectedItemCode,
+            session_id: session_id.value,
+            force: true
+        });
+
+        router.push({ name: 'MainProcess' });
+    } catch (e) {
+        error.value = e;
+        throw error.value
+    }
+}
+function cancelOperation() {
+    roomNumber.value = '';
+    error.value = '';
+    router.push({ name: 'MainProcess' });
+}
 </script>
 
 

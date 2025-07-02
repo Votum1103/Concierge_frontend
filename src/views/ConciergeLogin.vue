@@ -37,59 +37,52 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import BackButton from '../components/BackButton.vue';
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 import RouteButton from '../components/RouteButton.vue';
 import api from '../api';
+import { ref } from 'vue';
+import { useRouter  } from 'vue-router';
 
-export default {
-    name: 'ConciergeLogin',
-    components: {
-        GoogleFonts,
-        WUoT_Logo,
-        RouteButton,
-        BackButton
-    },
-    data() {
-        return {
-            username: '',
-            password: '',
-            loginError: false
-        };
-    },
-    methods: {
-        async login() {
-            try {
-                const response = await api.post('/login', new URLSearchParams({
-                    username: this.username,
-                    password: this.password
-                }));
+const username = ref('');
+const password = ref('');
+const loginError = ref(false);
 
-                const refreshToken = response.data.refresh_token;
-                const accessToken = response.data.access_token;
+const router = useRouter();
 
-                sessionStorage.setItem('access_token', accessToken);
-                sessionStorage.setItem('refresh_token', refreshToken);
-                const userResponse = await api.get('/concierge', {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
+async function login() {
 
-                const name = userResponse.data.name
-                const surname = userResponse.data.surname
-                const initials = (name[0] || '') + (surname[0] || '');
-                sessionStorage.setItem('userInitials', initials.toUpperCase());
+    loginError.value = false;
 
-                this.$router.push({ name: 'MainWindow' });
-            } catch (error) {
-                this.loginError = true;
-                console.error('Błąd logowania:', error);
+    try {
+        const response = await api.post('/login', new URLSearchParams({
+            username: username.value,
+            password: password.value
+        }));
+
+        const refreshToken = response.data.refresh_token;
+        const accessToken = response.data.access_token;
+
+        sessionStorage.setItem('access_token', accessToken);
+        sessionStorage.setItem('refresh_token', refreshToken);
+        const userResponse = await api.get('/concierge', {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
             }
-        },
-    },
+        });
+
+        const name = userResponse.data.name
+        const surname = userResponse.data.surname
+        const initials = (name?.[0] || '') + (surname?.[0] || '');
+        sessionStorage.setItem('userInitials', initials.toUpperCase());
+
+        router.push({ name: 'MainWindow' });
+    } catch (error) {
+        loginError.value = true;
+        console.error('Błąd logowania:', error);
+    }
 }
 </script>
 

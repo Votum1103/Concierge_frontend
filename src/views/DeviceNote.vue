@@ -48,120 +48,111 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import api from '../api';
 import BackButton from '../components/BackButton.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 
+import { ref } from 'vue';
+import { onMounted } from 'vue';
 
-export default {
-    components: {
-        BackButton,
-        WUoT_Logo
-    },
-    data() {
-        return {
-            notes: [],
-            roomNumber: null,
-            devType: null,
-            devVersion: null,
-            newNote: '',
-            editingIndex: null,
-            selectedNote: null,
-            isAdding: false,
-            editedNote: "",
-        };
-    },
-    mounted() {
-        const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
-        this.roomNumber = selectedDevice.room_number;
-        this.devType = selectedDevice.dev_type;
-        this.devVersion = selectedDevice.dev_version;
-        this.fetchNotes(selectedDevice.device_id);
-    },
-    methods: {
-        async fetchNotes(device_id) {
-            try {
-                const response = await api.get(`/notes/devices/?device_id=${device_id}`);
-                this.notes = response.data.map(noteObj => ({ "id": noteObj.id, "device": device_id, "note": noteObj.note }));
-            } catch (error) {
-                if (error.status == "404") {
-                    this.notes = [];
-                }
-            }
-        },
-        addNote() {
-            this.notes.push({ text: '', isEditing: true });
-            this.editingIndex = this.notes.length - 1;
-            this.isAdding = true;
-            this.editedNote = this.notes[this.editingIndex].note;
-        },
-        toggleNoteSelection(index) {
-            if (this.editingIndex === null) {
-                this.selectedNote = this.selectedNote === index ? null : index;
-            }
-        },
-        cancelEditingOrAdding() {
-            if (this.isAdding) {
-                this.notes.pop();
-                this.isAdding = false;
-            }
-            this.editingIndex = null;
-            this.editedNote = '';
-            this.selectedNote = null;
-        },
-        async saveNewNote() {
-            const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
-            const device_id = selectedDevice.device_id;
+const notes = ref([]);
+const roomNumber = ref(null);
+const devType = ref(null);
+const devVersion = ref(null);
+const editingIndex = ref(null);
+const selectedNote = ref(null);
+const isAdding = ref(false);
+const editedNote = ref("");
 
-            try {
-                await api.post('/notes/devices/', {
-                    device_id: device_id,
-                    note: this.editedNote
-                });
-                this.notes[this.editingIndex].note = this.editedNote;
-                this.editingIndex = null;
-                this.isAdding = false;
-                this.editedNote = '';
-                this.fetchNotes(selectedDevice.device_id);
-            } catch (error) {
-                console.error("Błąd podczas dodawania notatki: ", error);
-            }
-        },
-        editNote() {
-            this.editingIndex = this.selectedNote;
-            this.editedNote = this.notes[this.selectedNote].note;
-            this.isAdding = false;
-        },
-        async saveEditedNote() {
-            const noteId = this.notes[this.editingIndex].id;
+onMounted(() => {
+    const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
+    roomNumber.value = selectedDevice.room_number;
+    devType.value = selectedDevice.dev_type;
+    devVersion.value = selectedDevice.dev_version;
+    fetchNotes(selectedDevice.device_id);
+})
 
-            try {
-                await api.put(`/notes/devices/${noteId}`, { note: this.editedNote },);
-                this.notes[this.editingIndex].note = this.editedNote;
-                this.editingIndex = null;
-                this.editedNote = '';
-            } catch (error) {
-                console.error('Błąd podczas zapisywania notatki:', error);
-            }
-        },
-        async deleteNote() {
-            const noteId = this.notes[this.selectedNote].id;
-            const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
-
-            try {
-                await api.delete(`/notes/devices/${noteId}`);
-                this.notes.pop();
-                this.editingIndex = null;
-                this.editedNote = '';
-                this.selectedNote = null;
-            } catch (error) {
-                console.error('Błąd podczas usuwania notatki:', error);
-            }
-            this.fetchNotes(selectedDevice.device_id);
+async function fetchNotes(device_id) {
+    try {
+        const response = await api.get(`/notes/devices/?device_id=${device_id}`);
+        notes.value = response.data.map(noteObj => ({ "id": noteObj.id, "device": device_id, "note": noteObj.note }));
+    } catch (error) {
+        if (error.status == "404") {
+            notes.value = [];
         }
-    },
-};
+    }
+}
+function addNote() {
+    notes.value.push({ text: '', isEditing: true });
+    editingIndex.value = notes.value.length - 1;
+    isAdding.value = true;
+    editedNote.value = notes.value[editingIndex.value].note;
+}
+function toggleNoteSelection(index) {
+    if (editingIndex.value === null) {
+        selectedNote.value = selectedNote.value === index ? null : index;
+    }
+}
+function cancelEditingOrAdding() {
+    if (isAdding.value) {
+        notes.value.pop();
+        isAdding.value = false;
+    }
+    editingIndex.value = null;
+    editedNote.value = '';
+    selectedNote.value = null;
+}
+async function saveNewNote() {
+    const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
+    const device_id = selectedDevice.device_id;
+
+    try {
+        await api.post('/notes/devices/', {
+            device_id: device_id,
+            note: editedNote.value
+        });
+        notes.value[editingIndex.value].note = editedNote.value;
+        editingIndex.value = null;
+        isAdding.value = false;
+        editedNote.value = '';
+        fetchNotes(selectedDevice.device_id);
+    } catch (error) {
+        console.error("Błąd podczas dodawania notatki: ", error);
+    }
+}
+function editNote() {
+    editingIndex.value = selectedNote.value;
+    editedNote.value = notes.value[selectedNote.value].note;
+    isAdding.value = false;
+}
+async function saveEditedNote() {
+    const noteId = notes.value[editingIndex.value].id;
+
+    try {
+        await api.put(`/notes/devices/${noteId}`, { note: editedNote.value },);
+        notes.value[editingIndex.value].note = editedNote.value;
+        editingIndex.value = null;
+        editedNote.value = '';
+    } catch (error) {
+        console.error('Błąd podczas zapisywania notatki:', error);
+    }
+}
+async function deleteNote() {
+    const noteId = notes.value[selectedNote.value].id;
+    const selectedDevice = JSON.parse(sessionStorage.getItem('selectedDevice'));
+
+    try {
+        await api.delete(`/notes/devices/${noteId}`);
+        notes.value.pop();
+        editingIndex.value = null;
+        editedNote.value = '';
+        selectedNote.value = null;
+    } catch (error) {
+        console.error('Błąd podczas usuwania notatki:', error);
+    }
+    fetchNotes(selectedDevice.device_id);
+}
 </script>
 
 <style lang="scss" scoped>

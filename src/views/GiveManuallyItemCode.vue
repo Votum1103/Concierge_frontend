@@ -37,82 +37,70 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import api from "../api";
 import BackButton from '../components/BackButton.vue';
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 
-export default {
-    name: "GiveManuallyItemCode",
-    components: {
-        GoogleFonts,
-        WUoT_Logo,
-        BackButton,
-    },
-    data() {
-        return {
-            itemCode: "",
-            itemDetails: null,
-            error: null,
-            permissionError: null,
-            statusChange: "",
-            session_id: sessionStorage.getItem('sessionId'),
-            thisItem: "",
-        };
-    },
-    methods: {
-        async fetchItemDetails() {
-            this.error = null;
-            this.permissionError = null;
-            this.itemDetails = null;
-            
+import { ref } from 'vue';
+import { useRouter } from "vue-router";
 
-            try {
-                const response = await api.get(`/devices/code/${this.itemCode}`);
-                if (!response.data) {
-                    this.itemCode = '';
-                    this.permissionError = "Niepoprawny kod przedmiotu"
-                    return;
-                }
-                const item = response.data;
+const itemCode = ref("");
+const itemDetails = ref(null);
+const error = ref(null);
+const permissionError = ref(null);
+const statusChange = ref("");
+const session_id = sessionStorage.getItem('sessionId');
 
-                this.item = item;
-                this.itemCode = item.code;
-                console.log(this.session_id)
+const router = useRouter();
 
-                try {
-                    const changeStatusResponse = await api.post('/operations/change-status', {
-                        device_code: this.itemCode,
-                        session_id: this.session_id,
-                        force: false
-                    });
-                    
-                    this.statusChange = changeStatusResponse.data;
+async function fetchItemDetails() {
+    error.value = null;
+    permissionError.value = null;
+    itemDetails.value = null;
 
-                    
+    try {
+        const response = await api.get(`/devices/code/${itemCode.value}`);
+        if (!response.data) {
+            itemCode.value = '';
+            permissionError.value = "Niepoprawny kod przedmiotu"
+            return;
+        }
+        const item = response.data;
+        itemCode.value = item.code;
+        console.log(session_id)
+
+        try {
+            const changeStatusResponse = await api.post('/operations/change-status', {
+                device_code: itemCode.value,
+                session_id: session_id,
+                force: false
+            });
+
+            statusChange.value = changeStatusResponse.data;
 
 
-                    sessionStorage.setItem('UnapprovedDevices', JSON.stringify([this.item]));
 
-                    this.$router.push({ name: 'MainProcess' });
-                } catch (error) {
-                    if (error.response && error.response.status === 403) {
-                        sessionStorage.setItem('SelectedItemCode', this.itemCode)
-                        this.$router.push({ name: 'UnauthorizedUserAlert' });
-                    } else {
-                        this.error = "Wystąpił błąd podczas zmiany statusu urządzenia";
-                    }
 
-                }
-            } catch (error) {
-                this.error = "Wystąpił błąd podczas pobierania danych urządzenia";
+            sessionStorage.setItem('UnapprovedDevices', JSON.stringify([item]));
+
+            router.push({ name: 'MainProcess' });
+        } catch (error) {
+            if (error.response && error.response.status === 403) {
+                sessionStorage.setItem('SelectedItemCode', itemCode.value)
+                router.push({ name: 'UnauthorizedUserAlert' });
+            } else {
+                error.value = "Wystąpił błąd podczas zmiany statusu urządzenia";
             }
-            this.itemCode = "";
 
         }
+    } catch (error) {
+        error.value = "Wystąpił błąd podczas pobierania danych urządzenia";
     }
-};
+    itemCode.value = "";
+
+}
 </script>
 
 <style lang="scss" scoped>

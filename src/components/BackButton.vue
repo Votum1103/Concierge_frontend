@@ -9,24 +9,25 @@
     </button>
 </template>
 
-<script>
-export default {
-    name: 'BackButton',
-    props: {
-        routeName: {
-            type: String,
-            required: true
-        },
-        buttonText: {
-            type: String,
-            required: true
-        }
-    },
-    methods: {
-        redirectToRoute() {
-            this.$router.push({ name: this.routeName });
-        }
-    }
+<script setup>
+import { useRouter } from 'vue-router';
+import { defineProps } from 'vue';
+
+const router = useRouter();
+
+const props = defineProps({
+  routeName: {
+    type: String,
+    required: true
+  },
+  buttonText: {
+    type: String,
+    required: true
+  }
+});
+
+function redirectToRoute() {
+  router.push({ name: props.routeName });
 }
 </script>
 

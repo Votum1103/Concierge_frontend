@@ -38,45 +38,38 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import BackButton from '../components/BackButton.vue';
 import GoogleFonts from '../components/googleFonts.vue';
 import WUoT_Logo from '../components/WUoT_Logo.vue';
 
-export default {
-    name: 'AcceptOperationByConcierge',
-    components: {
-        GoogleFonts,
-        BackButton,
-        WUoT_Logo
-    },
-    data() {
-        return {
-            username: '',
-            surname: '',
-            role: '',
-            faculty: ''
-        };
-    },
-    mounted() {
-        this.loadUserData();
-    },
-    methods: {
-        loadUserData() {
-            this.username = sessionStorage.getItem('username') || 'Nieznane imię';
-            this.surname = sessionStorage.getItem('surname') || 'Nieznane nazwisko';
-            this.role = sessionStorage.getItem('role') || 'Nieznana rola';
-            this.faculty = sessionStorage.getItem('faculty') || 'Nieznany wydział';
-        },
-        cancelAcceptanceOperation() {
-            this.$router.push({ name: 'AccpetRejectionOperation' });
-        },
-        moveToAcceptanceOperationByLogin() {
-            this.$router.push({ name: 'ConciergeLoginAcceptOperation' });
-        },
+import { ref } from 'vue'
+import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
 
+const username =  ref('');
+const surname = ref('');
+const role = ref('');
+const faculty = ref('');
+const router = useRouter();
+
+function loadUserData() {
+        username.value = sessionStorage.getItem('username') || 'Nieznane imię';
+        surname.value = sessionStorage.getItem('surname') || 'Nieznane nazwisko';
+        role.value = sessionStorage.getItem('role') || 'Nieznana rola';
+        faculty.value = sessionStorage.getItem('faculty') || 'Nieznany wydział';
     }
-};
+function cancelAcceptanceOperation() {
+    router.push({ name: 'AccpetRejectionOperation' });
+}
+function moveToAcceptanceOperationByLogin() {
+    router.push({ name: 'ConciergeLoginAcceptOperation' });
+}
+
+onMounted(() => {
+    loadUserData();
+});
+
 </script>
 
 <style lang="scss" scoped>
