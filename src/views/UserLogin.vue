@@ -61,7 +61,7 @@ async function login() {
             password: password.value
         }));
 
-        const username = response.data.user.name;
+        const userName = response.data.user.name;
 
         const surname = response.data.user.surname;
         const faculty = response.data.user.faculty;
@@ -71,7 +71,7 @@ async function login() {
 
         sessionStorage.setItem('sessionId', sessionId);
         sessionStorage.setItem('userId', userId);
-        sessionStorage.setItem('username', username);
+        sessionStorage.setItem('username', userName);
         sessionStorage.setItem('surname', surname);
         sessionStorage.setItem('faculty', faculty);
         sessionStorage.setItem('role', role);
